@@ -1,0 +1,26 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "baseBranches": [
+    "main"
+  ],
+  "packageRules": [
+    {
+      "updateTypes": [
+        "patch",
+        "minor",
+        "major",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "dependencyDashboard": false,
+  "commitMessagePrefix": "deps:"
+}
