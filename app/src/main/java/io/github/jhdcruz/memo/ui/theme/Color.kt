@@ -1,4 +1,4 @@
-package io.github.jhdcruz.goods.ui.theme
+package io.github.jhdcruz.memo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

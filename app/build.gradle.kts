@@ -3,14 +3,17 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.perf.plugin)
+    alias(libs.plugins.firebase.crashlytics.gradle)
 }
 
 android {
-    namespace = "io.github.jhdcruz.goods"
+    namespace = "io.github.jhdcruz.memo"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "io.github.jhdcruz.goods"
+        applicationId = "io.github.jhdcruz.memo"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -79,12 +82,16 @@ android {
 dependencies {
 
     implementation(platform(libs.compose.bom))
+    implementation(platform(libs.firebase.bom))
+
+    implementation(libs.bundles.core)
 
     implementation(libs.bundles.appcompat)
     implementation(libs.bundles.compose.ui)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.play.services)
+    implementation(libs.bundles.firebase)
 
     testImplementation(libs.junit)
 

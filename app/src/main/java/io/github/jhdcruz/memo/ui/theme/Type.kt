@@ -1,4 +1,4 @@
-package io.github.jhdcruz.goods.ui.theme
+package io.github.jhdcruz.memo.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

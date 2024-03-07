@@ -29,5 +29,5 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "Goods"
+rootProject.name = "Memo"
 include(":app")

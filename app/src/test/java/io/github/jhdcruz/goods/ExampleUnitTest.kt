@@ -1,4 +1,4 @@
-package io.github.jhdcruz.goods
+package io.github.jhdcruz.memo
 
 import org.junit.Test
 
