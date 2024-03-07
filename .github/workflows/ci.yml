@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    paths-ignore:
+      - ./*.md
+      - ./*.txt
+      - .gitignore
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-XX:MaxMetaspaceSize=2g"
+  JDK_VERSION: 19
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ env.JDK_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JDK_VERSION }}
+          distribution: temurin
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+        # handles caching already
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: ./gradlew permissions
+        run: chmod +x ./gradlew
+
+      - name: Prepare libraries configs
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
+
+      - name: Build with analyze
+        run: ./gradlew build --no-daemon --stacktrace
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gradle dependency submission
+        if: always()
+        uses: mikepenz/gradle-dependency-submission@main
+        with:
+          gradle-build-module: :app
+          gradle-build-configuration: debugCompileClasspath
