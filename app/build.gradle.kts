@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,6 +14,9 @@ android {
     namespace = "io.github.jhdcruz.memo"
     compileSdk = 34
 
+    val properties = Properties()
+    properties.load(rootProject.file("local.properties").reader())
+
     defaultConfig {
         applicationId = "io.github.jhdcruz.memo"
         minSdk = 26
@@ -23,6 +28,17 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField(
+            "String",
+            "GCP_WEB_CLIENT",
+            "\"${properties.getProperty("gcp.web.client")}\""
+        )
+        buildConfigField(
+            "String",
+            "GCP_WEB_SECRET",
+            "\"${properties.getProperty("gcp.web.secret")}\""
+        )
     }
 
     buildTypes {
@@ -34,6 +50,12 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-defaults.txt"),
                 "proguard-rules-debug.txt",
+            )
+
+            buildConfigField(
+                "String",
+                "GCP_CLIENT_DEBUG",
+                "\"${properties.getProperty("gcp.client.debug")}\""
             )
         }
 
@@ -56,6 +78,12 @@ android {
                     excludes += "META-INF/DEPENDENCIES.txt"
                 }
             }
+
+            buildConfigField(
+                "String",
+                "GCP_CLIENT_RELEASE",
+                "\"${properties.getProperty("gcp.client.release")}\""
+            )
         }
     }
     compileOptions {
