@@ -120,6 +120,7 @@ dependencies {
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.play.services)
+    implementation(libs.bundles.android.credentials)
     implementation(libs.bundles.firebase)
 
     testImplementation(libs.junit)
