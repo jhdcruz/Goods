@@ -103,6 +103,7 @@ obj/
 /out/
 
 # User-specific configurations
+.idea/codeStyles/
 .idea/caches/
 .idea/libraries/
 .idea/shelf/
