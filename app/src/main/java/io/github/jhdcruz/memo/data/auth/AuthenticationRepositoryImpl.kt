@@ -2,6 +2,7 @@ package io.github.jhdcruz.memo.data.auth
 
 import android.content.Context
 import android.util.Log
+import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -24,7 +25,26 @@ import javax.inject.Inject
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth
 ) : AuthenticationRepository {
-    override suspend fun signIn(context: Context, email: String, password: String): Boolean {
+
+    /**
+     * Manual sign-in option using input fields,
+     */
+    override suspend fun manualSignIn(email: String, password: String): Boolean {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            true
+        } catch (e: FirebaseAuthException) {
+            Log.e("Authentication", "Failed to sign in with email and password", e)
+            false
+        }
+    }
+
+    /**
+     * Uses the CredentialManager to sign-in using saved credentials.
+     *
+     * Also handles Google sign-in/register
+     */
+    override suspend fun signIn(context: Context): Boolean {
         val credentialManager = CredentialManager.create(context)
 
         // Options for signing-in
@@ -55,13 +75,21 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signUp(email: String, password: String): Boolean {
+    override suspend fun signUp(context: Context, email: String, password: String): Boolean {
+        val credentialManager = CredentialManager.create(context)
+
         return try {
             auth.createUserWithEmailAndPassword(email, password).await()
+
+            credentialManager.createCredential(
+                context = context,
+                request = CreatePasswordRequest(email, password),
+            )
 
             // return true if there is user
             !auth.currentUser?.email.isNullOrEmpty()
         } catch (e: Exception) {
+            Log.e("Authentication", "Failed to sign up with credential manager.", e)
             false
         }
     }
