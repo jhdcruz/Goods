@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.ui.signup
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +36,7 @@ import io.github.jhdcruz.memo.ui.shared.GoogleButton
 fun SignUpScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    context: Context,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     Surface { ->
@@ -96,7 +99,7 @@ fun SignUpScreen(
                 .padding(top = 12.dp),
                 onClick = {
                     localSoftwareKeyboardController?.hide()
-                    viewModel.onSignUp()
+                    viewModel.onSignUp(context)
                 }) {
 
                 Text("Sign up")
@@ -133,6 +136,7 @@ fun SignUpScreen(
 fun SignUpScreenPreview() {
     SignUpScreen(
         navController = rememberNavController(),
+        context = LocalContext.current,
         viewModel = SignUpViewModelPreview()
     )
 }

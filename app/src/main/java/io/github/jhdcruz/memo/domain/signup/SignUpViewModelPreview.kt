@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.domain.signup
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
@@ -19,7 +20,7 @@ class SignUpViewModelPreview : SignUpViewModel() {
         _password.value = password
     }
 
-    override fun onSignUp() {
+    override fun onSignUp(context: Context) {
         flow {
             emit(true)
         }

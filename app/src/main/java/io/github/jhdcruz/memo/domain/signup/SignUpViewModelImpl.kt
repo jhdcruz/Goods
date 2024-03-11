@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.domain.signup
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
@@ -27,9 +28,10 @@ class SignUpViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override fun onSignUp() {
+    override fun onSignUp(context: Context) {
         viewModelScope.launch {
             authenticationRepository.signUp(
+                context = context,
                 email = _email.value,
                 password = _password.value
             )
