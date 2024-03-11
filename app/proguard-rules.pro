@@ -5,14 +5,13 @@
 #   public *;
 #}
 
--keepattributes Signature
--keepattributes EnclosingMethod
--keepattributes InnerClasses
--keepattributes *Annotation*
-
 -keep class com.google.android.gms.tasks.Task
 -keep class androidx.window.extensions.embedding.**
 -keep class javax.naming.*
+
+# Java Models
+-dontwarn javax.lang.model.**
+-dontwarn javax.tools.Diagnostic$Kind
 
 # okhttp
 # JSR 305 annotations are for embedding nullability information.
@@ -56,7 +55,9 @@
 -dontwarn org.apache.**
 -dontwarn org.w3c.dom.**
 
-# Google Credentials
+# Google
+-dontwarn com.google.auto.service.**
+
 -if class androidx.credentials.CredentialManager
 -keep class androidx.credentials.playservices.** {
   *;

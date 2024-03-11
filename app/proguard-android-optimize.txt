@@ -1,3 +1,6 @@
+-keepattributes Signature
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
 -keepattributes *Annotation*
 
 -keepclassmembers enum * {

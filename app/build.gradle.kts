@@ -48,7 +48,8 @@ android {
             isDebuggable = true
 
             proguardFiles(
-                getDefaultProguardFile("proguard-defaults.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
                 "proguard-rules-debug.txt",
             )
 
@@ -65,8 +66,8 @@ android {
             isDebuggable = false
 
             proguardFiles(
-                getDefaultProguardFile("proguard-defaults.txt"),
-                "proguard-android-optimize.txt",
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
             )
 
             packaging {
