@@ -1,11 +1,11 @@
-package io.github.jhdcruz.memo.domain.signup
+package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 
-class SignUpViewModelPreview : SignUpViewModel() {
+class AuthViewModelPreview : AuthViewModel() {
     private val _email = MutableStateFlow("")
     private val _password = MutableStateFlow("")
 
@@ -18,6 +18,12 @@ class SignUpViewModelPreview : SignUpViewModel() {
 
     override fun onPasswordChange(password: String) {
         _password.value = password
+    }
+
+    override fun initSignIn(context: Context) {
+        flow {
+            emit(true)
+        }
     }
 
     override fun onSignUp(context: Context) {

@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.domain.signup
+package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
@@ -10,9 +10,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignUpViewModelImpl @Inject constructor(
+class AuthViewModelImpl @Inject constructor(
     private val authenticationRepository: AuthenticationRepository
-) : SignUpViewModel() {
+) : AuthViewModel() {
 
     private val _email = MutableStateFlow("")
     override val email: Flow<String> = _email
@@ -26,6 +26,14 @@ class SignUpViewModelImpl @Inject constructor(
 
     override fun onPasswordChange(password: String) {
         _password.value = password
+    }
+
+    override fun initSignIn(context: Context) {
+        viewModelScope.launch {
+            authenticationRepository.signIn(
+                context = context,
+            )
+        }
     }
 
     override fun onSignUp(context: Context) {
