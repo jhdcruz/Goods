@@ -3,6 +3,7 @@ package io.github.jhdcruz.memo.ui.shared
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
@@ -20,6 +21,7 @@ fun GoogleButton(
 ) {
     ElevatedButton(
         modifier = modifier
+            .height(38.dp)
             .fillMaxWidth(),
         onClick = action
     ) {
