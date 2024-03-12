@@ -1,46 +1,30 @@
 package io.github.jhdcruz.memo
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.jhdcruz.memo.ui.signup.SignUpScreen
-import io.github.jhdcruz.memo.ui.theme.MemoTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MemoTheme {
-                val navController = rememberNavController()
-                val currentBackStack by navController.currentBackStackEntryAsState()
-                val currentDestination = currentBackStack?.destination
 
-                Scaffold { innerPadding ->
-                    NavHost(
-                        navController,
-                        startDestination = SignUpDestination.route,
-                        Modifier.padding(innerPadding)
-                    ) {
-                        composable(SignUpDestination.route) {
-                            SignUpScreen(
-                                context = LocalContext.current.applicationContext,
-                                navController = navController
-                            )
-                        }
-                    }
-                }
-            }
+        // check if user is signed in
+        if (auth.currentUser == null) {
+            // navigate to AuthActivity
+            val intent = Intent(this, AuthActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
+
+        setContent {}
     }
 }

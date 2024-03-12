@@ -10,17 +10,24 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.PasswordCredential
 import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
 import io.github.jhdcruz.memo.BuildConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth
@@ -37,6 +44,45 @@ class AuthenticationRepositoryImpl @Inject constructor(
             Log.e("Authentication", "Failed to sign in with email and password", e)
             false
         }
+    }
+
+    /**
+     * Manual Google sign-in/up option
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun googleSignIn(context: Context, reqId: Int): BeginSignInResult {
+
+        val oneTapClient: SignInClient = Identity.getSignInClient(context.applicationContext)
+
+        // Sign-in request config
+        val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
+            .setPasswordRequestOptions(
+                BeginSignInRequest.PasswordRequestOptions.builder()
+                    .setSupported(true)
+                    .build()
+            )
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
+            // Automatically sign in when exactly one credential is retrieved.
+            .setAutoSelectEnabled(true)
+            .build()
+
+        val signInResult: BeginSignInResult = suspendCancellableCoroutine { continuation ->
+            oneTapClient.beginSignIn(signInRequest)
+                .addOnSuccessListener { result ->
+                    continuation.resume(result)
+                }
+                .addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
+        }
+
+        return signInResult
     }
 
     /**
@@ -70,6 +116,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 handleSignIn(result)
                 true
             } catch (e: GetCredentialException) {
+                Log.e("Authentication", "Failed to start credential manager", e)
+                false
+            } catch (e: FirebaseAuthException) {
+                Log.e("Authentication", "Failed to sign in with credential manager.", e)
+                false
+            } catch (e: IllegalArgumentException) {
+                Log.e("Authentication", "Unknown login provider used!", e)
                 false
             }
         }
@@ -106,6 +159,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     Log.i("Authentication", "Successfully signed in with saved credential")
                 } catch (e: FirebaseAuthException) {
                     Log.e("Authentication", "Failed to sign in with credential", e)
+                    throw e;
                 }
             }
 
@@ -121,8 +175,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             GoogleAuthProvider.getCredential(googleIdTokenCredential, null)
 
                         auth.signInWithCredential(firebaseCredential)
-                    } catch (e: GoogleIdTokenParsingException) {
+                    } catch (e: FirebaseAuthException) {
                         Log.e("Authentication", "Received an invalid google id token response", e)
+                        throw e
                     }
                 }
             }
@@ -130,6 +185,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
             else -> {
                 // unrecognized credential type.
                 Log.e("Authentication", "Unexpected type of credential used.")
+                throw IllegalArgumentException("Unexpected type of credential used.")
             }
         }
     }
