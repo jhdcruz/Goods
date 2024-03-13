@@ -216,7 +216,7 @@ fun LoginForm(
         val localSoftwareKeyboardController = LocalSoftwareKeyboardController.current
         Button(modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
+            .height(62.dp)
             .padding(top = 12.dp),
             onClick = {
                 localSoftwareKeyboardController?.hide()

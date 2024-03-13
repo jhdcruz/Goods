@@ -21,7 +21,7 @@ fun GoogleButton(
 ) {
     ElevatedButton(
         modifier = modifier
-            .height(38.dp)
+            .height(52.dp)
             .fillMaxWidth(),
         onClick = action
     ) {
