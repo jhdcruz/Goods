@@ -25,7 +25,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,9 +39,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.domain.auth.AuthViewModel
+import io.github.jhdcruz.memo.domain.auth.AuthViewModelImpl
 import io.github.jhdcruz.memo.domain.auth.AuthViewModelPreview
 import io.github.jhdcruz.memo.ui.shared.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
+import kotlinx.coroutines.launch
 
 /**
  * Combined login and user registration flow,
@@ -50,9 +54,16 @@ import io.github.jhdcruz.memo.ui.theme.MemoTheme
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: AuthViewModel = hiltViewModel<AuthViewModelImpl>(),
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(true) {
+        scope.launch {
+            viewModel.initSignIn(context)
+        }
+    }
 
     Surface {
         Column(
@@ -74,7 +85,7 @@ fun LoginScreen(
 
             LoginForm(
                 modifier = modifier,
-                context = context.applicationContext,
+                context = context,
                 viewModel = viewModel
             )
 
@@ -194,7 +205,7 @@ fun LoginForm(
 fun LoginScreenPreview() {
     MemoTheme {
         LoginScreen(
-            viewModel = AuthViewModelPreview()
+            viewModel = AuthViewModelPreview(),
         )
     }
 }

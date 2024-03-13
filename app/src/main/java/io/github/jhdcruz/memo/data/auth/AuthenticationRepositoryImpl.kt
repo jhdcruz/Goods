@@ -25,6 +25,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -116,14 +117,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 handleSignIn(result)
                 true
             } catch (e: GetCredentialException) {
-                Log.e("Authentication", "Failed to start credential manager", e)
-                false
+                throw e
             } catch (e: FirebaseAuthException) {
-                Log.e("Authentication", "Failed to sign in with credential manager.", e)
-                false
+                throw e
             } catch (e: IllegalArgumentException) {
-                Log.e("Authentication", "Unknown login provider used!", e)
-                false
+                throw e
             }
         }
     }
@@ -142,24 +140,22 @@ class AuthenticationRepositoryImpl @Inject constructor(
             // return true if there is user
             !auth.currentUser?.email.isNullOrEmpty()
         } catch (e: Exception) {
-            Log.e("Authentication", "Failed to sign up with credential manager.", e)
-            false
+            throw e
         }
     }
 
-    private suspend fun handleSignIn(result: GetCredentialResponse) {
+    private suspend fun handleSignIn(result: GetCredentialResponse): Boolean {
         // handle authentication based on selected credential
-        when (val credential = result.credential) {
+        return when (val credential = result.credential) {
             is PasswordCredential -> {
                 val email = credential.id
                 val password = credential.password
 
                 try {
                     auth.signInWithEmailAndPassword(email, password).await()
-                    Log.i("Authentication", "Successfully signed in with saved credential")
+                    true
                 } catch (e: FirebaseAuthException) {
-                    Log.e("Authentication", "Failed to sign in with credential", e)
-                    throw e;
+                    throw e
                 }
             }
 
@@ -175,19 +171,22 @@ class AuthenticationRepositoryImpl @Inject constructor(
                             GoogleAuthProvider.getCredential(googleIdTokenCredential, null)
 
                         auth.signInWithCredential(firebaseCredential)
+                        true
                     } catch (e: FirebaseAuthException) {
-                        Log.e("Authentication", "Received an invalid google id token response", e)
+                        throw e
+                    } catch (e: RuntimeException) {
                         throw e
                     }
+                } else {
+                    false
                 }
             }
 
             else -> {
                 // unrecognized credential type.
-                Log.e("Authentication", "Unexpected type of credential used.")
-                throw IllegalArgumentException("Unexpected type of credential used.")
+                Log.e("Authentication", "Unexpected type of credential used.", e)
+                throw e
             }
         }
     }
-
 }

@@ -2,6 +2,7 @@ package io.github.jhdcruz.memo.di
 
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import io.github.jhdcruz.memo.domain.auth.AuthViewModel
@@ -14,7 +15,7 @@ abstract class DomainModule {
 
     @Binds
     @Singleton
-    abstract fun bindSignUpViewModel(
-        signUpViewModelImpl: AuthViewModelImpl
+    abstract fun bindAuthViewModel(
+        authViewModel: AuthViewModelImpl
     ): AuthViewModel
 }
