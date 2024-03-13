@@ -19,6 +19,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.github.jhdcruz.memo.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +32,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AuthenticationRepositoryImpl @Inject constructor(
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val crash: FirebaseCrashlytics,
 ) : AuthenticationRepository {
 
     /**
@@ -184,8 +186,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
             else -> {
                 // unrecognized credential type.
-                Log.e("Authentication", "Unexpected type of credential used.", e)
-                throw e
+                Log.e("Authentication", "Unexpected type of credential used.")
+                crash.log("Unexpected type of credential used.")
+                false
             }
         }
     }
