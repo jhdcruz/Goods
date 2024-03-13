@@ -9,7 +9,9 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.PasswordCredential
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInResult
 import com.google.android.gms.auth.api.identity.Identity
@@ -22,11 +24,9 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.github.jhdcruz.memo.BuildConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -52,7 +52,6 @@ class AuthenticationRepositoryImpl @Inject constructor(
     /**
      * Manual Google sign-in/up option
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun googleSignIn(context: Context, reqId: Int): BeginSignInResult {
 
         val oneTapClient: SignInClient = Identity.getSignInClient(context.applicationContext)
@@ -118,6 +117,12 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
                 handleSignIn(result)
                 true
+            } catch (e: GetCredentialCancellationException) {
+                // ignore
+                false
+            } catch (e: NoCredentialException) {
+                // ignore
+                false
             } catch (e: GetCredentialException) {
                 throw e
             } catch (e: FirebaseAuthException) {

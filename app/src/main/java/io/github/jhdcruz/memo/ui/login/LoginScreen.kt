@@ -139,7 +139,7 @@ fun LoginScreen(
                 text = buildAnnotatedString {
                     withStyle(
                         SpanStyle(
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.secondary
                         )
                     ) {
                         append("Copyright © 2024 jhdcruz")
