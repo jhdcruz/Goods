@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +60,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Launch sign in flow on initial start
     LaunchedEffect(true) {
         scope.launch {
             viewModel.initSignIn(context)
@@ -99,7 +101,11 @@ fun LoginScreen(
                         .padding(vertical = 12.dp)
                 )
 
-                Text(modifier = Modifier.padding(horizontal = 6.dp), text = "Or")
+                Text(
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    text = "Or"
+                )
 
                 HorizontalDivider(
                     modifier = Modifier
@@ -109,6 +115,16 @@ fun LoginScreen(
             }
 
             GoogleButton {
+            }
+
+            TextButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp)
+                    .padding(vertical = 12.dp),
+                onClick = { viewModel.initSignIn(context) }
+            ) {
+                Text("Login using Credential Manager")
             }
 
             Spacer(modifier = Modifier.weight(1f))
