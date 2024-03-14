@@ -4,15 +4,15 @@ A simple to-do app.
 
 ## Tech Stack
 
-- Kotlin
-- Jetpack Compose
-- Firebase
+- [Kotlin](https://kotlinlang.org/)
+- [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- [Firebase](https://firebase.google.com/)
     - Firestore
     - Authentication
     - Storage
     - Crashlytics
     - Analytics
-- Dagger Hilt
+- [Dagger Hilt](https://dagger.dev/hilt/)
 
 ## Development
 
@@ -28,18 +28,18 @@ A simple to-do app.
 
 2. Setup `SHA-1` and `SHA-256` fingerprints in Firebase project settings for Google services:
 
-    ```bash
-    $ ./gradlew signingReport
+```bash
+$ ./gradlew signingReport
 
-    Variant: debug    # <-------- SHOULD BE DEBUG VARIANT
-    Config: debug
-    Store: C:\Users\Admin\.android\debug.keystore
-    Alias: AndroidDebugKey
-    MD5: somethin:something
-    SHA1: somethin:something       # <---------- Needed for Google Cloud Platform API & Services Credentials
-    SHA-256: somethin:something    # <---------- Needed for Firebase Project Settings
-    Valid until: Saturday, January 10, 2099
-    ```
+Variant: debug    # <-------- SHOULD BE DEBUG VARIANT
+Config: debug
+Store: C:\Users\Admin\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: somethin:something
+SHA1: somethin:something       # <---------- Needed for Google Cloud Platform API & Services Credentials
+SHA-256: somethin:something    # <---------- Needed for Firebase Project Settings
+Valid until: Saturday, January 10, 2099
+```
 
 > [!IMPORTANT]\
 > Variant should be `debug`.
@@ -50,24 +50,28 @@ A simple to-do app.
 4. Create [OAuth Client ID](https://console.cloud.google.com/apis/credentials/oauthclient?previousPage=%2Fapis%2Fcredentials%3Forgonly%3Dtrue%26project%3Dmemo-android-app%26supportedpurview%3DorganizationId&orgonly=true&project=memo-android-app&supportedpurview=organizationId)
 Credential in Google Cloud Platform:
 
-  ```bash
-  Name: Memo Android [LastName]
-  Package name: io.github.jhdcruz.memo
-  SHA-1 certificate fingerprint: SHA1 from the gradle command above
-  ```
+```bash
+Name: Memo Android [LastName]
+Package name: io.github.jhdcruz.memo
+SHA-1 certificate fingerprint: SHA1 from the gradle command above
+```
 
 5. Set up firebase environment in `local.properties`.
 
-    ```properties
-    # Backend for authentication
-    gcp.web.client=CLIENT ID from "Memo Backend" OAuth 2.0 Client IDs
-    gcp.web.secret=CLIENT SECRET form "Memo Backend" OAuth 2.0 Client IDs
-    # Firebase Client SDK
-    gcp.client.debug=CLIENT ID from your "Memo Android [LastName]" OAuth 2.0 Client IDs
-    gcp.client.release=LEAVE BLANK
-    ```
+```properties
+# Backend for authentication
+gcp.web.client=CLIENT ID from "Memo Backend" OAuth 2.0 Client IDs
+gcp.web.secret=CLIENT SECRET form "Memo Backend" OAuth 2.0 Client IDs
+# Firebase Client SDK
+gcp.client.debug=CLIENT ID from your "Memo Android [LastName]" OAuth 2.0 Client IDs
+gcp.client.release=LEAVE BLANK
+```
 
 6. Run the app.
+
+> [!NOTE]\
+> If [Credential Manager](https://miro.medium.com/v2/resize:fit:872/1*IAy_jgfGxzdAfrAW47e2TA.png)
+> starts from login page, Firebase and GCP is configured correctly.
 
 ### Submitting changes
 
@@ -82,10 +86,6 @@ Credential in Google Cloud Platform:
 > [!TIP]\
 > Read tutorial/walkthrough
 > here: https://www.freecodecamp.org/news/how-to-make-your-first-pull-request-on-github-3/
-
-> [!NOTE]\
-> If [Credential Manager](https://miro.medium.com/v2/resize:fit:872/1*IAy_jgfGxzdAfrAW47e2TA.png)
-> starts from login page, Firebase and GCP is configured correctly.
 
 ## License
 
