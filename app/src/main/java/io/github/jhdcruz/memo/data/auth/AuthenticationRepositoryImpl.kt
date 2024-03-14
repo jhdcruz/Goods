@@ -12,10 +12,6 @@ import androidx.credentials.PasswordCredential
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.BeginSignInResult
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -24,12 +20,9 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.github.jhdcruz.memo.BuildConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class AuthenticationRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
@@ -49,41 +42,42 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    /**
-     * Manual Google sign-in/up option
-     */
-    override suspend fun googleSignIn(context: Context, reqId: Int): BeginSignInResult {
-        val oneTapClient: SignInClient = Identity.getSignInClient(context.applicationContext)
+    override suspend fun googleSignIn(context: Context): Boolean {
+        val credentialManager = CredentialManager.create(context)
 
-        // Sign-in request config
-        val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
-            .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.builder()
-                    .setSupported(true)
-                    .build()
-            )
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                    .setSupported(true)
-                    .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
-                    .setFilterByAuthorizedAccounts(false)
-                    .build()
-            )
-            // Automatically sign in when exactly one credential is retrieved.
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(true)
+            .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
             .build()
 
-        val signInResult: BeginSignInResult = suspendCancellableCoroutine { continuation ->
-            oneTapClient.beginSignIn(signInRequest)
-                .addOnSuccessListener { result ->
-                    continuation.resume(result)
-                }
-                .addOnFailureListener { e ->
-                    continuation.resumeWithException(e)
-                }
-        }
+        val getCredRequest = GetCredentialRequest(
+            listOf(googleIdOption)
+        )
+        return withContext(Dispatchers.IO) {
+            try {
+                // get saved credentials from the user's device
+                val result = credentialManager.getCredential(
+                    context = context,
+                    request = getCredRequest
+                )
 
-        return signInResult
+                handleSignIn(result)
+                true
+            } catch (e: GetCredentialCancellationException) {
+                Log.e("Authentication", "User cancelled sign-in", e)
+                false
+            } catch (e: NoCredentialException) {
+                Log.e("Authentication", "No saved credentials found", e)
+                false
+            } catch (e: GetCredentialException) {
+                Log.e("Authentication", "Failed to get credential", e)
+                false
+            } catch (e: FirebaseAuthException) {
+                Log.e("Authentication", "Failed to sign in with credential", e)
+                false
+            }
+        }
     }
 
     /**
@@ -136,6 +130,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         val credentialManager = CredentialManager.create(context)
 
         return try {
+            // If the new account was created, the user is also signed in.
             auth.createUserWithEmailAndPassword(email, password).await()
 
             credentialManager.createCredential(

@@ -11,6 +11,8 @@ abstract class AuthViewModel : ViewModel() {
     abstract fun onEmailChange(email: String)
     abstract fun onPasswordChange(password: String)
 
-    abstract fun initSignIn(context: Context)
+    abstract fun onSignIn(context: Context)
+    abstract fun onGoogleSignIn(context: Context)
+
     abstract fun onSignUp(context: Context)
 }

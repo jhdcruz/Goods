@@ -67,7 +67,7 @@ fun LoginScreen(
     // Launch sign in flow on initial start
     LaunchedEffect(true) {
         scope.launch {
-            viewModel.initSignIn(context)
+            viewModel.onSignIn(context)
         }
     }
 
@@ -120,15 +120,14 @@ fun LoginScreen(
 
             // manual google sign-in if
             // credential manager is not available/preferred
-            GoogleButton {
-            }
+            GoogleButton(action = { viewModel.onGoogleSignIn(context) })
 
             TextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(58.dp)
                     .padding(vertical = 12.dp),
-                onClick = { viewModel.initSignIn(context) }
+                onClick = { viewModel.onSignIn(context) }
             ) {
                 Text("Login using Credential Manager")
             }

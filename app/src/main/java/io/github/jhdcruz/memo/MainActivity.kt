@@ -17,6 +17,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContent {}
+    }
+
+    override fun onStart() {
+        super.onStart()
+
         // check if user is signed in
         if (auth.currentUser == null) {
             // navigate to AuthActivity
@@ -24,7 +30,5 @@ class MainActivity : ComponentActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
-
-        setContent {}
     }
 }

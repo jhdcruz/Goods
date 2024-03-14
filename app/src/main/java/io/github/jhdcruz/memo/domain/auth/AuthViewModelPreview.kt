@@ -20,7 +20,13 @@ class AuthViewModelPreview : AuthViewModel() {
         _password.value = password
     }
 
-    override fun initSignIn(context: Context) {
+    override fun onSignIn(context: Context) {
+        flow {
+            emit(true)
+        }
+    }
+
+    override fun onGoogleSignIn(context: Context) {
         flow {
             emit(true)
         }

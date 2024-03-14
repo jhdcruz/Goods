@@ -28,10 +28,18 @@ class AuthViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override fun initSignIn(context: Context) {
+    override fun onSignIn(context: Context) {
         viewModelScope.launch {
             authenticationRepository.signIn(
                 context = context,
+            )
+        }
+    }
+
+    override fun onGoogleSignIn(context: Context) {
+        viewModelScope.launch {
+            authenticationRepository.googleSignIn(
+                context = context
             )
         }
     }

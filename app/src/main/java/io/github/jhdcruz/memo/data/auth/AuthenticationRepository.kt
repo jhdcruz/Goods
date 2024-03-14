@@ -5,7 +5,7 @@ import com.google.android.gms.auth.api.identity.BeginSignInResult
 
 interface AuthenticationRepository {
     suspend fun manualSignIn(email: String, password: String): Boolean
-    suspend fun googleSignIn(context: Context, reqId: Int): BeginSignInResult
+    suspend fun googleSignIn(context: Context): Boolean
 
     suspend fun signIn(context: Context): Boolean
     suspend fun signUp(context: Context, email: String, password: String): Boolean
