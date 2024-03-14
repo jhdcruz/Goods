@@ -41,7 +41,7 @@ A simple to-do app.
     Valid until: Saturday, January 10, 2099
     ```
 
-> [IMPORTANT]\
+> [!IMPORTANT]\
 > Variant should be `debug`.
 
 3. Add the `SHA-256` fingerprint in
@@ -79,11 +79,11 @@ Credential in Google Cloud Platform:
 6. Click the Compare & pull request button
 7. Click Create pull request to open a new pull request
 
-> [TIP]\
+> [!TIP]\
 > Read tutorial/walkthrough
 > here: https://www.freecodecamp.org/news/how-to-make-your-first-pull-request-on-github-3/
 
-> [NOTE]\
+> [!NOTE]\
 > If [Credential Manager](https://miro.medium.com/v2/resize:fit:872/1*IAy_jgfGxzdAfrAW47e2TA.png)
 > starts from login page, Firebase and GCP is configured correctly.
 
