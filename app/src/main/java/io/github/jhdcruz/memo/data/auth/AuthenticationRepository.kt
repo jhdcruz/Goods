@@ -1,7 +1,6 @@
 package io.github.jhdcruz.memo.data.auth
 
 import android.content.Context
-import com.google.android.gms.auth.api.identity.BeginSignInResult
 
 interface AuthenticationRepository {
     suspend fun manualSignIn(email: String, password: String): Boolean
