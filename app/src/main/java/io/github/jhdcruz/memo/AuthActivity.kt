@@ -21,6 +21,7 @@ class AuthActivity : ComponentActivity() {
                 Scaffold { innerPadding ->
                     LoginScreen(
                         modifier = Modifier.padding(innerPadding),
+                        context = this,
                     )
                 }
             }

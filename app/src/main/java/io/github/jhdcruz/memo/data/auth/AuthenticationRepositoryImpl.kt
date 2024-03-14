@@ -53,7 +53,6 @@ class AuthenticationRepositoryImpl @Inject constructor(
      * Manual Google sign-in/up option
      */
     override suspend fun googleSignIn(context: Context, reqId: Int): BeginSignInResult {
-
         val oneTapClient: SignInClient = Identity.getSignInClient(context.applicationContext)
 
         // Sign-in request config
@@ -118,17 +117,17 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 handleSignIn(result)
                 true
             } catch (e: GetCredentialCancellationException) {
-                // ignore
+                Log.e("Authentication", "User cancelled sign-in", e)
                 false
             } catch (e: NoCredentialException) {
-                // ignore
+                Log.e("Authentication", "No saved credentials found", e)
                 false
             } catch (e: GetCredentialException) {
-                throw e
+                Log.e("Authentication", "Failed to get credential", e)
+                false
             } catch (e: FirebaseAuthException) {
-                throw e
-            } catch (e: IllegalArgumentException) {
-                throw e
+                Log.e("Authentication", "Failed to sign in with credential", e)
+                false
             }
         }
     }
@@ -146,8 +145,9 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
             // return true if there is user
             !auth.currentUser?.email.isNullOrEmpty()
-        } catch (e: Exception) {
-            throw e
+        } catch (e: RuntimeException) {
+            Log.e("Authentication", "Failed to sign up", e)
+            false
         }
     }
 
@@ -162,7 +162,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     auth.signInWithEmailAndPassword(email, password).await()
                     true
                 } catch (e: FirebaseAuthException) {
-                    throw e
+                    Log.e("Authentication", "Failed to sign in with saved password", e)
+                    false
                 }
             }
 
@@ -180,9 +181,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
                         auth.signInWithCredential(firebaseCredential)
                         true
                     } catch (e: FirebaseAuthException) {
-                        throw e
-                    } catch (e: RuntimeException) {
-                        throw e
+                        Log.e("Authentication", "Failed to sign in with Google credential", e)
+                        false
                     }
                 } else {
                     false

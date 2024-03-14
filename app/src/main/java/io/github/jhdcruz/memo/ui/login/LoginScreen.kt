@@ -53,13 +53,15 @@ import kotlinx.coroutines.launch
  *
  * Logging in without existing account will automatically
  * offer to create one.
+ *
+ * **[context] requires the activity's context.**
  */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel<AuthViewModelImpl>(),
+    context: Context,
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     // Launch sign in flow on initial start
@@ -234,6 +236,8 @@ fun LoginScreenPreview() {
     MemoTheme {
         LoginScreen(
             viewModel = AuthViewModelPreview(),
+            // intentional
+            context = LocalContext.current
         )
     }
 }
