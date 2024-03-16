@@ -32,7 +32,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
     /**
      * Manual sign-in option using input fields,
      */
-    override suspend fun manualSignIn(email: String, password: String): Boolean {
+    override suspend fun passwordSignIn(email: String, password: String): Boolean {
         return try {
             auth.signInWithEmailAndPassword(email, password).await()
             true
