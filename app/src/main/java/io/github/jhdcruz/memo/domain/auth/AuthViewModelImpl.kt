@@ -2,6 +2,7 @@ package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
 import android.content.Intent
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
@@ -32,67 +33,112 @@ class AuthViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override suspend fun onSignIn(context: Context) {
+    override suspend fun onSignIn(context: Context): AuthResponse {
         authenticationRepository.signIn(
             context = context,
         ).apply {
-            when (this) {
-                is AuthResponse.Success -> navigateToMain(context)
-                is AuthResponse.Invalid -> _status.value = this.message
-                is AuthResponse.NotFound -> _status.value = this.message
-                is AuthResponse.Error -> _status.value =
-                    this.exception.message ?: "An error occurred"
+            return when (this) {
+                is AuthResponse.Success -> {
+                    navigateToMain(context, this.user)
+                    this
+                }
 
-                is AuthResponse.Failure -> _status.value =
-                    this.exception.message ?: "An error occurred"
+                is AuthResponse.Invalid -> {
+                    _status.value = this.message
+                    this
+                }
 
-                else -> Unit // Do nothing
+                is AuthResponse.NotFound -> {
+                    _status.value = this.message
+                    this
+                }
+
+                is AuthResponse.Error -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                is AuthResponse.Failure -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                else -> this // Do nothing
             }
         }
     }
 
-    override suspend fun onGoogleSignIn(context: Context) {
+    override suspend fun onGoogleSignIn(context: Context): AuthResponse {
         authenticationRepository.googleSignIn(
             context = context
         ).apply {
-            when (this) {
-                is AuthResponse.Success -> navigateToMain(context)
-                is AuthResponse.Invalid -> _status.value = this.message
-                is AuthResponse.NotFound -> _status.value = this.message
-                is AuthResponse.Error -> _status.value =
-                    this.exception.message ?: "An error occurred"
+            return when (this) {
+                is AuthResponse.Success -> {
+                    navigateToMain(context, this.user)
+                    this
+                }
 
-                is AuthResponse.Failure -> _status.value =
-                    this.exception.message ?: "An error occurred"
+                is AuthResponse.Invalid -> {
+                    _status.value = this.message
+                    this
+                }
 
-                else -> Unit // Do nothing
+                is AuthResponse.NotFound -> {
+                    _status.value = this.message
+                    this
+                }
+
+                is AuthResponse.Error -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                is AuthResponse.Failure -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                else -> this // Do nothing
             }
         }
     }
 
-    override suspend fun onSignUp(context: Context) {
+    override suspend fun onSignUp(context: Context): AuthResponse {
         authenticationRepository.signUp(
             context = context,
             email = _email.value,
             password = _password.value
         ).apply {
-            when (this) {
-                is AuthResponse.Success -> navigateToMain(context)
-                is AuthResponse.Invalid -> _status.value = this.message
-                is AuthResponse.Error -> _status.value =
-                    this.exception.message ?: "An error occurred"
+            return when (this) {
+                is AuthResponse.Success -> {
+                    navigateToMain(context, this.user)
+                    this
+                }
 
-                is AuthResponse.Failure -> _status.value =
-                    this.exception.message ?: "An error occurred"
+                is AuthResponse.Invalid -> {
+                    _status.value = this.message
+                    this
+                }
 
-                else -> Unit // Do nothing
+                is AuthResponse.Error -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                is AuthResponse.Failure -> {
+                    _status.value = this.exception.message ?: "An error occurred"
+                    this
+                }
+
+                else -> this // Do nothing
             }
         }
     }
 
-    private fun navigateToMain(context: Context) {
+    private fun navigateToMain(context: Context, user: FirebaseUser) {
         Intent(context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("user", user)
             context.startActivity(this)
         }
     }

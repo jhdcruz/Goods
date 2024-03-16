@@ -18,6 +18,8 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.github.jhdcruz.memo.BuildConfig
@@ -40,11 +42,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
 
-            if (result.user != null) {
-                AuthResponse.Success(result.user!!)
-            } else {
-                AuthResponse.Invalid("Invalid email or password")
-            }
+            AuthResponse.Success(result.user!!)
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Log.i("Authentication", "User not found", e)
+            AuthResponse.NotFound("User not found")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.i("Authentication", "Invalid email or password", e)
+            AuthResponse.Invalid("Invalid email or password")
         } catch (e: FirebaseAuthException) {
             Log.e("Authentication", "Failed to sign in with email and password", e)
             AuthResponse.Failure(e)

@@ -4,7 +4,6 @@ import android.content.Context
 import io.github.jhdcruz.memo.data.response.AuthResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
 
 class AuthViewModelPreview : AuthViewModel() {
     private val _email = MutableStateFlow("")
@@ -24,21 +23,15 @@ class AuthViewModelPreview : AuthViewModel() {
         _password.value = password
     }
 
-    override suspend fun onSignIn(context: Context) {
-        flow {
-            emit(true)
-        }
+    override suspend fun onSignIn(context: Context): AuthResponse {
+        return AuthResponse.Invalid("View model preview is used")
     }
 
-    override suspend fun onGoogleSignIn(context: Context) {
-        flow {
-            emit(true)
-        }
+    override suspend fun onGoogleSignIn(context: Context): AuthResponse {
+        return AuthResponse.Invalid("View model preview is used")
     }
 
-    override suspend fun onSignUp(context: Context) {
-        flow {
-            emit(true)
-        }
+    override suspend fun onSignUp(context: Context): AuthResponse {
+        return AuthResponse.Invalid("View model preview is used")
     }
 }

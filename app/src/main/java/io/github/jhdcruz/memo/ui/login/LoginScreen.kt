@@ -3,6 +3,9 @@ package io.github.jhdcruz.memo.ui.login
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -45,12 +50,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.github.jhdcruz.memo.data.response.AuthResponse
 import io.github.jhdcruz.memo.domain.auth.AuthViewModel
 import io.github.jhdcruz.memo.domain.auth.AuthViewModelImpl
 import io.github.jhdcruz.memo.domain.auth.AuthViewModelPreview
+import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
 import io.github.jhdcruz.memo.ui.shared.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 /**
@@ -193,10 +201,33 @@ fun LoginForm(
     modifier: Modifier,
     context: Context,
 ) {
+    val notFound = remember { mutableStateOf(false) }
     val email = viewModel.email.collectAsState(initial = "")
     val password = viewModel.password.collectAsState(initial = "")
 
     Column {
+
+        AnimatedVisibility(
+            enter = fadeIn(),
+            exit = fadeOut(),
+            label = "Account Creation Dialog",
+            visible = notFound.value
+        ) {
+            ConfirmDialog(
+                onDismissRequest = { notFound.value = false },
+                onConfirmation = {
+                    scope.launch {
+                        viewModel.onSignUp(context)
+                    }.job.invokeOnCompletion {
+                        notFound.value = false
+                    }
+                },
+                dialogTitle = "Create new account?",
+                dialogText = "We couldn't find an account with the email you provided. Would you like to create one?",
+                icon = Icons.Outlined.Info,
+            )
+        }
+
         // Email input
         OutlinedTextField(
             modifier = modifier.fillMaxWidth(),
@@ -253,7 +284,12 @@ fun LoginForm(
                 localSoftwareKeyboardController?.hide()
 
                 scope.launch {
-                    viewModel.onSignUp(context)
+                    viewModel.onSignIn(context).apply {
+                        // offer to create account when not found
+                        if (this is AuthResponse.NotFound) {
+                            notFound.value = true
+                        }
+                    }
                 }
             }) {
 
