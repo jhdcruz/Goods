@@ -120,7 +120,7 @@ fun LoginScreen(
 
             // manual google sign-in if
             // credential manager is not available/preferred
-            GoogleButton(action = { viewModel.onGoogleSignIn(context) })
+            GoogleButton { viewModel.onGoogleSignIn(context) }
 
             TextButton(
                 modifier = Modifier

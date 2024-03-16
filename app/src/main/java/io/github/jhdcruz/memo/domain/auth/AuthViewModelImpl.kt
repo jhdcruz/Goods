@@ -1,8 +1,10 @@
 package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,9 @@ class AuthViewModelImpl @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.signIn(
                 context = context,
-            )
+            ).apply {
+                if (this) navigateToMain(context)
+            }
         }
     }
 
@@ -40,7 +44,9 @@ class AuthViewModelImpl @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.googleSignIn(
                 context = context
-            )
+            ).apply {
+                if (this) navigateToMain(context)
+            }
         }
     }
 
@@ -50,7 +56,16 @@ class AuthViewModelImpl @Inject constructor(
                 context = context,
                 email = _email.value,
                 password = _password.value
-            )
+            ).apply {
+                if (this) navigateToMain(context)
+            }
+        }
+    }
+
+    private fun navigateToMain(context: Context) {
+        Intent(context, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(this)
         }
     }
 }
