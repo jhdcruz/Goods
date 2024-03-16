@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jhdcruz.memo.ui.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -40,6 +41,12 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(TasksDestination.route) {
                             TasksScreen(
+                                navController = navController,
+                            )
+                        }
+
+                        composable(CalendarDestination.route) {
+                            CalendarScreen(
                                 navController = navController,
                             )
                         }

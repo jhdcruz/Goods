@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks
+package io.github.jhdcruz.memo.ui.calendar
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -12,23 +12,25 @@ import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 
 @Composable
-fun TasksScreen(
+fun CalendarScreen(
     navController: NavController,
 ) {
     Scaffold { innerPadding ->
         Surface(
             modifier = Modifier.padding(innerPadding)
         ) {
-            Text(text = "Tasks")
+            Text(text = "Calendar")
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun TasksScreenPreview() {
+private fun CalendarScreenPreview() {
     MemoTheme {
         val navController = rememberNavController()
-        TasksScreen(navController)
+
+        CalendarScreen(navController)
     }
 }
+
