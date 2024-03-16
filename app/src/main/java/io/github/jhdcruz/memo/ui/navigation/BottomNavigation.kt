@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.ui.navigation
 
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +36,10 @@ fun BottomNavigation(navController: NavHostController) {
                 selected = selected == index,
                 icon = {
                     // change icon to filled based on selected
-                    val icon = if (selected == index) item.activeIcon else item.inactiveIcon
+                    val icon: Int by animateIntAsState(
+                        targetValue = if (selected == index) item.activeIcon else item.inactiveIcon,
+                        label = "selected navigation transition"
+                    )
 
                     Image(
                         colorFilter = if (selected == index) {
