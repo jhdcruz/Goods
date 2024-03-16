@@ -1,6 +1,7 @@
 package io.github.jhdcruz.memo.data.auth
 
 import android.content.Context
+import android.util.Base64
 import android.util.Log
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialManager
@@ -22,6 +23,7 @@ import io.github.jhdcruz.memo.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.security.SecureRandom
 import javax.inject.Inject
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -48,12 +50,14 @@ class AuthenticationRepositoryImpl @Inject constructor(
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(true)
+            .setNonce(generateNonce())
             .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
             .build()
 
         val getCredRequest = GetCredentialRequest(
             listOf(googleIdOption)
         )
+
         return withContext(Dispatchers.IO) {
             try {
                 // get saved credentials from the user's device
@@ -93,6 +97,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(true)
+            .setNonce(generateNonce())
             .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
             .build()
 
@@ -191,5 +196,12 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 false
             }
         }
+    }
+
+    private fun generateNonce(): String {
+        val nonce = ByteArray(32)
+        SecureRandom().nextBytes(nonce)
+
+        return Base64.encodeToString(nonce, Base64.DEFAULT)
     }
 }
