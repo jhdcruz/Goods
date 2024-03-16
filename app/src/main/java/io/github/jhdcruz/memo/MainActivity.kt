@@ -4,8 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
+import io.github.jhdcruz.memo.ui.tasks.TasksScreen
+import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -17,7 +26,27 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {}
+        setContent {
+            MemoTheme {
+                val navController = rememberNavController()
+
+                Scaffold(
+                    bottomBar = { BottomNavigation(navController = navController) }
+                ) { innerPadding ->
+                    NavHost(
+                        navController,
+                        startDestination = TasksDestination.route,
+                        Modifier.padding(innerPadding)
+                    ) {
+                        composable(TasksDestination.route) {
+                            TasksScreen(
+                                navController = navController,
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {

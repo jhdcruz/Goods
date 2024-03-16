@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo
 
+import androidx.annotation.DrawableRes
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 
@@ -8,17 +9,28 @@ interface Destination {
     val title: String
 }
 
+interface RootDestination : Destination {
+    @get:DrawableRes
+    val activeIcon: Int
 
-object TaskListDestination : Destination {
-    override val route = "product_list"
-    override val title = "Product List"
+    @get:DrawableRes
+    val inactiveIcon: Int
+}
+
+// TASKS
+object TasksDestination : RootDestination {
+    override val route = "tasks"
+    override val title = "Tasks"
+    override val activeIcon = R.drawable.baseline_tasks_filled_24
+    override val inactiveIcon = R.drawable.baseline_tasks_24
 }
 
 object TaskDetailsDestination : Destination {
-    override val route = "product_details"
-    override val title = "Product Details"
+    override val route = "task_details"
+    override val title = "Task Details"
 
-    const val taskId = "product_id"
+    const val taskId = "id"
+
     val args = listOf(navArgument(name = taskId) {
         type = NavType.StringType
     })
@@ -26,17 +38,11 @@ object TaskDetailsDestination : Destination {
     fun createRouteWithParam(taskId: String) = "$route/${taskId}"
 }
 
-object CalendarDestination : Destination {
-    override val route = "add_product"
-    override val title = "Add Product"
-}
+// CALENDAR
+object CalendarDestination : RootDestination {
+    override val route = "calendar"
+    override val title = "Calendar"
 
-object AuthenticationDestination : Destination {
-    override val route = "authentication"
-    override val title = "Authentication"
-}
-
-object SignUpDestination : Destination {
-    override val route = "signup"
-    override val title = "Sign Up"
+    override val activeIcon = R.drawable.baseline_calendar_filled_24
+    override val inactiveIcon = R.drawable.baseline_calendar_24
 }
