@@ -21,7 +21,7 @@ fun GoogleButton(
 ) {
     ElevatedButton(
         modifier = modifier
-            .height(52.dp)
+            .height(44.dp)
             .fillMaxWidth(),
         onClick = action
     ) {
@@ -36,6 +36,6 @@ fun GoogleButton(
 
 @Preview
 @Composable
-fun GoogleButtonPreview() {
+private fun GoogleButtonPreview() {
     GoogleButton {}
 }

@@ -2,13 +2,12 @@ package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
 import android.content.Intent
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
+import io.github.jhdcruz.memo.data.response.AuthResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,6 +21,9 @@ class AuthViewModelImpl @Inject constructor(
     private val _password = MutableStateFlow("")
     override val password: Flow<String> = _password
 
+    private val _status = MutableStateFlow("")
+    override val status: Flow<String> = _status
+
     override fun onEmailChange(email: String) {
         _email.value = email
     }
@@ -30,34 +32,60 @@ class AuthViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override fun onSignIn(context: Context) {
-        viewModelScope.launch {
-            authenticationRepository.signIn(
-                context = context,
-            ).apply {
-                if (this) navigateToMain(context)
+    override suspend fun onSignIn(context: Context) {
+        authenticationRepository.signIn(
+            context = context,
+        ).apply {
+            when (this) {
+                is AuthResponse.Success -> navigateToMain(context)
+                is AuthResponse.Invalid -> _status.value = this.message
+                is AuthResponse.NotFound -> _status.value = this.message
+                is AuthResponse.Error -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                is AuthResponse.Failure -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                else -> Unit // Do nothing
             }
         }
     }
 
-    override fun onGoogleSignIn(context: Context) {
-        viewModelScope.launch {
-            authenticationRepository.googleSignIn(
-                context = context
-            ).apply {
-                if (this) navigateToMain(context)
+    override suspend fun onGoogleSignIn(context: Context) {
+        authenticationRepository.googleSignIn(
+            context = context
+        ).apply {
+            when (this) {
+                is AuthResponse.Success -> navigateToMain(context)
+                is AuthResponse.Invalid -> _status.value = this.message
+                is AuthResponse.NotFound -> _status.value = this.message
+                is AuthResponse.Error -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                is AuthResponse.Failure -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                else -> Unit // Do nothing
             }
         }
     }
 
-    override fun onSignUp(context: Context) {
-        viewModelScope.launch {
-            authenticationRepository.signUp(
-                context = context,
-                email = _email.value,
-                password = _password.value
-            ).apply {
-                if (this) navigateToMain(context)
+    override suspend fun onSignUp(context: Context) {
+        authenticationRepository.signUp(
+            context = context,
+            email = _email.value,
+            password = _password.value
+        ).apply {
+            when (this) {
+                is AuthResponse.Success -> navigateToMain(context)
+                is AuthResponse.Invalid -> _status.value = this.message
+                is AuthResponse.Error -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                is AuthResponse.Failure -> _status.value =
+                    this.exception.message ?: "An error occurred"
+
+                else -> Unit // Do nothing
             }
         }
     }

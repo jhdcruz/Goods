@@ -22,12 +22,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +50,7 @@ import io.github.jhdcruz.memo.domain.auth.AuthViewModelImpl
 import io.github.jhdcruz.memo.domain.auth.AuthViewModelPreview
 import io.github.jhdcruz.memo.ui.shared.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -62,21 +67,34 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel<AuthViewModelImpl>(),
     context: Context,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val authStatus = viewModel.status.collectAsState(initial = "")
 
     // Launch sign in flow on initial start
-    LaunchedEffect(true) {
-        scope.launch {
-            viewModel.onSignIn(context)
+    LaunchedEffect(context) {
+        viewModel.onSignIn(context)
+    }
+
+    // Show snackbar based on auth status result
+    if (authStatus.value.isNotEmpty()) {
+        LaunchedEffect(snackbarHostState) {
+            snackbarHostState.showSnackbar(
+                message = authStatus.value,
+                duration = SnackbarDuration.Short
+            )
         }
     }
 
-    Surface {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = modifier
                 .fillMaxHeight()
-                .padding(20.dp)
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp)
         ) {
 
             Spacer(modifier = Modifier.weight(1f))
@@ -90,9 +108,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             LoginForm(
+                scope = scope,
+                viewModel = viewModel,
                 modifier = modifier,
                 context = context,
-                viewModel = viewModel
             )
 
             Row(
@@ -108,7 +127,7 @@ fun LoginScreen(
                 Text(
                     modifier = Modifier.padding(horizontal = 6.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    text = "Or"
+                    text = "Or, sign in using"
                 )
 
                 HorizontalDivider(
@@ -120,14 +139,22 @@ fun LoginScreen(
 
             // manual google sign-in if
             // credential manager is not available/preferred
-            GoogleButton { viewModel.onGoogleSignIn(context) }
+            GoogleButton {
+                scope.launch {
+                    viewModel.onGoogleSignIn(context)
+                }
+            }
 
             TextButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp)
-                    .padding(vertical = 12.dp),
-                onClick = { viewModel.onSignIn(context) }
+                    .padding(vertical = 8.dp)
+                    .height(54.dp),
+                onClick = {
+                    scope.launch {
+                        viewModel.onSignIn(context)
+                    }
+                }
             ) {
                 Text("Login using Credential Manager")
             }
@@ -136,7 +163,9 @@ fun LoginScreen(
 
             ClickableText(
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 16.dp),
                 text = buildAnnotatedString {
                     withStyle(
                         SpanStyle(
@@ -159,9 +188,10 @@ fun LoginScreen(
 
 @Composable
 fun LoginForm(
+    viewModel: AuthViewModel = hiltViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope(),
     modifier: Modifier,
     context: Context,
-    viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val email = viewModel.email.collectAsState(initial = "")
     val password = viewModel.password.collectAsState(initial = "")
@@ -217,11 +247,14 @@ fun LoginForm(
         val localSoftwareKeyboardController = LocalSoftwareKeyboardController.current
         Button(modifier = modifier
             .fillMaxWidth()
-            .height(62.dp)
+            .height(58.dp)
             .padding(top = 12.dp),
             onClick = {
                 localSoftwareKeyboardController?.hide()
-                viewModel.onSignUp(context)
+
+                scope.launch {
+                    viewModel.onSignUp(context)
+                }
             }) {
 
             Text("Log in / Sign up")
@@ -229,9 +262,9 @@ fun LoginForm(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+private fun LoginScreenPreview() {
     MemoTheme {
         LoginScreen(
             viewModel = AuthViewModelPreview(),
