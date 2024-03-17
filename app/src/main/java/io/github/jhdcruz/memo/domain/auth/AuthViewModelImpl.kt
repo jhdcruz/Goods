@@ -2,7 +2,6 @@ package io.github.jhdcruz.memo.domain.auth
 
 import android.content.Context
 import android.content.Intent
-import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
@@ -39,7 +38,7 @@ class AuthViewModelImpl @Inject constructor(
         ).apply {
             return when (this) {
                 is AuthResponse.Success -> {
-                    navigateToMain(context, this.user)
+                    navigateToMain(context)
                     this
                 }
 
@@ -74,7 +73,7 @@ class AuthViewModelImpl @Inject constructor(
         ).apply {
             return when (this) {
                 is AuthResponse.Success -> {
-                    navigateToMain(context, this.user)
+                    navigateToMain(context)
                     this
                 }
 
@@ -111,7 +110,7 @@ class AuthViewModelImpl @Inject constructor(
         ).apply {
             return when (this) {
                 is AuthResponse.Success -> {
-                    navigateToMain(context, this.user)
+                    navigateToMain(context)
                     this
                 }
 
@@ -135,10 +134,9 @@ class AuthViewModelImpl @Inject constructor(
         }
     }
 
-    private fun navigateToMain(context: Context, user: FirebaseUser) {
+    private fun navigateToMain(context: Context) {
         Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("user", user)
             context.startActivity(this)
         }
     }

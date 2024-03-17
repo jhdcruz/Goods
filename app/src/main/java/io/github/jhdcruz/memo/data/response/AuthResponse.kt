@@ -8,7 +8,7 @@ import com.google.firebase.auth.FirebaseUser
  */
 sealed class AuthResponse : Response() {
 
-    data class Success(val user: FirebaseUser?) : AuthResponse()
+    data class Success(val user: FirebaseUser? = null) : AuthResponse()
     data class Failure(val exception: FirebaseAuthException) : AuthResponse()
 
     data class Cancelled(val message: String) : AuthResponse()
