@@ -9,9 +9,12 @@
 -keep class androidx.window.extensions.embedding.**
 -keep class javax.naming.**
 
+
+
+# javax/kotlinpoet
 -keep class com.squareup.kotlinpoet.**
 
-# Java Models
+-dontwarn javax.tools.**
 -dontwarn javax.lang.model.**
 -dontwarn javax.tools.Diagnostic$Kind
 
