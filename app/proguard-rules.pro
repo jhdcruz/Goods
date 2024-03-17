@@ -12,7 +12,7 @@
 -keep class com.squareup.kotlinpoet.**
 
 # Java Models
--keep class javax.lang.model.**
+-dontwarn javax.lang.model.**
 -dontwarn javax.tools.Diagnostic$Kind
 
 # compose
