@@ -9,9 +9,14 @@
 -keep class androidx.window.extensions.embedding.**
 -keep class javax.naming.*
 
+-keep class com.squareup.kotlinpoet.**
+
 # Java Models
--dontwarn javax.lang.model.**
+-keep class javax.lang.model.*
 -dontwarn javax.tools.Diagnostic$Kind
+
+# compose
+-keep class androidx.compose.animation.**
 
 # okhttp
 # JSR 305 annotations are for embedding nullability information.
@@ -62,11 +67,3 @@
 -keep class androidx.credentials.playservices.** {
   *;
 }
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
