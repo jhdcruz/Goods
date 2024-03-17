@@ -7,12 +7,12 @@
 
 -keep class com.google.android.gms.tasks.Task
 -keep class androidx.window.extensions.embedding.**
--keep class javax.naming.*
+-keep class javax.naming.**
 
 -keep class com.squareup.kotlinpoet.**
 
 # Java Models
--keep class javax.lang.model.*
+-keep class javax.lang.model.**
 -dontwarn javax.tools.Diagnostic$Kind
 
 # compose
