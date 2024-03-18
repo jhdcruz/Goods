@@ -50,10 +50,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.jhdcruz.memo.data.response.AuthResponse
-import io.github.jhdcruz.memo.domain.auth.AuthViewModel
-import io.github.jhdcruz.memo.domain.auth.AuthViewModelImpl
-import io.github.jhdcruz.memo.domain.auth.AuthViewModelPreview
+import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
 import io.github.jhdcruz.memo.ui.shared.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -72,7 +69,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel<AuthViewModelImpl>(),
+    viewModel: LoginViewModel = hiltViewModel<LoginViewModelImpl>(),
     context: Context,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -196,7 +193,7 @@ fun LoginScreen(
 
 @Composable
 fun LoginForm(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     scope: CoroutineScope = rememberCoroutineScope(),
     modifier: Modifier,
     context: Context,
@@ -286,7 +283,7 @@ fun LoginForm(
                 scope.launch {
                     viewModel.onSignIn(context).apply {
                         // offer to create account when not found
-                        if (this is AuthResponse.NotFound) {
+                        if (this is AuthResponseUseCase.NotFound) {
                             notFound.value = true
                         }
                     }
@@ -303,7 +300,7 @@ fun LoginForm(
 private fun LoginScreenPreview() {
     MemoTheme {
         LoginScreen(
-            viewModel = AuthViewModelPreview(),
+            viewModel = LoginViewModelPreview(),
             // intentional
             context = LocalContext.current
         )

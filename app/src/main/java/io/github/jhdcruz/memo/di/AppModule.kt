@@ -1,39 +1,20 @@
 package io.github.jhdcruz.memo.di
 
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.analytics
-import com.google.firebase.auth.auth
-import com.google.firebase.crashlytics.crashlytics
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.components.ViewModelComponent
+import io.github.jhdcruz.memo.ui.login.LoginViewModel
+import io.github.jhdcruz.memo.ui.login.LoginViewModelImpl
 import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
+@InstallIn(ViewModelComponent::class)
 @Module
-object AppModule {
+abstract class AppModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideFirestore() = Firebase.firestore
-
-    @Provides
-    @Singleton
-    fun provideAuth() = Firebase.auth
-
-    @Provides
-    @Singleton
-    fun provideStorage() = Firebase.storage
-
-    @Provides
-    @Singleton
-    fun provideAnalytics() = Firebase.analytics
-
-    @Provides
-    @Singleton
-    fun provideCrashlytics() = Firebase.crashlytics
-
+    abstract fun bindLoginViewModel(
+        loginViewModel: LoginViewModelImpl
+    ): LoginViewModel
 }

@@ -1,19 +1,19 @@
-package io.github.jhdcruz.memo.domain.auth
+package io.github.jhdcruz.memo.ui.login
 
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
-import io.github.jhdcruz.memo.data.response.AuthResponse
+import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModelImpl @Inject constructor(
+class LoginViewModelImpl @Inject constructor(
     private val authenticationRepository: AuthenticationRepository
-) : AuthViewModel() {
+) : LoginViewModel() {
 
     private val _email = MutableStateFlow("")
     override val email: Flow<String> = _email
@@ -32,32 +32,32 @@ class AuthViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override suspend fun onSignIn(context: Context): AuthResponse {
+    override suspend fun onSignIn(context: Context): AuthResponseUseCase {
         authenticationRepository.signIn(
             context = context,
         ).apply {
             return when (this) {
-                is AuthResponse.Success -> {
+                is AuthResponseUseCase.Success -> {
                     navigateToMain(context)
                     this
                 }
 
-                is AuthResponse.Invalid -> {
+                is AuthResponseUseCase.Invalid -> {
                     _status.value = this.message
                     this
                 }
 
-                is AuthResponse.NotFound -> {
+                is AuthResponseUseCase.NotFound -> {
                     _status.value = this.message
                     this
                 }
 
-                is AuthResponse.Error -> {
+                is AuthResponseUseCase.Error -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }
 
-                is AuthResponse.Failure -> {
+                is AuthResponseUseCase.Failure -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }
@@ -67,32 +67,32 @@ class AuthViewModelImpl @Inject constructor(
         }
     }
 
-    override suspend fun onGoogleSignIn(context: Context): AuthResponse {
+    override suspend fun onGoogleSignIn(context: Context): AuthResponseUseCase {
         authenticationRepository.googleSignIn(
             context = context
         ).apply {
             return when (this) {
-                is AuthResponse.Success -> {
+                is AuthResponseUseCase.Success -> {
                     navigateToMain(context)
                     this
                 }
 
-                is AuthResponse.Invalid -> {
+                is AuthResponseUseCase.Invalid -> {
                     _status.value = this.message
                     this
                 }
 
-                is AuthResponse.NotFound -> {
+                is AuthResponseUseCase.NotFound -> {
                     _status.value = this.message
                     this
                 }
 
-                is AuthResponse.Error -> {
+                is AuthResponseUseCase.Error -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }
 
-                is AuthResponse.Failure -> {
+                is AuthResponseUseCase.Failure -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }
@@ -102,29 +102,29 @@ class AuthViewModelImpl @Inject constructor(
         }
     }
 
-    override suspend fun onSignUp(context: Context): AuthResponse {
+    override suspend fun onSignUp(context: Context): AuthResponseUseCase {
         authenticationRepository.signUp(
             context = context,
             email = _email.value,
             password = _password.value
         ).apply {
             return when (this) {
-                is AuthResponse.Success -> {
+                is AuthResponseUseCase.Success -> {
                     navigateToMain(context)
                     this
                 }
 
-                is AuthResponse.Invalid -> {
+                is AuthResponseUseCase.Invalid -> {
                     _status.value = this.message
                     this
                 }
 
-                is AuthResponse.Error -> {
+                is AuthResponseUseCase.Error -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }
 
-                is AuthResponse.Failure -> {
+                is AuthResponseUseCase.Failure -> {
                     _status.value = this.exception.message ?: "An error occurred"
                     this
                 }

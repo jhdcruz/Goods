@@ -1,11 +1,11 @@
-package io.github.jhdcruz.memo.domain.auth
+package io.github.jhdcruz.memo.ui.login
 
 import android.content.Context
-import io.github.jhdcruz.memo.data.response.AuthResponse
+import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class AuthViewModelPreview : AuthViewModel() {
+class LoginViewModelPreview : LoginViewModel() {
     private val _email = MutableStateFlow("")
     override val email: Flow<String> = _email
 
@@ -23,15 +23,15 @@ class AuthViewModelPreview : AuthViewModel() {
         _password.value = password
     }
 
-    override suspend fun onSignIn(context: Context): AuthResponse {
-        return AuthResponse.Invalid("View model preview is used")
+    override suspend fun onSignIn(context: Context): AuthResponseUseCase {
+        return AuthResponseUseCase.Invalid("View model preview is used")
     }
 
-    override suspend fun onGoogleSignIn(context: Context): AuthResponse {
-        return AuthResponse.Invalid("View model preview is used")
+    override suspend fun onGoogleSignIn(context: Context): AuthResponseUseCase {
+        return AuthResponseUseCase.Invalid("View model preview is used")
     }
 
-    override suspend fun onSignUp(context: Context): AuthResponse {
-        return AuthResponse.Invalid("View model preview is used")
+    override suspend fun onSignUp(context: Context): AuthResponseUseCase {
+        return AuthResponseUseCase.Invalid("View model preview is used")
     }
 }

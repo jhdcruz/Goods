@@ -28,8 +28,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import io.github.jhdcruz.memo.BuildConfig
 import io.github.jhdcruz.memo.data.User
-import io.github.jhdcruz.memo.data.response.AuthResponse
-import io.github.jhdcruz.memo.data.response.FirestoreResponse
+import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
+import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
 import java.security.SecureRandom
 import javax.inject.Inject
@@ -48,7 +48,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
      * This should be migrated to 'Functions' instead.
      * https://extensions.dev/extensions/rowy/firestore-user-document
      */
-    override suspend fun saveUser(user: FirebaseUser): FirestoreResponse {
+    override suspend fun saveUser(user: FirebaseUser): FirestoreResponseUseCase {
         val data = User(
             uid = user.uid,
             email = user.email,
@@ -62,34 +62,34 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 .set(data, SetOptions.merge())
                 .await()
 
-            FirestoreResponse.Success()
+            FirestoreResponseUseCase.Success()
         } catch (e: FirebaseFirestoreException) {
             Log.e("Firestore", "Failed to save new user data", e)
-            FirestoreResponse.Failure(e)
+            FirestoreResponseUseCase.Failure(e)
         }
     }
 
     /**
      * Manual sign-in option using input fields,
      */
-    override suspend fun passwordSignIn(email: String, password: String): AuthResponse {
+    override suspend fun passwordSignIn(email: String, password: String): AuthResponseUseCase {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
 
-            AuthResponse.Success(result.user!!)
+            AuthResponseUseCase.Success(result.user!!)
         } catch (e: FirebaseAuthInvalidUserException) {
             Log.i("Authentication", "User not found", e)
-            AuthResponse.NotFound("User not found")
+            AuthResponseUseCase.NotFound("User not found")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             Log.i("Authentication", "Invalid email or password", e)
-            AuthResponse.Invalid("Invalid email or password")
+            AuthResponseUseCase.Invalid("Invalid email or password")
         } catch (e: FirebaseAuthException) {
             Log.e("Authentication", "Failed to sign in with email and password", e)
-            AuthResponse.Failure(e)
+            AuthResponseUseCase.Failure(e)
         }
     }
 
-    override suspend fun googleSignIn(context: Context): AuthResponse {
+    override suspend fun googleSignIn(context: Context): AuthResponseUseCase {
         val credentialManager = CredentialManager.create(context)
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
@@ -113,16 +113,16 @@ class AuthenticationRepositoryImpl @Inject constructor(
             handleSignIn(result.credential)
         } catch (e: GetCredentialCancellationException) {
             Log.i("Authentication", "User cancelled sign-in", e)
-            AuthResponse.Cancelled("User cancelled sign-in")
+            AuthResponseUseCase.Cancelled("User cancelled sign-in")
         } catch (e: NoCredentialException) {
             Log.i("Authentication", "No saved credentials found", e)
-            AuthResponse.NotFound("No saved credentials found")
+            AuthResponseUseCase.NotFound("No saved credentials found")
         } catch (e: GetCredentialException) {
             Log.e("Authentication", "Failed to get credential", e)
-            AuthResponse.Error(e)
+            AuthResponseUseCase.Error(e)
         } catch (e: FirebaseAuthException) {
             Log.e("Authentication", "Failed to sign in with credential", e)
-            AuthResponse.Failure(e)
+            AuthResponseUseCase.Failure(e)
         }
     }
 
@@ -131,7 +131,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
      *
      * Also handles Google sign-in/register
      */
-    override suspend fun signIn(context: Context): AuthResponse {
+    override suspend fun signIn(context: Context): AuthResponseUseCase {
         val credentialManager = CredentialManager.create(context)
 
         // Options for signing-in
@@ -157,20 +157,20 @@ class AuthenticationRepositoryImpl @Inject constructor(
             handleSignIn(result.credential)
         } catch (e: GetCredentialCancellationException) {
             Log.i("Authentication", "User cancelled sign-in", e)
-            AuthResponse.Cancelled("User cancelled sign-in")
+            AuthResponseUseCase.Cancelled("User cancelled sign-in")
         } catch (e: NoCredentialException) {
             Log.i("Authentication", "No saved credentials found", e)
-            AuthResponse.NotFound("No saved credentials found")
+            AuthResponseUseCase.NotFound("No saved credentials found")
         } catch (e: GetCredentialException) {
             Log.e("Authentication", "Failed to start credential manager", e)
-            AuthResponse.Error(e)
+            AuthResponseUseCase.Error(e)
         } catch (e: FirebaseAuthException) {
             Log.e("Authentication", "Failed to sign in with credential", e)
-            AuthResponse.Failure(e)
+            AuthResponseUseCase.Failure(e)
         }
     }
 
-    override suspend fun signUp(context: Context, email: String, password: String): AuthResponse {
+    override suspend fun signUp(context: Context, email: String, password: String): AuthResponseUseCase {
         val credentialManager = CredentialManager.create(context)
 
         return try {
@@ -183,17 +183,17 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 request = CreatePasswordRequest(email, password),
             )
 
-            AuthResponse.Success(result.user)
+            AuthResponseUseCase.Success(result.user)
         } catch (e: FirebaseAuthException) {
             Log.e("Authentication", "Failed to sign up", e)
-            AuthResponse.Failure(e)
+            AuthResponseUseCase.Failure(e)
         } catch (e: CreateCredentialException) {
             Log.e("Authentication", "Failed to save new credential", e)
-            AuthResponse.Error(e)
+            AuthResponseUseCase.Error(e)
         }
     }
 
-    private suspend fun handleSignIn(credential: Credential): AuthResponse {
+    private suspend fun handleSignIn(credential: Credential): AuthResponseUseCase {
         // handle authentication based on selected credential
         return when (credential) {
             is PasswordCredential -> {
@@ -204,13 +204,13 @@ class AuthenticationRepositoryImpl @Inject constructor(
                     val result = auth.signInWithEmailAndPassword(email, password).await()
                     if (result.user != null) {
                         saveUser(result.user!!)
-                        AuthResponse.Success(result.user)
+                        AuthResponseUseCase.Success(result.user)
                     } else {
-                        AuthResponse.Invalid("Invalid email or password")
+                        AuthResponseUseCase.Invalid("Invalid email or password")
                     }
                 } catch (e: FirebaseAuthException) {
                     Log.e("Authentication", "Failed to sign in with saved password", e)
-                    return AuthResponse.Failure(e)
+                    return AuthResponseUseCase.Failure(e)
                 }
             }
 
@@ -221,7 +221,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 Log.e("Authentication", "Unexpected type of credential used.")
                 crashlytics.log("Unexpected type of credential used.")
 
-                return AuthResponse.Invalid("Unexpected type of credential used.")
+                return AuthResponseUseCase.Invalid("Unexpected type of credential used.")
             }
         }
     }
@@ -229,7 +229,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
     /**
      * Handles third-part login services
      */
-    private suspend fun customSignIn(credential: Credential): AuthResponse {
+    private suspend fun customSignIn(credential: Credential): AuthResponseUseCase {
         when (credential.type) {
             // Handles Google sign-in
             GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL -> {
@@ -243,10 +243,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
                     val result = auth.signInWithCredential(firebaseCredential).await()
                     saveUser(result.user!!)
-                    AuthResponse.Success(result.user)
+                    AuthResponseUseCase.Success(result.user)
                 } catch (e: FirebaseAuthException) {
                     Log.e("Authentication", "Failed to sign in with Google credential", e)
-                    AuthResponse.Failure(e)
+                    AuthResponseUseCase.Failure(e)
                 }
             }
 
@@ -255,7 +255,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 Log.e("Authentication", "Unexpected type of custom credential used.")
                 crashlytics.log("Unexpected type of custom credential used.")
 
-                return AuthResponse.Invalid("Unexpected type of custom credential used.")
+                return AuthResponseUseCase.Invalid("Unexpected type of custom credential used.")
             }
         }
     }
