@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.data
+package io.github.jhdcruz.memo.data.auth
 
 data class User(
     val uid: String = "",

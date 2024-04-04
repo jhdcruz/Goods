@@ -8,6 +8,7 @@ compose-bom = "2024.04.00"
 # https://androidx.dev/storage/compose-compiler/repository
 compose-compiler = "1.5.11-dev-k1.9.23-96ef9dc6af1"
 
+coil = "2.6.0"
 coroutines = "1.8.0"
 credentials = "1.3.0-alpha02"
 core-ktx = "1.12.0"
@@ -39,6 +40,7 @@ hilt = ["hilt-android", "hilt-compiler", "hilt-navigation-compose"]
 lifecycle = ["lifecycle-runtime", "lifecycle-runtime-compose", "lifecycle-viewmodel", "lifecycle-viewmodel-compose"]
 play-services = ["play-coroutines"]
 test-extensions = ["androidx-test-ext-junit", "espresso-core", "ui-test-junit4"]
+external = ["coil-compose"]
 
 [libraries]
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
@@ -48,6 +50,7 @@ compat-app = { group = "androidx.appcompat", name = "appcompat", version.ref = "
 compat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 credentials-play-services = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }

@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
                         composable(TasksDestination.route) {
                             TasksScreen(
                                 navController = navController,
+                                profile = auth.currentUser?.photoUrl.toString(),
                             )
                         }
 

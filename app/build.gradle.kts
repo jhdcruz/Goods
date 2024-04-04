@@ -126,6 +126,7 @@ dependencies {
     implementation(libs.bundles.play.services)
     implementation(libs.bundles.android.credentials)
     implementation(libs.bundles.firebase)
+    implementation(libs.bundles.external)
 
     testImplementation(libs.junit)
 

@@ -27,7 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import io.github.jhdcruz.memo.BuildConfig
-import io.github.jhdcruz.memo.data.User
 import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
