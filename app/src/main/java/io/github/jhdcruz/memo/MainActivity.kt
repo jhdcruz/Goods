@@ -5,7 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +18,8 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jhdcruz.memo.ui.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
+import io.github.jhdcruz.memo.ui.shared.AppSearch
+import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import javax.inject.Inject
@@ -38,26 +44,48 @@ class MainActivity : ComponentActivity() {
         setContent {
             MemoTheme {
                 val navController = rememberNavController()
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-                Scaffold(
-                    bottomBar = { BottomNavigation(navController = navController) }
-                ) { innerPadding ->
-                    NavHost(
-                        navController,
-                        startDestination = TasksDestination.route,
-                        Modifier.padding(innerPadding)
-                    ) {
-                        composable(TasksDestination.route) {
-                            TasksScreen(
-                                navController = navController,
-                                profile = auth.currentUser?.photoUrl.toString(),
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        ModalDrawerSheet {
+                            Sidebar(
+                                drawerState = drawerState,
                             )
                         }
-
-                        composable(CalendarDestination.route) {
-                            CalendarScreen(
+                    },
+                ) {
+                    Scaffold(
+                        topBar = {
+                            AppSearch(
+                                navController = navController,
+                                profile = auth.currentUser?.photoUrl.toString(),
+                                drawerState = drawerState,
+                            )
+                        },
+                        bottomBar = {
+                            BottomNavigation(
                                 navController = navController,
                             )
+                        }
+                    ) { innerPadding ->
+                        NavHost(
+                            navController,
+                            startDestination = TasksDestination.route,
+                            Modifier.padding(innerPadding)
+                        ) {
+                            composable(TasksDestination.route) {
+                                TasksScreen(
+                                    navController = navController,
+                                )
+                            }
+
+                            composable(CalendarDestination.route) {
+                                CalendarScreen(
+                                    navController = navController,
+                                )
+                            }
                         }
                     }
                 }

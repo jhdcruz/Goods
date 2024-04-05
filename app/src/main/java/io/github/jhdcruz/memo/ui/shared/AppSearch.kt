@@ -5,24 +5,23 @@ import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DockedSearchBar
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,11 +29,13 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
@@ -44,11 +45,10 @@ import kotlinx.coroutines.launch
 fun AppSearch(
     modifier: Modifier = Modifier,
     navController: NavController,
-    tasksViewModel: TasksViewModel,
+    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    drawerState: DrawerState,
     profile: String? = null,
 ) {
-    var isSearching by remember { mutableStateOf(false) }
-
     val scope = rememberCoroutineScope()
     val query = tasksViewModel.query.collectAsState(initial = "").value
 
@@ -57,11 +57,15 @@ fun AppSearch(
             if (result.resultCode == Activity.RESULT_OK) {
                 // matches[0] will contain the result of voice input
                 val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                matches?.get(0)?.let { tasksViewModel::onQueryChange }
+
+                scope.launch {
+                    tasksViewModel.onQueryChange(matches?.get(0) ?: "")
+                    tasksViewModel.onSearch()
+                }
             }
         }
 
-    SearchBar(
+    DockedSearchBar(
         modifier = modifier
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .fillMaxWidth(),
@@ -73,39 +77,54 @@ fun AppSearch(
             }
         },
         leadingIcon = {
-            Image(
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                painter = painterResource(id = R.drawable.baseline_menu_24),
-                contentDescription = "Tasks menu"
-            )
-        },
-        trailingIcon = {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        drawerState.apply {
+                            if (isClosed) open() else close()
+                        }
+                    }
+                }
             ) {
                 Image(
-                    modifier = Modifier.clickable { voiceSearch.launch(tasksViewModel.onVoiceSearch()) },
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    painter = painterResource(id = R.drawable.baseline_mic_24),
-                    contentDescription = "Search tasks using voice input"
-                )
-                AsyncImage(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape),
-                    model = profile,
-                    contentDescription = "Profile icon",
-                    placeholder = painterResource(id = R.drawable.baseline_user_circle_24),
-                    error = painterResource(id = R.drawable.baseline_user_circle_24),
+                    painter = painterResource(id = R.drawable.baseline_menu_24),
+                    contentDescription = "Tasks menu"
                 )
             }
         },
-        active = isSearching,
-        onActiveChange = { active ->
-            isSearching = active
+        trailingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    modifier = Modifier.offset(x = 4.dp),
+                    onClick = {
+                        voiceSearch.launch(tasksViewModel.onVoiceSearch())
+                    }) {
+                    Image(
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                        painter = painterResource(id = R.drawable.baseline_mic_24),
+                        contentDescription = "Search tasks using voice input"
+                    )
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape),
+                        model = profile,
+                        contentDescription = "Profile icon",
+                        placeholder = painterResource(id = R.drawable.baseline_user_circle_24),
+                        error = painterResource(id = R.drawable.baseline_user_circle_24),
+                    )
+                }
+            }
         },
+
+        // we don't need the search bar content, we filter directly
+        active = false,
+        onActiveChange = {},
         placeholder = {
             Text(text = "Search your tasks")
         },
@@ -117,11 +136,13 @@ fun AppSearch(
 @Composable
 private fun AppSearchPreview() {
     val navController = rememberNavController()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     MemoTheme {
         AppSearch(
             navController = navController,
-            tasksViewModel = TasksViewModelPreview()
+            tasksViewModel = TasksViewModelPreview(),
+            drawerState = drawerState,
         )
     }
 }

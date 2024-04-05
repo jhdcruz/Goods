@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,17 +34,10 @@ fun TasksScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
-    profile: String? = null,
 ) {
+
     Scaffold(
         modifier = modifier,
-        topBar = {
-            AppSearch(
-                navController = navController,
-                tasksViewModel = viewModel,
-                profile = profile,
-            )
-        },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
                 Row(
@@ -79,7 +74,16 @@ fun TasksScreen(
 private fun TasksScreenPreview() {
     MemoTheme {
         val navController = rememberNavController()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
         Scaffold(
+            topBar = {
+                AppSearch(
+                    navController = navController,
+                    tasksViewModel = TasksViewModelPreview(),
+                    drawerState = drawerState,
+                )
+            },
             bottomBar = {
                 BottomNavigation(navController)
             }
