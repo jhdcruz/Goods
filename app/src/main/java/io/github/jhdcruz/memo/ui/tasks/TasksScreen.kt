@@ -8,13 +8,20 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -27,19 +34,32 @@ import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
+import io.github.jhdcruz.memo.ui.tasks.components.TaskAdd
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
+    var showAddTask by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    scope.launch {
+                        showAddTask = true
+                        sheetState.show()
+                    }
+                },
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -57,6 +77,20 @@ fun TasksScreen(
         Surface(
             modifier = Modifier.padding(innerPadding)
         ) {
+
+            if (showAddTask) {
+                TaskAdd(
+                    tasksViewModel = viewModel,
+                    onDismissRequest = {
+                        scope.launch {
+                            sheetState.hide()
+                            showAddTask = false
+                        }
+                    },
+                    sheetState = sheetState,
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

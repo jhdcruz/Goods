@@ -1,10 +1,13 @@
 package io.github.jhdcruz.memo.data.task
 
+import com.google.type.DateTime
+
 data class Task(
     val uid: String? = null,
 
     val priority: Int = 0,
     val category: String? = null,
+    val deadline: DateTime? = null,
 
     val title: String = "",
 
@@ -26,6 +29,8 @@ data class Task(
 
     @field:JvmField
     val isCompleted: Boolean = false,
+
+    val attachments: List<String>? = null,
 
     val created: String = "",
     val updated: String? = null,
