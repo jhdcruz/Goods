@@ -1,7 +1,9 @@
 package io.github.jhdcruz.memo.data.task
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
@@ -17,12 +19,16 @@ class TasksRepositoryImpl @Inject constructor(
 
         return try {
             // search tasks in Firestore nested collection located in 'users/uid/tasks'
-            firestore.collection("users").document(userUid).collection("tasks")
+            val result = firestore.collection("users").document(userUid).collection("tasks")
                 .whereEqualTo("title", query)
                 .get()
                 .await()
                 .toObjects(Task::class.java)
-        } catch (e: Exception) {
+
+            Log.i("TasksRepository", "Tasks search yields ${result.size} results")
+            return result
+        } catch (e: FirebaseFirestoreException) {
+            Log.i("TasksRepository", "Tasks search yields no results", e)
             emptyList()
         }
     }
@@ -38,6 +44,7 @@ class TasksRepositoryImpl @Inject constructor(
 
             FirestoreResponseUseCase.Success("New task added!")
         } catch (e: Exception) {
+            Log.e("TasksRepository", "Error adding new task", e)
             FirestoreResponseUseCase.Error(e)
         }
     }
@@ -54,6 +61,7 @@ class TasksRepositoryImpl @Inject constructor(
 
             FirestoreResponseUseCase.Success("Task updated!")
         } catch (e: Exception) {
+            Log.e("TasksRepository", "Error updating task", e)
             FirestoreResponseUseCase.Error(e)
         }
     }
@@ -70,6 +78,7 @@ class TasksRepositoryImpl @Inject constructor(
 
             FirestoreResponseUseCase.Success("Task deleted!")
         } catch (e: Exception) {
+            Log.e("TasksRepository", "Error deleting task $uid", e)
             FirestoreResponseUseCase.Error(e)
         }
     }
