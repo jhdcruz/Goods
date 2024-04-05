@@ -60,7 +60,7 @@ fun MemoTheme(
             val insetsController = WindowCompat.getInsetsController(window, view)
 
             window.statusBarColor = colorScheme.background.toArgb()
-            window.navigationBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.surfaceContainer.toArgb()
 
             insetsController.isAppearanceLightStatusBars = !darkTheme
             insetsController.isAppearanceLightNavigationBars = !darkTheme
