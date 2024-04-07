@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -32,7 +33,12 @@ fun BottomNavigation(navController: NavHostController) {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 alwaysShowLabel = true,
-                label = { Text(item.title) },
+                label = {
+                    Text(
+                        fontWeight = if (selected == index) FontWeight.Bold else FontWeight.Normal,
+                        text = item.title,
+                    )
+                },
                 selected = selected == index,
                 icon = {
                     // change icon to filled based on selected
@@ -45,7 +51,7 @@ fun BottomNavigation(navController: NavHostController) {
                         colorFilter = if (selected == index) {
                             ColorFilter.tint(MaterialTheme.colorScheme.onSecondaryContainer)
                         } else {
-                            ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                            ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                         },
                         painter = painterResource(id = icon),
                         contentDescription = item.title
