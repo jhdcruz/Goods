@@ -6,6 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepositoryImpl
+import io.github.jhdcruz.memo.data.task.AttachmentsRepository
+import io.github.jhdcruz.memo.data.task.AttachmentsRepositoryImpl
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.data.task.TasksRepositoryImpl
 
@@ -22,5 +24,10 @@ abstract class RepositoryModule {
     abstract fun bindTasksRepository(
         tasksRepositoryImpl: TasksRepositoryImpl
     ): TasksRepository
+
+    @Binds
+    abstract fun bindAttachmentsRepository(
+        attachmentsRepositoryImpl: AttachmentsRepositoryImpl
+    ): AttachmentsRepository
 
 }

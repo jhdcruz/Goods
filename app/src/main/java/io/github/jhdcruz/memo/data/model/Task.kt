@@ -1,9 +1,9 @@
-package io.github.jhdcruz.memo.data.task
+package io.github.jhdcruz.memo.data.model
 
 import com.google.firebase.Timestamp
 
 data class Task(
-    val uid: String? = null,
+    val id: String? = null,
 
     val priority: Int = 0,
     val dueDate: Timestamp? = null,

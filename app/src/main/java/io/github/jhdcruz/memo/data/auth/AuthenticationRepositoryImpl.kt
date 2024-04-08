@@ -1,7 +1,6 @@
 package io.github.jhdcruz.memo.data.auth
 
 import android.content.Context
-import android.util.Base64
 import android.util.Log
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.Credential
@@ -27,10 +26,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import io.github.jhdcruz.memo.BuildConfig
+import io.github.jhdcruz.memo.data.model.User
+import io.github.jhdcruz.memo.domain.generateNonce
 import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
-import java.security.SecureRandom
 import javax.inject.Inject
 
 class AuthenticationRepositoryImpl @Inject constructor(
@@ -38,6 +38,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val crashlytics: FirebaseCrashlytics,
 ) : AuthenticationRepository {
+
+    private val nonceSize = 32
 
     /**
      * Save user data to database,
@@ -94,7 +96,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(true)
-            .setNonce(generateNonce())
+            .setNonce(generateNonce(nonceSize))
             .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
             .build()
 
@@ -138,7 +140,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(true)
-            .setNonce(generateNonce())
+            .setNonce(generateNonce(nonceSize))
             .setServerClientId(BuildConfig.GCP_WEB_CLIENT)
             .build()
 
@@ -169,7 +171,11 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signUp(context: Context, email: String, password: String): AuthResponseUseCase {
+    override suspend fun signUp(
+        context: Context,
+        email: String,
+        password: String,
+    ): AuthResponseUseCase {
         val credentialManager = CredentialManager.create(context)
 
         return try {
@@ -257,12 +263,5 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 return AuthResponseUseCase.Invalid("Unexpected type of custom credential used.")
             }
         }
-    }
-
-    private fun generateNonce(): String {
-        val nonce = ByteArray(32)
-        SecureRandom().nextBytes(nonce)
-
-        return Base64.encodeToString(nonce, Base64.DEFAULT)
     }
 }
