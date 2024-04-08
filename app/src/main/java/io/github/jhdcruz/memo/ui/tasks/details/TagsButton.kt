@@ -73,93 +73,95 @@ fun TagsButton(
         )
     }
 
-    AlertDialog(
-        modifier = Modifier.verticalScroll(ScrollState(0)),
-        onDismissRequest = { showTagsDialog = false },
-        dismissButton = {
-            newTag = ""
-            showTagsDialog = false
-        },
-        confirmButton = { onConfirm = true },
-        text = {
-            Row(modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = newTag,
-                    onValueChange = {
-                        // limit length
-                        if (it.length <= 20) {
-                            newTag = it
+    if (showTagsDialog) {
+        AlertDialog(
+            modifier = Modifier.verticalScroll(ScrollState(0)),
+            onDismissRequest = { showTagsDialog = false },
+            dismissButton = {
+                newTag = ""
+                showTagsDialog = false
+            },
+            confirmButton = { onConfirm = true },
+            text = {
+                Row(modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = newTag,
+                        onValueChange = {
+                            // limit length
+                            if (it.length <= 20) {
+                                newTag = it
+                            }
+                        },
+                        label = { Text(text = "Tag") },
+                        placeholder = { Text(text = "Create new tag") },
+                        supportingText = { Text(text = "Max. 20 characters") },
+                        singleLine = true,
+                    )
+
+                    IconButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        onClick = {
+                            scope.launch {
+                                viewModel.onTagAdd(newTag)
+                                newTag = ""
+
+                                // append to tags instead of calling onGetTags() again
+                                // this gets updated on opening the dialog anyways
+                                tags = tags.toMutableList().apply {
+                                    add(newTag)
+                                }
+                            }
                         }
-                    },
-                    label = { Text(text = "Tag") },
-                    placeholder = { Text(text = "Create new tag") },
-                    supportingText = { Text(text = "Max. 20 characters") },
-                    singleLine = true,
-                )
+                    ) {
+                        Image(imageVector = Icons.Filled.Add, contentDescription = "Create tag")
+                    }
+                }
 
-                IconButton(
-                    modifier = Modifier.padding(start = 8.dp),
-                    onClick = {
-                        scope.launch {
-                            viewModel.onTagAdd(newTag)
-                            newTag = ""
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                            // append to tags instead of calling onGetTags() again
-                            // this gets updated on opening the dialog anyways
-                            tags = tags.toMutableList().apply {
-                                add(newTag)
+                if (tags.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxSize()
+                    ) {
+                        Text(text = "No tags created yet.")
+                    }
+                } else {
+                    LazyRow(
+                        modifier = Modifier.selectableGroup(),
+                    ) {
+                        items(tags) { tag ->
+                            Row {
+                                Checkbox(
+                                    checked = selectedTag.contains(tag),
+                                    onCheckedChange = {
+                                        // update selected tags
+                                        scope.launch {
+                                            selectedTag = if (it) {
+                                                selectedTag.toMutableList().apply {
+                                                    add(tag)
+                                                }
+                                            } else {
+                                                selectedTag.toMutableList().apply {
+                                                    remove(tag)
+                                                }
+                                            }
+
+                                        }
+                                    },
+                                )
+
+                                Text(
+                                    text = tag,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
                             }
                         }
                     }
-                ) {
-                    Image(imageVector = Icons.Filled.Add, contentDescription = "Create tag")
                 }
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            if (tags.isEmpty()) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxSize()
-                ) {
-                    Text(text = "No tags created yet.")
-                }
-            } else {
-                LazyRow(
-                    modifier = Modifier.selectableGroup(),
-                ) {
-                    items(tags) { tag ->
-                        Row {
-                            Checkbox(
-                                checked = selectedTag.contains(tag),
-                                onCheckedChange = {
-                                    // update selected tags
-                                    scope.launch {
-                                        selectedTag = if (it) {
-                                            selectedTag.toMutableList().apply {
-                                                add(tag)
-                                            }
-                                        } else {
-                                            selectedTag.toMutableList().apply {
-                                                remove(tag)
-                                            }
-                                        }
-
-                                    }
-                                },
-                            )
-
-                            Text(
-                                text = tag,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
+        )
+    }
 }

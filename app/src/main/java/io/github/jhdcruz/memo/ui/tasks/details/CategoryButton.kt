@@ -72,82 +72,87 @@ fun CategoryButton(
         )
     }
 
-    AlertDialog(
-        modifier = Modifier.verticalScroll(ScrollState(0)),
-        onDismissRequest = { showCategoryDialog = false },
-        dismissButton = {
-            newCategory = ""
-            showCategoryDialog = false
-        },
-        confirmButton = { onConfirm = true },
-        text = {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = newCategory,
-                    onValueChange = {
-                        // limit length
-                        if (it.length <= 20) {
-                            newCategory = it
+    if (showCategoryDialog) {
+        AlertDialog(
+            modifier = Modifier.verticalScroll(ScrollState(0)),
+            onDismissRequest = { showCategoryDialog = false },
+            dismissButton = {
+                newCategory = ""
+                showCategoryDialog = false
+            },
+            confirmButton = { onConfirm = true },
+            text = {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = newCategory,
+                        onValueChange = {
+                            // limit length
+                            if (it.length <= 20) {
+                                newCategory = it
+                            }
+                        },
+                        label = { Text(text = "Category") },
+                        placeholder = { Text(text = "Create new category") },
+                        supportingText = { Text(text = "Max. 20 characters") },
+                        singleLine = true,
+                    )
+
+                    IconButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        onClick = {
+                            scope.launch {
+                                viewModel.onCategoryAdd(newCategory)
+                                newCategory = ""
+
+                                // append to tags instead of calling onGetTags() again
+                                // this gets updated on opening the dialog anyways
+                                categories = categories.toMutableList().apply {
+                                    add(newCategory)
+                                }
+                            }
                         }
-                    },
-                    label = { Text(text = "Category") },
-                    placeholder = { Text(text = "Create new category") },
-                    supportingText = { Text(text = "Max. 20 characters") },
-                    singleLine = true,
-                )
+                    ) {
+                        Image(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Create category"
+                        )
+                    }
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                IconButton(
-                    modifier = Modifier.padding(start = 8.dp),
-                    onClick = {
-                        scope.launch {
-                            viewModel.onCategoryAdd(newCategory)
-                            newCategory = ""
+                if (categories.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxSize()
+                    ) {
+                        Text(text = "No categories created yet.")
+                    }
+                } else {
+                    LazyRow(
+                        modifier = Modifier.selectableGroup(),
+                    ) {
+                        items(categories) { category ->
+                            Row {
+                                RadioButton(
+                                    selected = selectedCategory == category,
+                                    onClick = {
+                                        scope.launch {
+                                            selectedCategory = category
+                                        }
+                                    },
+                                )
 
-                            // append to tags instead of calling onGetTags() again
-                            // this gets updated on opening the dialog anyways
-                            categories = categories.toMutableList().apply {
-                                add(newCategory)
+                                Text(
+                                    text = category,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
                             }
                         }
                     }
-                ) {
-                    Image(imageVector = Icons.Filled.Add, contentDescription = "Create category")
                 }
             }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            if (categories.isEmpty()) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxSize()
-                ) {
-                    Text(text = "No categories created yet.")
-                }
-            } else {
-                LazyRow(
-                    modifier = Modifier.selectableGroup(),
-                ) {
-                    items(categories) { category ->
-                        Row {
-                            RadioButton(
-                                selected = selectedCategory == category,
-                                onClick = {
-                                    scope.launch {
-                                        selectedCategory = category
-                                    }
-                                },
-                            )
-
-                            Text(
-                                text = category,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
+        )
+    }
 }
