@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.components
+package io.github.jhdcruz.memo.ui.tasks.details
 
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog

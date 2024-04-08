@@ -1,10 +1,11 @@
 package io.github.jhdcruz.memo.ui.tasks
 
 import android.content.Intent
+import android.net.Uri
 import android.speech.RecognizerIntent
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.jhdcruz.memo.data.task.Task
+import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.domain.toTimestamp
@@ -37,8 +38,8 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskTags = MutableStateFlow<List<String>>(emptyList())
     override val taskTags: Flow<List<String>> = _taskTags
 
-    private val _taskAttachments = MutableStateFlow<List<String>>(emptyList())
-    override val taskAttachments: Flow<List<String>> = _taskAttachments
+    private val _taskAttachments = MutableStateFlow<List<Uri>?>(emptyList())
+    override val taskAttachments: Flow<List<Uri>?> = _taskAttachments
 
     private val _taskSelectedDate = MutableStateFlow<Long?>(null)
     override val taskSelectedDate: Flow<Long?> = _taskSelectedDate
@@ -88,12 +89,52 @@ class TasksViewModelImpl @Inject constructor(
         tasksRepository.onTaskCompleted(uid)
     }
 
+    override suspend fun onCategoryAdd(category: String) {
+        tasksRepository.onCategoryAdd(category)
+    }
+
+    override suspend fun onCategoryUpdate(category: String, newCategory: String) {
+        tasksRepository.onCategoryUpdate(category, newCategory)
+    }
+
+    override suspend fun onCategoriesDelete(categories: List<String>) {
+        tasksRepository.onCategoriesDelete(categories)
+    }
+
+    override suspend fun onTagAdd(tag: String) {
+        tasksRepository.onTagAdd(tag)
+    }
+
+    override suspend fun onTagUpdate(tag: String, newTag: String) {
+        tasksRepository.onTagUpdate(tag, newTag)
+    }
+
+    override suspend fun onTagsDelete(tags: List<String>) {
+        tasksRepository.onTagsDelete(tags)
+    }
+
+    override suspend fun onGetCategories(): List<String> {
+        return tasksRepository.onGetCategories()
+    }
+
+    override suspend fun onGetTags(): List<String> {
+        return tasksRepository.onGetTags()
+    }
+
     override fun onQueryChange(query: String) {
         _query.value = query
     }
 
     override fun onTaskListChange(taskList: List<Task>) {
         _taskList.value = taskList
+    }
+
+    override fun onTagsChange(tags: List<String>) {
+        _taskTags.value = tags
+    }
+
+    override fun onCategoryChange(category: String) {
+        _taskCategory.value = category
     }
 
     override fun onTaskTitleChange(title: String) {
@@ -112,7 +153,14 @@ class TasksViewModelImpl @Inject constructor(
         _taskTags.value = tags
     }
 
-    override fun onTaskAttachmentsChange(attachments: List<String>) {
+    override fun onTaskAttachmentsChange(attachments: List<Uri>?) {
+        _taskAttachments.value = attachments
+    }
+
+    override fun removeTaskAttachment(index: Int) {
+        val attachments = _taskAttachments.value?.toMutableList()
+
+        attachments?.removeAt(index)
         _taskAttachments.value = attachments
     }
 

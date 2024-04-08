@@ -1,7 +1,10 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.components
+package io.github.jhdcruz.memo.ui.tasks.details
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.data.task.Task
+import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
@@ -44,7 +47,7 @@ import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun TaskAdd(
+fun TaskDetailsSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
@@ -71,15 +74,22 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
     val taskDescription = tasksViewModel.taskDescription.collectAsState(initial = "")
     val taskCategory = tasksViewModel.taskCategory.collectAsState(initial = "")
     val taskTags = tasksViewModel.taskTags.collectAsState(initial = emptyList())
-    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(initial = emptyList())
     val taskPriority = tasksViewModel.taskPriority.collectAsState(initial = 0)
 
+    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(initial = emptyList())
     val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(initial = null)
     val taskSelectedHour = tasksViewModel.taskSelectedHour.collectAsState(initial = null)
     val taskSelectedMinute = tasksViewModel.taskSelectedMinute.collectAsState(initial = null)
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+
+    val taskAttachmentsUpload =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
+            if (uris != null) {
+                tasksViewModel.onTaskAttachmentsChange(uris.map { it })
+            }
+        }
 
     Column(
         modifier = Modifier
@@ -103,6 +113,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
                 )
             )
 
+            // submit button
             IconButton(
                 onClick = {
                     scope.launch {
@@ -129,7 +140,6 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
                                 description = taskDescription.value,
                                 category = taskCategory.value,
                                 tags = taskTags.value,
-                                attachments = taskAttachments.value,
                                 dueDate = dueDate,
                                 priority = taskPriority.value
                             )
@@ -159,31 +169,21 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
             )
         )
 
+        // list of attachments uploaded
+        AttachmentsList(tasksViewModel = tasksViewModel, attachments = taskAttachments.value)
+
         HorizontalDivider()
 
         Row(
             modifier = Modifier.padding(bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = {
-                }) {
-                Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    painter = painterResource(id = R.drawable.baseline_flag_24),
-                    contentDescription = "Set task's priority"
-                )
-            }
+            PriorityButton(
+                taskPriority = taskPriority.value,
+                tasksViewModel = tasksViewModel
+            )
 
-            IconButton(
-                onClick = {
-                }) {
-                Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    painter = painterResource(id = R.drawable.baseline_folder_24),
-                    contentDescription = "Set task's category"
-                )
-            }
+            CategoryButton(viewModel = tasksViewModel)
 
             IconButton(
                 onClick = {
@@ -198,6 +198,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
 
             IconButton(
                 onClick = {
+                    taskAttachmentsUpload.launch(arrayOf("*/*"))
                 }) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
@@ -209,16 +210,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
             // space-between
             Spacer(modifier = Modifier.weight(1F))
 
-            IconButton(
-                onClick = {
-                }) {
-                Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    painter = painterResource(id = R.drawable.baseline_label_24),
-                    contentDescription = "Set task's label"
-                )
-            }
-
+            TagsButton(viewModel = tasksViewModel)
 
             // Modal Dialogs
             if (showDatePicker) {
@@ -245,6 +237,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
         } // Row
     }
 }
+
 
 @Composable
 @Preview(showBackground = true)
