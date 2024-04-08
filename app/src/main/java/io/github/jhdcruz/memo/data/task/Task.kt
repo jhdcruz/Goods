@@ -1,13 +1,12 @@
 package io.github.jhdcruz.memo.data.task
 
-import com.google.type.DateTime
+import com.google.firebase.Timestamp
 
 data class Task(
     val uid: String? = null,
 
     val priority: Int = 0,
-    val category: String? = null,
-    val deadline: DateTime? = null,
+    val dueDate: Timestamp? = null,
 
     val title: String = "",
 
@@ -18,21 +17,18 @@ data class Task(
      */
     val description: String? = null,
 
-    /**
-     * This serves as the detailed information about the task,
-     * and is different from the description which contains
-     * a brief (one-liner) description of the task.
-     */
-    val body: String? = null,
-
-    val tags: List<String>? = null,
-
     @field:JvmField
     val isCompleted: Boolean = false,
 
+    val category: String? = null,
+    val tags: List<String>? = null,
+
+    /**
+     * Stores URL links to files or images uploaded to storage/buckets
+     */
     val attachments: List<String>? = null,
 
-    val created: String = "",
-    val updated: String? = null,
+    val created: Timestamp = Timestamp.now(),
+    val updated: Timestamp? = null,
 )
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,9 +76,9 @@ fun TasksScreen(
         }
     ) { innerPadding ->
         Surface(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
-
+            // New task bottom sheet
             if (showAddTask) {
                 TaskAdd(
                     tasksViewModel = viewModel,
@@ -91,6 +92,7 @@ fun TasksScreen(
                 )
             }
 
+            // Main screen content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
