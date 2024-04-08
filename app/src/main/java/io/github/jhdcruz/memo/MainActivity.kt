@@ -4,7 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -31,6 +34,7 @@ class MainActivity : ComponentActivity() {
     lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // check if user is signed in
@@ -46,45 +50,47 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        ModalDrawerSheet {
-                            Sidebar(
-                                drawerState = drawerState,
-                            )
-                        }
-                    },
-                ) {
-                    Scaffold(
-                        topBar = {
-                            AppSearch(
-                                navController = navController,
-                                profile = auth.currentUser?.photoUrl.toString(),
-                                drawerState = drawerState,
-                            )
+                Box(Modifier.safeDrawingPadding()) {
+                    ModalNavigationDrawer(
+                        drawerState = drawerState,
+                        drawerContent = {
+                            ModalDrawerSheet {
+                                Sidebar(
+                                    drawerState = drawerState,
+                                )
+                            }
                         },
-                        bottomBar = {
-                            BottomNavigation(
-                                navController = navController,
-                            )
-                        }
-                    ) { innerPadding ->
-                        NavHost(
-                            navController,
-                            startDestination = TasksDestination.route,
-                            Modifier.padding(innerPadding)
-                        ) {
-                            composable(TasksDestination.route) {
-                                TasksScreen(
+                    ) {
+                        Scaffold(
+                            topBar = {
+                                AppSearch(
+                                    navController = navController,
+                                    profile = auth.currentUser?.photoUrl.toString(),
+                                    drawerState = drawerState,
+                                )
+                            },
+                            bottomBar = {
+                                BottomNavigation(
                                     navController = navController,
                                 )
                             }
+                        ) { innerPadding ->
+                            NavHost(
+                                navController,
+                                startDestination = TasksDestination.route,
+                                Modifier.padding(innerPadding)
+                            ) {
+                                composable(TasksDestination.route) {
+                                    TasksScreen(
+                                        navController = navController,
+                                    )
+                                }
 
-                            composable(CalendarDestination.route) {
-                                CalendarScreen(
-                                    navController = navController,
-                                )
+                                composable(CalendarDestination.route) {
+                                    CalendarScreen(
+                                        navController = navController,
+                                    )
+                                }
                             }
                         }
                     }
