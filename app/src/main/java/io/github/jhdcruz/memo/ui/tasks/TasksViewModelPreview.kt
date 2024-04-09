@@ -3,6 +3,7 @@ package io.github.jhdcruz.memo.ui.tasks
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
@@ -15,7 +16,7 @@ class TasksViewModelPreview : TasksViewModel() {
         get() = TODO("Not yet implemented")
     override val taskTitle: Flow<String>
         get() = TODO("Not yet implemented")
-    override val taskDescription: Flow<String>
+    override val taskDescription: Flow<TextFieldValue>
         get() = TODO("Not yet implemented")
     override val taskCategory: Flow<String>
         get() = TODO("Not yet implemented")
@@ -127,7 +128,7 @@ class TasksViewModelPreview : TasksViewModel() {
         TODO("Not yet implemented")
     }
 
-    override fun onTaskDescriptionChange(description: String) {
+    override fun onTaskDescriptionChange(description: TextFieldValue) {
         TODO("Not yet implemented")
     }
 

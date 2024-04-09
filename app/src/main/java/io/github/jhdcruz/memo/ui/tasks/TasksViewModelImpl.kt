@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
+import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
@@ -33,8 +34,8 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskTitle = MutableStateFlow("")
     override val taskTitle: Flow<String> = _taskTitle
 
-    private val _taskDescription = MutableStateFlow("")
-    override val taskDescription: Flow<String> = _taskDescription
+    private val _taskDescription = MutableStateFlow(TextFieldValue(""))
+    override val taskDescription: Flow<TextFieldValue> = _taskDescription
 
     private val _taskCategory = MutableStateFlow("")
     override val taskCategory: Flow<String> = _taskCategory
@@ -163,7 +164,7 @@ class TasksViewModelImpl @Inject constructor(
         _taskTitle.value = title
     }
 
-    override fun onTaskDescriptionChange(description: String) {
+    override fun onTaskDescriptionChange(description: TextFieldValue) {
         _taskDescription.value = description
     }
 

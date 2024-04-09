@@ -3,6 +3,7 @@ package io.github.jhdcruz.memo.ui.tasks
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
@@ -15,7 +16,7 @@ abstract class TasksViewModel : ViewModel() {
 
     // Populating tasks
     abstract val taskTitle: Flow<String>
-    abstract val taskDescription: Flow<String>
+    abstract val taskDescription: Flow<TextFieldValue>
     abstract val taskCategory: Flow<String>
     abstract val taskTags: Flow<List<String>>
     abstract val taskAttachments: Flow<List<Map<String, String>>?>
@@ -73,7 +74,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract fun onCategoryChange(category: String)
 
     abstract fun onTaskTitleChange(title: String)
-    abstract fun onTaskDescriptionChange(description: String)
+    abstract fun onTaskDescriptionChange(description: TextFieldValue)
     abstract fun onTaskCategoryChange(category: String)
     abstract fun onTaskTagsChange(tags: List<String>)
 

@@ -34,12 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.createTimestamp
+import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
@@ -70,19 +72,19 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
     val scope = rememberCoroutineScope()
 
     // Populating tasks
-    val taskTitle = tasksViewModel.taskTitle.collectAsState(initial = "")
-    val taskDescription = tasksViewModel.taskDescription.collectAsState(initial = "")
-    val taskCategory = tasksViewModel.taskCategory.collectAsState(initial = "")
-    val taskTags = tasksViewModel.taskTags.collectAsState(initial = emptyList())
-    val taskPriority = tasksViewModel.taskPriority.collectAsState(initial = 0)
+    val taskTitle = tasksViewModel.taskTitle.collectAsState("")
+    val taskDescription = tasksViewModel.taskDescription.collectAsState(TextFieldValue(""))
+    val taskCategory = tasksViewModel.taskCategory.collectAsState("")
+    val taskTags = tasksViewModel.taskTags.collectAsState(emptyList())
+    val taskPriority = tasksViewModel.taskPriority.collectAsState(0)
 
-    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(initial = emptyList())
+    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(emptyList())
     val taskLocalAttachments =
-        tasksViewModel.taskLocalAttachments.collectAsState(initial = emptyList())
+        tasksViewModel.taskLocalAttachments.collectAsState(emptyList())
 
-    val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(initial = null)
-    val taskSelectedHour = tasksViewModel.taskSelectedHour.collectAsState(initial = null)
-    val taskSelectedMinute = tasksViewModel.taskSelectedMinute.collectAsState(initial = null)
+    val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(null)
+    val taskSelectedHour = tasksViewModel.taskSelectedHour.collectAsState(null)
+    val taskSelectedMinute = tasksViewModel.taskSelectedMinute.collectAsState(null)
 
     var fileUris by remember { mutableStateOf(emptyList<Uri>()) }
 
@@ -144,11 +146,11 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
                                 priority = taskPriority.value,
                                 dueDate = dueDate,
                                 title = taskTitle.value,
-                                description = taskDescription.value,
+                                description = taskDescription.value.text,
                                 category = taskCategory.value,
                                 tags = taskTags.value,
                             )
-                        )
+                        ) as FirestoreResponseUseCase.Success
 
                         // upload attachments
                         tasksViewModel.onAttachmentsUpload(
