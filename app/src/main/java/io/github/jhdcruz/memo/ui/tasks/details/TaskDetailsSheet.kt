@@ -88,7 +88,7 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
 
     var fileUris by remember { mutableStateOf(emptyList<Uri>()) }
 
-    val taskAttachmentSelect =
+    val selectTaskAttachments =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
             if (uris != null) {
                 // append selected files, instead of overwriting
@@ -153,10 +153,12 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
                         ) as FirestoreResponseUseCase.Success
 
                         // upload attachments
-                        tasksViewModel.onAttachmentsUpload(
-                            id = id.toString(),
-                            attachments = taskLocalAttachments.value
-                        )
+                        if (fileUris.isNotEmpty()) {
+                            tasksViewModel.onAttachmentsUpload(
+                                id = id.result as String,
+                                attachments = taskLocalAttachments.value
+                            )
+                        }
                     }
                 }) {
                 Image(
@@ -204,7 +206,7 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
 
             IconButton(
                 onClick = {
-                    taskAttachmentSelect.launch(arrayOf("*/*"))
+                    selectTaskAttachments.launch(arrayOf("*/*"))
                 }) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
