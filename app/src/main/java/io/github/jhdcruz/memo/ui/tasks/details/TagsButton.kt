@@ -127,7 +127,7 @@ fun TagsButton(
                                         viewModel.onTagAdd(newTag)
 
                                         // append manually to avoid calling onGetTags again
-                                        tags = listOf(newTag + tags)
+                                        tags = listOf(newTag) + tags
                                         newTag = ""
                                     }
                                 }

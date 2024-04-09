@@ -123,7 +123,7 @@ fun CategoryButton(
                                         viewModel.onCategoryAdd(newCategory)
 
                                         // append manually to avoid calling onGetTags again
-                                        categories = listOf(newCategory + categories)
+                                        categories = listOf(newCategory) + categories
                                         newCategory = ""
                                     }
                                 }
