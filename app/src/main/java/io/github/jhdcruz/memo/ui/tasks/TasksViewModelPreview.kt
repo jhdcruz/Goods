@@ -1,59 +1,63 @@
 package io.github.jhdcruz.memo.ui.tasks
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
+import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.flow.Flow
 
 class TasksViewModelPreview : TasksViewModel() {
     override val query: Flow<String>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskList: Flow<List<Task>>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskTitle: Flow<String>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskDescription: Flow<String>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskCategory: Flow<String>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskTags: Flow<List<String>>
-        get() = TODO("Preview only")
-    override val taskAttachments: Flow<List<Uri>?>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
+    override val taskAttachments: Flow<List<Map<String, String>>?>
+        get() = TODO("Not yet implemented")
     override val taskSelectedDate: Flow<Long?>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskSelectedHour: Flow<Int?>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskSelectedMinute: Flow<Int?>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskPriority: Flow<Int>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
     override val taskUpdated: Flow<Timestamp>
-        get() = TODO("Preview only")
+        get() = TODO("Not yet implemented")
+    override val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
+        get() = TODO("Not yet implemented")
 
     override fun onVoiceSearch(): Intent {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override suspend fun onSearch() {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
-    override suspend fun onTaskAdd(task: Task) {
-        TODO("Preview only")
+    override suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase {
+        TODO("Not yet implemented")
     }
 
     override suspend fun onTaskUpdate(uid: String, task: Task) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override suspend fun onTaskDelete(uid: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override suspend fun onTaskCompleted(uid: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override suspend fun onCategoryAdd(category: String) {
@@ -80,6 +84,21 @@ class TasksViewModelPreview : TasksViewModel() {
         TODO("Not yet implemented")
     }
 
+    override suspend fun onAttachmentsUpload(
+        id: String,
+        attachments: List<Pair<String, Uri>>,
+    ): FirestoreResponseUseCase {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun onAttachmentDelete(id: String, path: String): FirestoreResponseUseCase {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun onGetCategories(): List<String> {
         TODO("Not yet implemented")
     }
@@ -89,11 +108,11 @@ class TasksViewModelPreview : TasksViewModel() {
     }
 
     override fun onQueryChange(query: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskListChange(taskList: List<Task>) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTagsChange(tags: List<String>) {
@@ -105,50 +124,68 @@ class TasksViewModelPreview : TasksViewModel() {
     }
 
     override fun onTaskTitleChange(title: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskDescriptionChange(description: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskCategoryChange(category: String) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskTagsChange(tags: List<String>) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
-    override fun onTaskAttachmentsChange(attachments: List<Uri>?) {
-        TODO("Preview only")
+    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {
+        TODO("Not yet implemented")
     }
 
-    override fun removeTaskAttachment(index: Int) {
-        TODO("Preview only")
+    override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun onTaskAttachmentPreview(
+        context: Context,
+        attachment: Map<String, String>,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeTaskAttachment(
+        attachment: Map<String, String>,
+        originalAttachments: List<Map<String, String>>,
+    ) {
+        TODO("Not yet implemented")
     }
 
     override fun onTaskSelectedDateChange(date: Long) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskSelectedHourChange(hour: Int) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskSelectedMinuteChange(minute: Int) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskPriorityChange(priority: Int) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun onTaskUpdatedChange(updated: Timestamp) {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
-        TODO("Preview only")
+        TODO("Not yet implemented")
     }
 }

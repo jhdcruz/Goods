@@ -1,17 +1,22 @@
 package io.github.jhdcruz.memo.ui.tasks.details
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -23,7 +28,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,18 +51,12 @@ fun CategoryButton(
     viewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
+    var categories by remember { mutableStateOf(listOf("loading")) }
+
+    val taskCategory = viewModel.taskCategory.collectAsState(initial = "")
 
     var showCategoryDialog by remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("") }
-
-    var categories by remember { mutableStateOf<List<String>>(emptyList()) }
-    var onConfirm by remember { mutableStateOf(false) }
-
-    LaunchedEffect(onConfirm) {
-        viewModel.onCategoryChange(selectedCategory)
-        onConfirm = false
-    }
 
     IconButton(
         modifier = modifier,
@@ -77,8 +76,10 @@ fun CategoryButton(
     }
 
     if (showCategoryDialog) {
+        var selectedCategory by remember { mutableStateOf(taskCategory.value) }
+
         PickerDialog(
-            title = { Text(text = "Assign Category") },
+            title = { Text(text = "Assign category for this task") },
             onDismissRequest = { showCategoryDialog = false },
             buttons = {
                 TextButton(
@@ -89,8 +90,10 @@ fun CategoryButton(
 
                 TextButton(
                     onClick = {
-                        onConfirm = true
-                        showCategoryDialog = false
+                        scope.launch {
+                            viewModel.onCategoryChange(selectedCategory)
+                            showCategoryDialog = false
+                        }
                     }
                 ) {
                     Text(text = "Confirm")
@@ -118,13 +121,10 @@ fun CategoryButton(
                                 onClick = {
                                     scope.launch {
                                         viewModel.onCategoryAdd(newCategory)
-                                        newCategory = ""
 
-                                        // append to tags instead of calling onGetTags() again
-                                        // this gets updated on opening the dialog anyways
-                                        categories = categories.toMutableList().apply {
-                                            add(newCategory)
-                                        }
+                                        // append manually to avoid calling onGetTags again
+                                        categories = listOf(newCategory + categories)
+                                        newCategory = ""
                                     }
                                 }
                             ) {
@@ -137,36 +137,71 @@ fun CategoryButton(
                     )
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
 
-                if (categories.isEmpty()) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "No categories created yet.")
+                when {
+                    categories.contains("loading") -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
                     }
-                } else {
-                    LazyRow(
-                        modifier = Modifier.selectableGroup(),
-                    ) {
-                        items(categories) { category ->
-                            Row {
-                                RadioButton(
-                                    selected = selectedCategory == category,
-                                    onClick = {
-                                        scope.launch {
-                                            selectedCategory = category
-                                        }
-                                    },
-                                )
 
-                                Text(
-                                    text = category,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
+                    categories.isEmpty() -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp)
+                        ) {
+                            Text(text = "No categories created yet.")
+                        }
+                    }
+
+                    else -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(320.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .verticalScroll(ScrollState(0))
+                                    .selectableGroup()
+                                    .fillMaxWidth(),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                categories.forEach { category ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp)
+                                            .selectable(
+                                                selected = selectedCategory == category,
+                                                onClick = {
+                                                    scope.launch {
+                                                        selectedCategory = category
+                                                    }
+                                                }
+                                            ),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = selectedCategory == category,
+                                            onClick = null
+                                        )
+                                        Text(
+                                            text = category,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

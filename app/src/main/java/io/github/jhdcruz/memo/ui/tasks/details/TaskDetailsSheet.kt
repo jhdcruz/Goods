@@ -61,12 +61,12 @@ fun TaskDetailsSheet(
         sheetState = sheetState,
         dragHandle = { }
     ) {
-        TaskAddContent(tasksViewModel)
+        TaskDetailsContent(tasksViewModel)
     }
 }
 
 @Composable
-private fun TaskAddContent(tasksViewModel: TasksViewModel) {
+private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
     val scope = rememberCoroutineScope()
 
     // Populating tasks
@@ -77,17 +77,20 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
     val taskPriority = tasksViewModel.taskPriority.collectAsState(initial = 0)
 
     val taskAttachments = tasksViewModel.taskAttachments.collectAsState(initial = emptyList())
+    val taskLocalAttachments =
+        tasksViewModel.taskLocalAttachments.collectAsState(initial = emptyList())
+
     val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(initial = null)
     val taskSelectedHour = tasksViewModel.taskSelectedHour.collectAsState(initial = null)
     val taskSelectedMinute = tasksViewModel.taskSelectedMinute.collectAsState(initial = null)
 
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var fileUris by remember { mutableStateOf(emptyList<Uri>()) }
 
-    val taskAttachmentsUpload =
+    val taskAttachmentSelect =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
             if (uris != null) {
-                tasksViewModel.onTaskAttachmentsChange(uris.map { it })
+                // append selected files, instead of overwriting
+                fileUris += uris
             }
         }
 
@@ -118,6 +121,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
                 onClick = {
                     scope.launch {
                         // get due date from pickers else return null
+                        // means there is no due date set
                         val dueDate =
                             if (
                                 taskSelectedDate.value != null &&
@@ -134,15 +138,22 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
                                 null
                             }
 
-                        tasksViewModel.onTaskAdd(
+                        // save to firestore
+                        val id = tasksViewModel.onTaskAdd(
                             Task(
+                                priority = taskPriority.value,
+                                dueDate = dueDate,
                                 title = taskTitle.value,
                                 description = taskDescription.value,
                                 category = taskCategory.value,
                                 tags = taskTags.value,
-                                dueDate = dueDate,
-                                priority = taskPriority.value
                             )
+                        )
+
+                        // upload attachments
+                        tasksViewModel.onAttachmentsUpload(
+                            id = id.toString(),
+                            attachments = taskLocalAttachments.value
                         )
                     }
                 }) {
@@ -170,7 +181,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
         )
 
         // list of attachments uploaded
-        AttachmentsList(tasksViewModel = tasksViewModel, attachments = taskAttachments.value)
+        AttachmentsList(tasksViewModel = tasksViewModel, localFiles = fileUris)
 
         HorizontalDivider()
 
@@ -185,20 +196,13 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
 
             CategoryButton(viewModel = tasksViewModel)
 
-            IconButton(
-                onClick = {
-                    showDatePicker = true
-                }) {
-                Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    painter = painterResource(id = R.drawable.baseline_calendar_24),
-                    contentDescription = "Set task's due date"
-                )
-            }
+            DueDatePicker(
+                tasksViewModel = tasksViewModel,
+            )
 
             IconButton(
                 onClick = {
-                    taskAttachmentsUpload.launch(arrayOf("*/*"))
+                    taskAttachmentSelect.launch(arrayOf("*/*"))
                 }) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
@@ -211,30 +215,7 @@ private fun TaskAddContent(tasksViewModel: TasksViewModel) {
             Spacer(modifier = Modifier.weight(1F))
 
             TagsButton(viewModel = tasksViewModel)
-
-            // Modal Dialogs
-            if (showDatePicker) {
-                TaskDatePickerDialog(
-                    tasksViewModel = tasksViewModel,
-                    onDismissRequest = {
-                        showDatePicker = false
-                    },
-                    onConfirmRequest = {
-                        showDatePicker = false
-                        showTimePicker = true
-                    }
-                )
-            }
-
-            if (showTimePicker) {
-                TaskTimePickerDialog(
-                    tasksViewModel = tasksViewModel,
-                    onDismissRequest = {
-                        showTimePicker = false
-                    }
-                )
-            }
-        } // Row
+        }
     }
 }
 
@@ -245,6 +226,6 @@ private fun TaskAddPreview() {
     val previewViewModel = TasksViewModelPreview()
 
     MemoTheme {
-        TaskAddContent(previewViewModel)
+        TaskDetailsContent(previewViewModel)
     }
 }

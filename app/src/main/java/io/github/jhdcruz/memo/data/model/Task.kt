@@ -26,7 +26,7 @@ data class Task(
     /**
      * Stores URL links to files or images uploaded to storage/buckets
      */
-    val attachments: List<String>? = null,
+    val attachments: List<Map<String, String>>? = null,
 
     val created: Timestamp = Timestamp.now(),
     val updated: Timestamp? = null,

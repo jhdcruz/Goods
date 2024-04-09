@@ -38,12 +38,13 @@ class TasksRepositoryImpl @Inject constructor(
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
-            // save task to Firestore nested collection located in 'users/uid/tasks'
-            firestore.collection("users").document(userUid).collection("tasks")
+            // save task to Firestore nested collection located in 'users/uid/tasks' and get id back
+            val taskId = firestore.collection("users").document(userUid).collection("tasks")
                 .add(task)
                 .await()
+                .id
 
-            FirestoreResponseUseCase.Success("New task added!")
+            FirestoreResponseUseCase.Success(taskId)
         } catch (e: Exception) {
             Log.e("TasksRepository", "Error adding new task", e)
             FirestoreResponseUseCase.Error(e)
@@ -171,13 +172,19 @@ class TasksRepositoryImpl @Inject constructor(
 
         return try {
             val originalTags: List<String> = onGetTags()
-            val updatedTags = originalTags.plus(tag)
 
-            // append tag to 'users/uid/tasksMetadata/labels' in tags field
-            firestore.collection("users").document(userUid).collection("tasksMetadata")
-                .document("labels")
-                .update("tags", updatedTags)
-                .await()
+            if (originalTags.isEmpty()) {
+                firestore.collection("users").document(userUid).collection("tasksMetadata")
+                    .document("labels")
+                    .set(mapOf("tags" to listOf(tag)), SetOptions.merge())
+                    .await()
+            } else {
+                val updatedTags = originalTags.plus(tag)
+                firestore.collection("users").document(userUid).collection("tasksMetadata")
+                    .document("labels")
+                    .update("tags", updatedTags)
+                    .await()
+            }
 
             FirestoreResponseUseCase.Success("New tag added!")
         } catch (e: Exception) {
@@ -221,8 +228,8 @@ class TasksRepositoryImpl @Inject constructor(
                 .document("labels")
                 .get()
                 .await()
-                .get("categories", List::class.java)
-                ?.map { it.toString() }
+                .data
+                ?.get("categories") as? List<String>
                 ?: emptyList()
         } catch (e: FirebaseFirestoreException) {
             Log.e("TasksRepository", "Error querying categories", e)
@@ -239,8 +246,8 @@ class TasksRepositoryImpl @Inject constructor(
                 .document("labels")
                 .get()
                 .await()
-                .get("tags", List::class.java)
-                ?.map { it.toString() }
+                .data
+                ?.get("tags") as? List<String>
                 ?: emptyList()
         } catch (e: FirebaseFirestoreException) {
             Log.e("TasksRepository", "Error querying tags", e)

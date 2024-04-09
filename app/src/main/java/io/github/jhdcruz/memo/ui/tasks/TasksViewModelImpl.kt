@@ -1,13 +1,16 @@
 package io.github.jhdcruz.memo.ui.tasks
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
+import io.github.jhdcruz.memo.data.task.AttachmentsRepository
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.createTimestamp
+import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import io.github.jhdcruz.memo.domain.toTimestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TasksViewModelImpl @Inject constructor(
     private val tasksRepository: TasksRepository,
+    private val attachmentsRepository: AttachmentsRepository,
 ) : TasksViewModel() {
     private val _query = MutableStateFlow("")
     override val query: Flow<String> = _query
@@ -38,8 +42,8 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskTags = MutableStateFlow<List<String>>(emptyList())
     override val taskTags: Flow<List<String>> = _taskTags
 
-    private val _taskAttachments = MutableStateFlow<List<Uri>?>(emptyList())
-    override val taskAttachments: Flow<List<Uri>?> = _taskAttachments
+    private val _taskAttachments = MutableStateFlow<List<Map<String, String>>?>(emptyList())
+    override val taskAttachments: Flow<List<Map<String, String>>?> = _taskAttachments
 
     private val _taskSelectedDate = MutableStateFlow<Long?>(null)
     override val taskSelectedDate: Flow<Long?> = _taskSelectedDate
@@ -57,6 +61,9 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskUpdated = MutableStateFlow(LocalDateTime.now().toTimestamp())
     override val taskUpdated: Flow<Timestamp> = _taskUpdated
 
+    private val _taskLocalAttachments = MutableStateFlow<List<Pair<String, Uri>>>(emptyList())
+    override val taskLocalAttachments: Flow<List<Pair<String, Uri>>> = _taskLocalAttachments
+
     override fun onVoiceSearch(): Intent {
         return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).also {
             it.putExtra(
@@ -73,8 +80,8 @@ class TasksViewModelImpl @Inject constructor(
         onTaskListChange(taskList)
     }
 
-    override suspend fun onTaskAdd(task: Task) {
-        tasksRepository.onTaskAdd(task)
+    override suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase {
+        return tasksRepository.onTaskAdd(task)
     }
 
     override suspend fun onTaskUpdate(uid: String, task: Task) {
@@ -111,6 +118,21 @@ class TasksViewModelImpl @Inject constructor(
 
     override suspend fun onTagsDelete(tags: List<String>) {
         tasksRepository.onTagsDelete(tags)
+    }
+
+    override suspend fun onAttachmentsUpload(
+        id: String,
+        attachments: List<Pair<String, Uri>>,
+    ): FirestoreResponseUseCase {
+        return attachmentsRepository.onAttachmentsUpload(id, attachments)
+    }
+
+    override suspend fun onAttachmentDelete(id: String, path: String): FirestoreResponseUseCase {
+        return attachmentsRepository.onAttachmentDelete(id, path)
+    }
+
+    override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
+        return attachmentsRepository.onAttachmentDownload(path)
     }
 
     override suspend fun onGetCategories(): List<String> {
@@ -153,15 +175,53 @@ class TasksViewModelImpl @Inject constructor(
         _taskTags.value = tags
     }
 
-    override fun onTaskAttachmentsChange(attachments: List<Uri>?) {
+    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {
         _taskAttachments.value = attachments
     }
 
-    override fun removeTaskAttachment(index: Int) {
-        val attachments = _taskAttachments.value?.toMutableList()
+    override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {
+        _taskLocalAttachments.value = attachments
+    }
 
-        attachments?.removeAt(index)
-        _taskAttachments.value = attachments
+    override suspend fun onTaskAttachmentPreview(
+        context: Context,
+        attachment: Map<String, String>,
+    ) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val fileProvider = context.contentResolver
+
+        intent.setDataAndType(
+            Uri.parse(attachment.values.last()),
+            fileProvider.getType(Uri.parse(attachment.values.last()))
+        ).apply {
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        context.startActivity(intent)
+    }
+
+    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val fileProvider = context.contentResolver
+
+        intent.setDataAndType(
+            attachment.second,
+            fileProvider.getType(attachment.second)
+        ).apply {
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        context.startActivity(intent)
+    }
+
+    override fun removeTaskAttachment(
+        attachment: Map<String, String>,
+        originalAttachments: List<Map<String, String>>,
+    ) {
+        val updatedAttachments = originalAttachments.toMutableList()
+        updatedAttachments.remove(attachment)
+
+        _taskAttachments.value = updatedAttachments
     }
 
     override fun onTaskSelectedDateChange(date: Long) {

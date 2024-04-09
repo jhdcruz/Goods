@@ -17,8 +17,8 @@ class AttachmentsRepositoryImpl @Inject constructor(
 ) : AttachmentsRepository {
 
     override suspend fun onAttachmentsUpload(
-        uid: String,
-        attachments: List<Uri>,
+        id: String,
+        attachments: List<Pair<String, Uri>>,
     ): FirestoreResponseUseCase {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
@@ -29,17 +29,18 @@ class AttachmentsRepositoryImpl @Inject constructor(
             attachments.forEach { attachment ->
                 storage.reference.child(
                     // store attachments with added hash to prevent file collisions
-                    "$userUid/attachments/${attachment.lastPathSegment}-${
+                    "$userUid/attachments/${attachment.first}-${
                         generateHash(
                             8
                         )
                     }"
                 )
-                    .putFile(attachment)
+                    .putFile(attachment.second)
                     .addOnSuccessListener {
                         // store both storage path and download url
                         attachmentUrls.add(
                             mapOf(
+                                "name" to attachment.first,
                                 "path" to it.storage.path,
                                 "downloadUrl" to it.storage.downloadUrl.toString()
                             )
@@ -50,7 +51,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
 
             // store url to firestore
             firestore.collection("users").document(userUid).collection("tasks")
-                .document(uid)
+                .document(id)
                 .update("attachments", listOf(attachmentUrls))
                 .await()
 
@@ -62,16 +63,28 @@ class AttachmentsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun onAttachmentDelete(
-        uid: String,
+        id: String,
         path: String,
     ): FirestoreResponseUseCase {
-        auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+        val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // delete attachment from Firestore storage
             storage.reference.child(path)
                 .delete()
                 .await()
+
+            // remove from firebase with matching path
+            val taskRef =
+                firestore.collection("users").document(uid).collection("tasks").document(id)
+            val taskSnapshot = taskRef.get().await()
+
+            if (taskSnapshot.exists()) {
+                val attachments = taskSnapshot["attachments"] as List<Map<String, String>>
+                val updatedAttachments = attachments.filter { it["path"] != path }
+
+                taskRef.update("attachments", updatedAttachments).await()
+            }
 
             FirestoreResponseUseCase.Success("Attachment deleted!")
         } catch (e: Exception) {
@@ -80,10 +93,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun onAttachmentDownload(
-        uid: String,
-        path: String,
-    ): FirestoreResponseUseCase {
+    override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
         auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
