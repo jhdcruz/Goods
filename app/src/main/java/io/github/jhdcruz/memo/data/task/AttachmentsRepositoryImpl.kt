@@ -52,7 +52,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
             // store url to firestore
             firestore.collection("users").document(userUid).collection("tasks")
                 .document(id)
-                .update("attachments", listOf(attachmentUrls))
+                .update("attachments", attachmentUrls)
                 .await()
 
             FirestoreResponseUseCase.Success("Attachments uploaded!")
