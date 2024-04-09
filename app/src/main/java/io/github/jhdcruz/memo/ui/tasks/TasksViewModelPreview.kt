@@ -7,186 +7,119 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 class TasksViewModelPreview : TasksViewModel() {
-    override val query: Flow<String>
-        get() = TODO("Not yet implemented")
-    override val taskList: Flow<List<Task>>
-        get() = TODO("Not yet implemented")
-    override val taskTitle: Flow<String>
-        get() = TODO("Not yet implemented")
-    override val taskDescription: Flow<TextFieldValue>
-        get() = TODO("Not yet implemented")
-    override val taskCategory: Flow<String>
-        get() = TODO("Not yet implemented")
-    override val taskTags: Flow<List<String>>
-        get() = TODO("Not yet implemented")
-    override val taskAttachments: Flow<List<Map<String, String>>?>
-        get() = TODO("Not yet implemented")
-    override val taskSelectedDate: Flow<Long?>
-        get() = TODO("Not yet implemented")
-    override val taskSelectedHour: Flow<Int?>
-        get() = TODO("Not yet implemented")
-    override val taskSelectedMinute: Flow<Int?>
-        get() = TODO("Not yet implemented")
-    override val taskPriority: Flow<Int>
-        get() = TODO("Not yet implemented")
-    override val taskUpdated: Flow<Timestamp>
-        get() = TODO("Not yet implemented")
-    override val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
-        get() = TODO("Not yet implemented")
+    override val query = flowOf("Generic Query")
+    override val taskList = flowOf(listOf<Task>())
+    override val taskTitle = flowOf("Generic Title")
+    override val taskDescription = flowOf(TextFieldValue("Generic Description"))
+    override val taskCategory = flowOf("Generic Category")
+    override val taskTags = flowOf(listOf("Generic Tag"))
+    override val taskAttachments = flowOf(listOf<Map<String, String>>())
+    override val taskSelectedDate = flowOf(0L)
+    override val taskSelectedHour = flowOf(0)
+    override val taskSelectedMinute = flowOf(0)
+    override val taskPriority = flowOf(0)
+    override val taskUpdated = flowOf(Timestamp.now())
+    override val taskLocalAttachments = flowOf(listOf<Pair<String, Uri>>())
 
     override fun onVoiceSearch(): Intent {
-        TODO("Not yet implemented")
+        return Intent()
     }
 
-    override suspend fun onSearch() {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onSearch() {}
 
     override suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase {
-        TODO("Not yet implemented")
+        return FirestoreResponseUseCase.Success("Generic Success")
     }
 
-    override suspend fun onTaskUpdate(uid: String, task: Task) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTaskUpdate(uid: String, task: Task) {}
 
-    override suspend fun onTaskDelete(uid: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTaskDelete(uid: String) {}
 
-    override suspend fun onTaskCompleted(uid: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTaskCompleted(uid: String) {}
 
-    override suspend fun onCategoryAdd(category: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onCategoryAdd(category: String) {}
 
-    override suspend fun onCategoryUpdate(category: String, newCategory: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onCategoryUpdate(category: String, newCategory: String) {}
 
-    override suspend fun onCategoriesDelete(categories: List<String>) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onCategoriesDelete(categories: List<String>) {}
 
-    override suspend fun onTagAdd(tag: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTagAdd(tag: String) {}
 
-    override suspend fun onTagUpdate(tag: String, newTag: String) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTagUpdate(tag: String, newTag: String) {}
 
-    override suspend fun onTagsDelete(tags: List<String>) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTagsDelete(tags: List<String>) {}
 
     override suspend fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
     ): FirestoreResponseUseCase {
-        TODO("Not yet implemented")
+        return FirestoreResponseUseCase.Success("Generic Success")
     }
 
     override suspend fun onAttachmentDelete(id: String, path: String): FirestoreResponseUseCase {
-        TODO("Not yet implemented")
+        return FirestoreResponseUseCase.Success("Generic Success")
     }
 
     override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
-        TODO("Not yet implemented")
+        return FirestoreResponseUseCase.Success("Generic Success")
     }
 
     override suspend fun onGetCategories(): List<String> {
-        TODO("Not yet implemented")
+        return listOf("Generic Category")
     }
 
     override suspend fun onGetTags(): List<String> {
-        TODO("Not yet implemented")
+        return listOf("Generic Tag")
     }
 
-    override fun onQueryChange(query: String) {
-        TODO("Not yet implemented")
-    }
+    override fun onQueryChange(query: String) {}
 
-    override fun onTaskListChange(taskList: List<Task>) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskListChange(taskList: List<Task>) {}
 
-    override fun onTagsChange(tags: List<String>) {
-        TODO("Not yet implemented")
-    }
+    override fun onTagsChange(tags: List<String>) {}
 
-    override fun onCategoryChange(category: String) {
-        TODO("Not yet implemented")
-    }
+    override fun onCategoryChange(category: String) {}
 
-    override fun onTaskTitleChange(title: String) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskTitleChange(title: String) {}
 
-    override fun onTaskDescriptionChange(description: TextFieldValue) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskDescriptionChange(description: TextFieldValue) {}
 
-    override fun onTaskCategoryChange(category: String) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskCategoryChange(category: String) {}
 
-    override fun onTaskTagsChange(tags: List<String>) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskTagsChange(tags: List<String>) {}
 
-    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {}
 
-    override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {}
 
     override suspend fun onTaskAttachmentPreview(
         context: Context,
         attachment: Map<String, String>,
     ) {
-        TODO("Not yet implemented")
     }
 
-    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {}
 
     override fun removeTaskAttachment(
         attachment: Map<String, String>,
         originalAttachments: List<Map<String, String>>,
     ) {
-        TODO("Not yet implemented")
     }
 
-    override fun onTaskSelectedDateChange(date: Long) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskSelectedDateChange(date: Long) {}
 
-    override fun onTaskSelectedHourChange(hour: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskSelectedHourChange(hour: Int) {}
 
-    override fun onTaskSelectedMinuteChange(minute: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskSelectedMinuteChange(minute: Int) {}
 
-    override fun onTaskPriorityChange(priority: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskPriorityChange(priority: Int) {}
 
-    override fun onTaskUpdatedChange(updated: Timestamp) {
-        TODO("Not yet implemented")
-    }
+    override fun onTaskUpdatedChange(updated: Timestamp) {}
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
-        TODO("Not yet implemented")
+        return Timestamp.now()
     }
 }

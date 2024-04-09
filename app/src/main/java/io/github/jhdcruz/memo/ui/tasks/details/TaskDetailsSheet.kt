@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,12 +64,12 @@ fun TaskDetailsSheet(
         sheetState = sheetState,
         dragHandle = { }
     ) {
-        TaskDetailsContent(tasksViewModel)
+        TaskDetailsContent(tasksViewModel, sheetState)
     }
 }
 
 @Composable
-private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
+private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: SheetState) {
     val scope = rememberCoroutineScope()
 
     // Populating tasks
@@ -159,6 +160,9 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
                                 attachments = taskLocalAttachments.value
                             )
                         }
+
+                        // hide bottom sheet
+                        sheetState.hide()
                     }
                 }) {
                 Image(
@@ -187,10 +191,10 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
         // list of attachments uploaded
         AttachmentsList(tasksViewModel = tasksViewModel, localFiles = fileUris)
 
-        HorizontalDivider()
+        HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
 
         Row(
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = 16.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             PriorityButton(
@@ -226,10 +230,11 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel) {
 
 @Composable
 @Preview(showBackground = true)
-private fun TaskAddPreview() {
+private fun TaskDetailsContentPreview() {
     val previewViewModel = TasksViewModelPreview()
+    val sheetState = rememberModalBottomSheetState()
 
     MemoTheme {
-        TaskDetailsContent(previewViewModel)
+        TaskDetailsContent(previewViewModel, sheetState)
     }
 }
