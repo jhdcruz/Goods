@@ -17,9 +17,10 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
@@ -47,7 +50,6 @@ import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagsButton(
     modifier: Modifier = Modifier,
@@ -61,22 +63,42 @@ fun TagsButton(
     var showTagsDialog by remember { mutableStateOf(false) }
     var newTag by remember { mutableStateOf("") }
 
-    IconButton(
-        modifier = modifier,
-        onClick = {
-            showTagsDialog = true
+    val buttonIcon = if (taskTags.value.isEmpty()) {
+        R.drawable.baseline_label_24
+    } else {
+        R.drawable.baseline_label_filled_24
+    }
 
-            scope.launch {
-                tags = viewModel.onGetTags()
+    BadgedBox(
+        badge = {
+            Badge {
+                Text(
+                    modifier = Modifier.semantics {
+                        contentDescription = "${taskTags.value.size} tags selected"
+                    },
+                    text = taskTags.value.size.toString(),
+                )
             }
         }
     ) {
-        Image(
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            painter = painterResource(id = R.drawable.baseline_label_24),
-            contentDescription = "Set task's tags"
-        )
+        IconButton(
+            modifier = modifier,
+            onClick = {
+                showTagsDialog = true
+
+                scope.launch {
+                    tags = viewModel.onGetTags()
+                }
+            }
+        ) {
+            Image(
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                painter = painterResource(id = buttonIcon),
+                contentDescription = "Set task's tags"
+            )
+        }
     }
+
 
     if (showTagsDialog) {
         var selectedTag by remember { mutableStateOf(taskTags.value) }

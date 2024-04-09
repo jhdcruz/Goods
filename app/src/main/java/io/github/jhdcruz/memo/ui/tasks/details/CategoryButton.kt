@@ -59,6 +59,12 @@ fun CategoryButton(
     var showCategoryDialog by remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
 
+    val buttonIcon = if (taskCategory.value.isEmpty()) {
+        R.drawable.baseline_folder_24
+    } else {
+        R.drawable.baseline_folder_filled_24
+    }
+
     IconButton(
         modifier = modifier,
         onClick = {
@@ -71,7 +77,7 @@ fun CategoryButton(
     ) {
         Image(
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            painter = painterResource(id = R.drawable.baseline_folder_24),
+            painter = painterResource(id = buttonIcon),
             contentDescription = "Set task's category"
         )
     }

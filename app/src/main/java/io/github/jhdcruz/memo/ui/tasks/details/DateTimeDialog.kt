@@ -31,13 +31,21 @@ fun DueDatePicker(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
+    val taskDueDate = tasksViewModel.taskSelectedDate.collectAsState(initial = null)
+
+    val buttonIcon = if (taskDueDate.value == null) {
+        R.drawable.baseline_calendar_24
+    } else {
+        R.drawable.baseline_calendar_filled_24
+    }
+
     IconButton(
         onClick = {
             showDatePicker = true
         }) {
         Image(
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            painter = painterResource(id = R.drawable.baseline_calendar_24),
+            painter = painterResource(id = buttonIcon),
             contentDescription = "Set task's due date"
         )
     }
