@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -43,10 +44,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
 
@@ -69,25 +73,27 @@ fun TagsButton(
         R.drawable.baseline_label_filled_24
     }
 
-    BadgedBox(
-        badge = {
-            Badge {
-                Text(
-                    modifier = Modifier.semantics {
-                        contentDescription = "${taskTags.value.size} tags selected"
-                    },
-                    text = taskTags.value.size.toString(),
-                )
+    IconButton(
+        modifier = modifier.widthIn(min = 48.dp),
+        onClick = {
+            showTagsDialog = true
+
+            scope.launch {
+                tags = viewModel.onGetTags()
             }
         }
     ) {
-        IconButton(
-            modifier = modifier,
-            onClick = {
-                showTagsDialog = true
-
-                scope.launch {
-                    tags = viewModel.onGetTags()
+        BadgedBox(
+            badge = {
+                if (taskTags.value.isNotEmpty()) {
+                    Badge {
+                        Text(
+                            modifier = Modifier.semantics {
+                                contentDescription = "${taskTags.value.size} tags selected"
+                            },
+                            text = taskTags.value.size.toString(),
+                        )
+                    }
                 }
             }
         ) {
@@ -243,5 +249,15 @@ fun TagsButton(
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun TagsButtonPreview() {
+    val previewViewModel = TasksViewModelPreview()
+
+    MemoTheme {
+        TagsButton(viewModel = previewViewModel)
     }
 }
