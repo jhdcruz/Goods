@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
@@ -17,6 +18,7 @@ import io.github.jhdcruz.memo.domain.toTimestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.Locale
@@ -75,6 +77,12 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskLocalAttachments = MutableStateFlow<List<Pair<String, Uri>>>(emptyList())
     override val taskLocalAttachments: Flow<List<Pair<String, Uri>>> = _taskLocalAttachments
 
+    init {
+        viewModelScope.launch {
+            onGetTasks()
+        }
+    }
+
     override fun onVoiceSearch(): Intent {
         return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).also {
             it.putExtra(
@@ -95,44 +103,55 @@ class TasksViewModelImpl @Inject constructor(
         onTaskListChange(taskList)
     }
 
-    override suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase {
-        return tasksRepository.onTaskAdd(task)
+    override suspend fun onTaskAdd(task: Task): String {
+        val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
+        val taskId = taskJob.result as String
+
+        // query task
+        val newTask = tasksRepository.onGetTask(taskId)
+
+        // append to taskList
+        _taskList.value = _taskList.value.toMutableList().apply {
+            add(newTask)
+        }
+
+        return taskId
     }
 
     override suspend fun onTaskUpdate(id: String, task: Task) {
-        withContext(Dispatchers.IO) {
-            tasksRepository.onTaskUpdate(id, task)
-
+        viewModelScope.launch {
             _taskList.value.toMutableList().apply {
                 val index = indexOfFirst { it.id == id }
                 set(index, task)
             }
+
+            tasksRepository.onTaskUpdate(id, task)
         }
     }
 
     override suspend fun onTaskDelete(id: String) {
-        withContext(Dispatchers.IO) {
-            tasksRepository.onTaskDelete(id)
-
+        viewModelScope.launch {
             _taskList.value = _taskList.value.toMutableList().apply {
                 removeIf { it.id == id }
             }
+
+            tasksRepository.onTaskDelete(id)
         }
     }
 
     override suspend fun onTaskCompleted(id: String) {
-        withContext(Dispatchers.IO) {
+        viewModelScope.launch {
             // update task status for AnimatedVisibility
             _taskList.value.firstOrNull { it.id == id }?.let {
                 tasksRepository.onTaskUpdate(id, it.copy(isCompleted = true))
             }
 
-            tasksRepository.onTaskCompleted(id)
-
             // remove from the list
             _taskList.value = _taskList.value.toMutableList().apply {
                 removeIf { it.id == id }
             }
+
+            tasksRepository.onTaskCompleted(id)
         }
     }
 
@@ -265,7 +284,7 @@ class TasksViewModelImpl @Inject constructor(
         filename: String,
         originalAttachments: Map<Int, TaskAttachment>,
     ) {
-        withContext(Dispatchers.IO) {
+        viewModelScope.launch {
             attachmentsRepository.onAttachmentDelete(taskId, filename)
 
             // remove attachment that contains the same filename

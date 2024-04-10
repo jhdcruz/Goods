@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -13,8 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -24,6 +28,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -31,9 +37,17 @@ import kotlinx.coroutines.launch
 fun Sidebar(
     modifier: Modifier = Modifier,
     drawerState: DrawerState,
+    tasksViewModel: TasksViewModel,
 ) {
-    var selected by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+
+    var selected by remember { mutableIntStateOf(0) }
+    var categories by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    LaunchedEffect(true) {
+        categories = tasksViewModel.onGetCategories()
+
+    }
 
     Scaffold(
         modifier = modifier,
@@ -111,6 +125,24 @@ fun Sidebar(
             )
 
             LazyColumn {
+                itemsIndexed(categories) { index, category ->
+                    NavigationDrawerItem(
+                        label = { Text(text = category) },
+                        icon = {
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_folder_24),
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                                contentDescription = null
+                            )
+                        },
+                        selected = false,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -121,7 +153,8 @@ fun Sidebar(
 private fun SidebarPreview() {
     MemoTheme {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val tasksViewModel = TasksViewModelPreview()
 
-        Sidebar(drawerState = drawerState)
+        Sidebar(drawerState = drawerState, tasksViewModel = tasksViewModel)
     }
 }

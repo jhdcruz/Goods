@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,8 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
-import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
-import io.github.jhdcruz.memo.domain.toLocalDateTime
+import io.github.jhdcruz.memo.domain.format
 import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
@@ -165,12 +163,14 @@ private fun TaskDetailsContent(
                     modifier = Modifier.weight(1f),
                     onClick = { showDatePicker = true }
                 ) {
-                    Text(text = taskDueDate.value?.toLocalDateTime().toString())
+                    Text(text = taskDueDate.value!!.format())
                 }
             } else {
-                Spacer(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f))
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
             }
 
             // submit button
@@ -182,9 +182,12 @@ private fun TaskDetailsContent(
                         sheetState.hide()
                         keyboardController?.hide()
 
+                        var id: String =
+                            if (taskId.value?.isNotEmpty() == true) taskId.value!! else ""
+
                         if (task == null) {
                             // add new task
-                            val id = tasksViewModel.onTaskAdd(
+                            id = tasksViewModel.onTaskAdd(
                                 Task(
                                     priority = taskPriority.value,
                                     dueDate = taskDueDate.value,
@@ -193,18 +196,10 @@ private fun TaskDetailsContent(
                                     category = taskCategory.value,
                                     tags = taskTags.value,
                                 )
-                            ) as FirestoreResponseUseCase.Success
-
-                            // upload attachments
-                            if (taskLocalAttachments.value.isNotEmpty()) {
-                                tasksViewModel.onAttachmentsUpload(
-                                    id = id.result as String,
-                                    attachments = taskLocalAttachments.value
-                                )
-                            }
+                            )
                         } else {
-                            // add new task
-                            val id = tasksViewModel.onTaskUpdate(
+                            // update task
+                            tasksViewModel.onTaskUpdate(
                                 taskId.value!!,
                                 Task(
                                     priority = taskPriority.value,
@@ -216,15 +211,16 @@ private fun TaskDetailsContent(
                                     created = task.created,
                                     updated = Timestamp.now()
                                 )
-                            ) as FirestoreResponseUseCase.Success
+                            )
 
-                            // upload attachments
-                            if (taskLocalAttachments.value.isNotEmpty()) {
-                                tasksViewModel.onAttachmentsUpload(
-                                    id = id.result as String,
-                                    attachments = taskLocalAttachments.value
-                                )
-                            }
+                        }
+
+                        // upload local files
+                        if (taskLocalAttachments.value.isNotEmpty()) {
+                            tasksViewModel.onAttachmentsUpload(
+                                id = id,
+                                attachments = taskLocalAttachments.value
+                            )
                         }
                         // reset values
                         fileUris.value = emptyList()
