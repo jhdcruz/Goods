@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 class TasksViewModelPreview : TasksViewModel() {
@@ -17,6 +18,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override val taskCategory = flowOf("Generic Category")
     override val taskTags = flowOf(listOf("Generic Tag"))
     override val taskAttachments = flowOf(listOf<Map<String, String>>())
+    override val taskDueDate: Flow<Timestamp?> = flowOf(null)
     override val taskSelectedDate = flowOf(0L)
     override val taskSelectedHour = flowOf(0)
     override val taskSelectedMinute = flowOf(0)
@@ -55,17 +57,11 @@ class TasksViewModelPreview : TasksViewModel() {
     override suspend fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
-    ): FirestoreResponseUseCase {
-        return FirestoreResponseUseCase.Success("Generic Success")
+    ) {
     }
 
-    override suspend fun onAttachmentDelete(id: String, path: String): FirestoreResponseUseCase {
-        return FirestoreResponseUseCase.Success("Generic Success")
-    }
-
-    override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
-        return FirestoreResponseUseCase.Success("Generic Success")
-    }
+    override suspend fun onAttachmentDelete(id: String, path: String) {}
+    override suspend fun onAttachmentDownload(path: String) {}
 
     override suspend fun onGetCategories(): List<String> {
         return listOf("Generic Category")
@@ -108,6 +104,8 @@ class TasksViewModelPreview : TasksViewModel() {
         originalAttachments: List<Map<String, String>>,
     ) {
     }
+
+    override fun onTaskDueDateChange(date: Timestamp) {}
 
     override fun onTaskSelectedDateChange(date: Long) {}
 

@@ -27,13 +27,15 @@ fun Timestamp.toLocalDateTime(): LocalDateTime {
         .toLocalDateTime()
 }
 
-fun createTimestamp(millis: Long, hour: Int, minute: Int): Timestamp {
+fun createTimestamp(millis: Long, hour: Int? = null, minute: Int? = null): Timestamp {
     // Convert system milliseconds to LocalDateTime
     var localDateTime =
         Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime()
 
-    // Adjust the hour and minute of LocalDateTime
-    localDateTime = localDateTime.withHour(hour).withMinute(minute)
+    if (hour != null && minute != null) {
+        // Adjust the hour and minute of LocalDateTime
+        localDateTime = localDateTime.withHour(hour).withMinute(minute)
+    }
 
     // Convert LocalDateTime to Instant
     val instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant()

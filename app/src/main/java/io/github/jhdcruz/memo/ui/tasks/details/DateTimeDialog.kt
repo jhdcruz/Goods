@@ -16,13 +16,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.ui.shared.TimePickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun DueDatePicker(
@@ -31,7 +34,7 @@ fun DueDatePicker(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val taskDueDate = tasksViewModel.taskSelectedDate.collectAsState(initial = null)
+    val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)
 
     val buttonIcon = if (taskDueDate.value == null) {
         R.drawable.baseline_calendar_24
@@ -85,6 +88,7 @@ fun TaskDatePickerDialog(
     onDismissRequest: () -> Unit,
     onConfirmRequest: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val datePickerState = rememberDatePickerState()
 
     DatePickerDialog(
@@ -97,13 +101,18 @@ fun TaskDatePickerDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                val date = datePickerState.selectedDateMillis
+                scope.launch {
+                    val date = datePickerState.selectedDateMillis
 
-                if (date != null) {
-                    tasksViewModel.onTaskSelectedDateChange(date)
+                    if (date != null) {
+                        tasksViewModel.onTaskSelectedDateChange(date)
+                        tasksViewModel.onTaskDueDateChange(
+                            createTimestamp(date)
+                        )
+                    }
+
+                    onConfirmRequest()
                 }
-
-                onConfirmRequest()
             }) {
                 Text(text = "Confirm")
             }
@@ -126,19 +135,32 @@ fun TaskTimePickerDialog(
     tasksViewModel: TasksViewModel,
     onDismissRequest: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+    val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(null)
+
     TimePickerDialog(
         modifier = modifier,
         onCancel = {
             onDismissRequest()
         },
         onConfirm = { timePickerState ->
-            val hour = timePickerState.hour
-            val minute = timePickerState.minute
+            scope.launch {
+                val hour = timePickerState.hour
+                val minute = timePickerState.minute
 
-            tasksViewModel.onTaskSelectedHourChange(hour)
-            tasksViewModel.onTaskSelectedMinuteChange(minute)
+                tasksViewModel.onTaskSelectedHourChange(hour)
+                tasksViewModel.onTaskSelectedMinuteChange(minute)
 
-            onDismissRequest()
+                tasksViewModel.onTaskDueDateChange(
+                    createTimestamp(
+                        taskSelectedDate.value!!,
+                        hour,
+                        minute
+                    )
+                )
+
+                onDismissRequest()
+            }
         }
     )
 }
