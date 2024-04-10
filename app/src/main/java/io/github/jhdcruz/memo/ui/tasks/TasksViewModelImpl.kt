@@ -13,8 +13,10 @@ import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import io.github.jhdcruz.memo.domain.toTimestamp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.Locale
 import javax.inject.Inject
@@ -45,6 +47,9 @@ class TasksViewModelImpl @Inject constructor(
 
     private val _taskAttachments = MutableStateFlow<List<Map<String, String>>?>(emptyList())
     override val taskAttachments: Flow<List<Map<String, String>>?> = _taskAttachments
+
+    private val _taskDueDate = MutableStateFlow<Timestamp?>(null)
+    override val taskDueDate: Flow<Timestamp?> = _taskDueDate
 
     private val _taskSelectedDate = MutableStateFlow<Long?>(null)
     override val taskSelectedDate: Flow<Long?> = _taskSelectedDate
@@ -124,16 +129,18 @@ class TasksViewModelImpl @Inject constructor(
     override suspend fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
-    ): FirestoreResponseUseCase {
-        return attachmentsRepository.onAttachmentsUpload(id, attachments)
+    ) {
+        withContext(Dispatchers.IO) {
+            attachmentsRepository.onAttachmentsUpload(id, attachments)
+        }
     }
 
-    override suspend fun onAttachmentDelete(id: String, path: String): FirestoreResponseUseCase {
-        return attachmentsRepository.onAttachmentDelete(id, path)
+    override suspend fun onAttachmentDelete(id: String, path: String) {
+        attachmentsRepository.onAttachmentDelete(id, path)
     }
 
-    override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
-        return attachmentsRepository.onAttachmentDownload(path)
+    override suspend fun onAttachmentDownload(path: String) {
+        attachmentsRepository.onAttachmentDownload(path)
     }
 
     override suspend fun onGetCategories(): List<String> {
@@ -223,6 +230,10 @@ class TasksViewModelImpl @Inject constructor(
         updatedAttachments.remove(attachment)
 
         _taskAttachments.value = updatedAttachments
+    }
+
+    override fun onTaskDueDateChange(date: Timestamp) {
+        _taskDueDate.value = date
     }
 
     override fun onTaskSelectedDateChange(date: Long) {

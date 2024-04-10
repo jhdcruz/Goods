@@ -25,15 +25,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
-import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
@@ -71,6 +69,7 @@ fun TaskDetailsSheet(
 @Composable
 private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: SheetState) {
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     // Populating tasks
     val taskTitle = tasksViewModel.taskTitle.collectAsState("")
@@ -82,18 +81,15 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
     val taskAttachments = tasksViewModel.taskAttachments.collectAsState(emptyList())
     val taskLocalAttachments =
         tasksViewModel.taskLocalAttachments.collectAsState(emptyList())
+    val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)
 
-    val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(null)
-    val taskSelectedHour = tasksViewModel.taskSelectedHour.collectAsState(null)
-    val taskSelectedMinute = tasksViewModel.taskSelectedMinute.collectAsState(null)
-
-    var fileUris by remember { mutableStateOf(emptyList<Uri>()) }
+    val fileUris = remember { mutableStateOf(emptyList<Uri>()) }
 
     val selectTaskAttachments =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
             if (uris != null) {
                 // append selected files, instead of overwriting
-                fileUris += uris
+                fileUris.value = uris
             }
         }
 
@@ -121,31 +117,18 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
 
             // submit button
             IconButton(
+                enabled = taskTitle.value.isNotEmpty(),
                 onClick = {
                     scope.launch {
-                        // get due date from pickers else return null
-                        // means there is no due date set
-                        val dueDate =
-                            if (
-                                taskSelectedDate.value != null &&
-                                taskSelectedHour.value != null &&
-                                taskSelectedMinute.value != null
-                            ) {
-                                // convert to firestore compatible timestamp
-                                createTimestamp(
-                                    taskSelectedDate.value!!,
-                                    taskSelectedHour.value!!,
-                                    taskSelectedMinute.value!!
-                                )
-                            } else {
-                                null
-                            }
+                        // hide bottom sheet to avoid blocking UI
+                        sheetState.hide()
+                        keyboardController?.hide()
 
                         // save to firestore
                         val id = tasksViewModel.onTaskAdd(
                             Task(
                                 priority = taskPriority.value,
-                                dueDate = dueDate,
+                                dueDate = taskDueDate.value,
                                 title = taskTitle.value,
                                 description = taskDescription.value.text,
                                 category = taskCategory.value,
@@ -154,15 +137,15 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
                         ) as FirestoreResponseUseCase.Success
 
                         // upload attachments
-                        if (fileUris.isNotEmpty()) {
+                        if (taskLocalAttachments.value.isNotEmpty()) {
                             tasksViewModel.onAttachmentsUpload(
                                 id = id.result as String,
                                 attachments = taskLocalAttachments.value
                             )
                         }
 
-                        // hide bottom sheet
-                        sheetState.hide()
+                        // reset values
+                        fileUris.value = emptyList()
                     }
                 }) {
                 Image(
@@ -189,7 +172,7 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
         )
 
         // list of attachments uploaded
-        AttachmentsList(tasksViewModel = tasksViewModel, localFiles = fileUris)
+        AttachmentsList(tasksViewModel = tasksViewModel, localFiles = fileUris.value)
 
         HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
 
@@ -210,7 +193,9 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
 
             IconButton(
                 onClick = {
-                    selectTaskAttachments.launch(arrayOf("*/*"))
+                    scope.launch {
+                        selectTaskAttachments.launch(arrayOf("*/*"))
+                    }
                 }) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),

@@ -5,15 +5,15 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import io.github.jhdcruz.memo.domain.generateHash
+import com.google.firebase.storage.StorageException
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AttachmentsRepositoryImpl @Inject constructor(
+    private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val auth: FirebaseAuth,
 ) : AttachmentsRepository {
 
     override suspend fun onAttachmentsUpload(
@@ -22,41 +22,36 @@ class AttachmentsRepositoryImpl @Inject constructor(
     ): FirestoreResponseUseCase {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
-        return try {
-            val attachmentUrls = mutableListOf(mapOf<String, String>())
+        Log.i("TasksRepository", attachments.toString())
 
+        return try {
             // upload attachments to Firestore storage
-            attachments.forEach { attachment ->
-                storage.reference.child(
-                    // store attachments with added hash to prevent file collisions
-                    "$userUid/attachments/${attachment.first}-${
-                        generateHash(
-                            8
-                        )
-                    }"
-                )
+            attachments.forEachIndexed { index, attachment ->
+                val uploadTask = storage.reference.child(userUid)
+                    .child("attachments")
+                    .child(id)
+                    .child(attachment.first)
                     .putFile(attachment.second)
-                    .addOnSuccessListener {
-                        // store both storage path and download url
-                        attachmentUrls.add(
-                            mapOf(
-                                "name" to attachment.first,
-                                "path" to it.storage.path,
-                                "downloadUrl" to it.storage.downloadUrl.toString()
-                            )
-                        )
-                    }
+                    .await()
+
+                val downloadUrl = uploadTask.storage.downloadUrl.await()
+
+                // store both storage path and download url
+                val attachmentRef = mapOf(
+                    "name" to attachment.first,
+                    "path" to uploadTask.storage.path,
+                    "downloadUrl" to downloadUrl.toString()
+                )
+
+                // store each file reference to firestore with index as id
+                firestore.collection("users").document(userUid)
+                    .collection("tasks").document(id)
+                    .update("attachments", mapOf(index.toString() to attachmentRef))
                     .await()
             }
 
-            // store url to firestore
-            firestore.collection("users").document(userUid).collection("tasks")
-                .document(id)
-                .update("attachments", attachmentUrls)
-                .await()
-
             FirestoreResponseUseCase.Success("Attachments uploaded!")
-        } catch (e: Exception) {
+        } catch (e: StorageException) {
             Log.e("TasksRepository", "Error uploading attachments", e)
             FirestoreResponseUseCase.Error(e)
         }
@@ -87,7 +82,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
             }
 
             FirestoreResponseUseCase.Success("Attachment deleted!")
-        } catch (e: Exception) {
+        } catch (e: StorageException) {
             Log.e("TasksRepository", "Error deleting attachment", e)
             FirestoreResponseUseCase.Error(e)
         }
@@ -103,7 +98,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
                 .await()
 
             FirestoreResponseUseCase.Success(attachment)
-        } catch (e: Exception) {
+        } catch (e: StorageException) {
             Log.e("TasksRepository", "Error downloading attachment", e)
             FirestoreResponseUseCase.Error(e)
         }

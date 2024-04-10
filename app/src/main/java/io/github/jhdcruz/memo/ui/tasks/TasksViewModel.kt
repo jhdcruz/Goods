@@ -21,6 +21,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract val taskTags: Flow<List<String>>
     abstract val taskAttachments: Flow<List<Map<String, String>>?>
 
+    abstract val taskDueDate: Flow<Timestamp?>
     abstract val taskSelectedDate: Flow<Long?>
     abstract val taskSelectedHour: Flow<Int?>
     abstract val taskSelectedMinute: Flow<Int?>
@@ -52,16 +53,10 @@ abstract class TasksViewModel : ViewModel() {
     abstract suspend fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
-    ): FirestoreResponseUseCase
+    )
 
-    abstract suspend fun onAttachmentDelete(
-        id: String,
-        path: String,
-    ): FirestoreResponseUseCase
-
-    abstract suspend fun onAttachmentDownload(
-        path: String,
-    ): FirestoreResponseUseCase
+    abstract suspend fun onAttachmentDelete(id: String, path: String)
+    abstract suspend fun onAttachmentDownload(path: String)
 
     // fetch
     abstract suspend fun onGetCategories(): List<String>
@@ -87,6 +82,7 @@ abstract class TasksViewModel : ViewModel() {
         originalAttachments: List<Map<String, String>>,
     )
 
+    abstract fun onTaskDueDateChange(date: Timestamp)
     abstract fun onTaskSelectedDateChange(date: Long)
     abstract fun onTaskSelectedHourChange(hour: Int)
     abstract fun onTaskSelectedMinuteChange(minute: Int)
