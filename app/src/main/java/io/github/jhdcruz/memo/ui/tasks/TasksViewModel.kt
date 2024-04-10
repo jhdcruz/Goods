@@ -27,7 +27,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract val taskSelectedMinute: Flow<Int?>
 
     abstract val taskPriority: Flow<Int>
-    abstract val taskUpdated: Flow<Timestamp>
+    abstract val taskUpdated: Flow<Timestamp?>
 
     // Attachments to be uploaded
     abstract val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
@@ -90,5 +90,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract fun onTaskPriorityChange(priority: Int)
     abstract fun onTaskUpdatedChange(updated: Timestamp)
 
+
+    abstract fun onClearInput()
     abstract fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp
 }

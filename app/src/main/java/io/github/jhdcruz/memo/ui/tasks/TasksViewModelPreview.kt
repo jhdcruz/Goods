@@ -116,6 +116,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTaskPriorityChange(priority: Int) {}
 
     override fun onTaskUpdatedChange(updated: Timestamp) {}
+    override fun onClearInput() {}
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
         return Timestamp.now()

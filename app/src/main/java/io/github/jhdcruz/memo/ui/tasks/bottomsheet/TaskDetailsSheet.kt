@@ -146,6 +146,7 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
 
                         // reset values
                         fileUris.value = emptyList()
+                        tasksViewModel.onClearInput()
                     }
                 }) {
                 Image(

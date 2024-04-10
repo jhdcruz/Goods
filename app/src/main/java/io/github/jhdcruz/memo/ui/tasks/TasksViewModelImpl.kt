@@ -64,8 +64,8 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskPriority = MutableStateFlow(0)
     override val taskPriority: Flow<Int> = _taskPriority
 
-    private val _taskUpdated = MutableStateFlow(LocalDateTime.now().toTimestamp())
-    override val taskUpdated: Flow<Timestamp> = _taskUpdated
+    private val _taskUpdated = MutableStateFlow<Timestamp?>(LocalDateTime.now().toTimestamp())
+    override val taskUpdated: Flow<Timestamp?> = _taskUpdated
 
     private val _taskLocalAttachments = MutableStateFlow<List<Pair<String, Uri>>>(emptyList())
     override val taskLocalAttachments: Flow<List<Pair<String, Uri>>> = _taskLocalAttachments
@@ -254,6 +254,21 @@ class TasksViewModelImpl @Inject constructor(
 
     override fun onTaskUpdatedChange(updated: Timestamp) {
         _taskUpdated.value = updated
+    }
+
+    override fun onClearInput() {
+        _taskTitle.value = ""
+        _taskDescription.value = TextFieldValue("")
+        _taskCategory.value = ""
+        _taskTags.value = emptyList()
+        _taskAttachments.value = emptyList()
+        _taskLocalAttachments.value = emptyList()
+        _taskDueDate.value = null
+        _taskSelectedDate.value = null
+        _taskSelectedHour.value = null
+        _taskSelectedMinute.value = null
+        _taskPriority.value = 0
+        _taskUpdated.value = LocalDateTime.now().toTimestamp()
     }
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
