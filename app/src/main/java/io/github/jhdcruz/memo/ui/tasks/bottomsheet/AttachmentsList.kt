@@ -128,7 +128,6 @@ fun AttachmentsList(
 
         if (taskAttachments.value?.entries?.isNotEmpty() == true) {
             items(taskAttachments.value!!.entries.toList()) { attachment ->
-                val key = attachment.key
                 val file = attachment.value
 
                 InputChip(
