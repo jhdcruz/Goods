@@ -5,14 +5,14 @@ import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 
 interface TasksRepository {
     suspend fun onGetTasks(): List<Task>
-    suspend fun onGetTask(uid: String): Task
+    suspend fun onGetTask(id: String): Task
 
     suspend fun onSearch(query: String): List<Task>
 
     suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase
-    suspend fun onTaskUpdate(uid: String, task: Task): FirestoreResponseUseCase
-    suspend fun onTaskDelete(uid: String): FirestoreResponseUseCase
-    suspend fun onTaskCompleted(uid: String): FirestoreResponseUseCase
+    suspend fun onTaskUpdate(id: String, task: Task): FirestoreResponseUseCase
+    suspend fun onTaskDelete(id: String): FirestoreResponseUseCase
+    suspend fun onTaskCompleted(id: String): FirestoreResponseUseCase
 
     suspend fun onCategoryAdd(category: String): FirestoreResponseUseCase
     suspend fun onCategoryUpdate(category: String, newCategory: String): FirestoreResponseUseCase

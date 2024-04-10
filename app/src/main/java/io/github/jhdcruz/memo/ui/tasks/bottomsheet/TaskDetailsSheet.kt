@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
@@ -71,16 +72,21 @@ fun TaskDetailsSheet(
             tasksViewModel.onTaskPreview(task)
         }
 
-        TaskDetailsContent(tasksViewModel, sheetState)
+        TaskDetailsContent(tasksViewModel, sheetState, task)
     }
 }
 
 @Composable
-private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: SheetState) {
+private fun TaskDetailsContent(
+    tasksViewModel: TasksViewModel,
+    sheetState: SheetState,
+    task: Task? = null,
+) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // Populating tasks
+    val taskId = tasksViewModel.taskId.collectAsState(null)
     val taskTitle = tasksViewModel.taskTitle.collectAsState("")
     val taskDescription = tasksViewModel.taskDescription.collectAsState(TextFieldValue(""))
     val taskCategory = tasksViewModel.taskCategory.collectAsState("")
@@ -132,26 +138,50 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
                         sheetState.hide()
                         keyboardController?.hide()
 
-                        // save to firestore
-                        val id = tasksViewModel.onTaskAdd(
-                            Task(
-                                priority = taskPriority.value,
-                                dueDate = taskDueDate.value,
-                                title = taskTitle.value,
-                                description = taskDescription.value.text,
-                                category = taskCategory.value,
-                                tags = taskTags.value,
-                            )
-                        ) as FirestoreResponseUseCase.Success
+                        if (task == null) {
+                            // add new task
+                            val id = tasksViewModel.onTaskAdd(
+                                Task(
+                                    priority = taskPriority.value,
+                                    dueDate = taskDueDate.value,
+                                    title = taskTitle.value,
+                                    description = taskDescription.value.text,
+                                    category = taskCategory.value,
+                                    tags = taskTags.value,
+                                )
+                            ) as FirestoreResponseUseCase.Success
 
-                        // upload attachments
-                        if (taskLocalAttachments.value.isNotEmpty()) {
-                            tasksViewModel.onAttachmentsUpload(
-                                id = id.result as String,
-                                attachments = taskLocalAttachments.value
-                            )
+                            // upload attachments
+                            if (taskLocalAttachments.value.isNotEmpty()) {
+                                tasksViewModel.onAttachmentsUpload(
+                                    id = id.result as String,
+                                    attachments = taskLocalAttachments.value
+                                )
+                            }
+                        } else {
+                            // add new task
+                            val id = tasksViewModel.onTaskUpdate(
+                                taskId.value!!,
+                                Task(
+                                    priority = taskPriority.value,
+                                    dueDate = taskDueDate.value,
+                                    title = taskTitle.value,
+                                    description = taskDescription.value.text,
+                                    category = taskCategory.value,
+                                    tags = taskTags.value,
+                                    created = task.created,
+                                    updated = Timestamp.now()
+                                )
+                            ) as FirestoreResponseUseCase.Success
+
+                            // upload attachments
+                            if (taskLocalAttachments.value.isNotEmpty()) {
+                                tasksViewModel.onAttachmentsUpload(
+                                    id = id.result as String,
+                                    attachments = taskLocalAttachments.value
+                                )
+                            }
                         }
-
                         // reset values
                         fileUris.value = emptyList()
                         tasksViewModel.onClearInput()

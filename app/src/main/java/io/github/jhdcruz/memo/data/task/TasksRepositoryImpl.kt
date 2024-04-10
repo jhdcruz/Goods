@@ -29,19 +29,19 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun onGetTask(uid: String): Task {
+    override suspend fun onGetTask(id: String): Task {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // get task from Firestore nested collection located in 'users/uid/tasks'
             firestore.collection("users").document(userUid).collection("tasks")
-                .document(uid)
+                .document(id)
                 .get()
                 .await()
                 .toObject(Task::class.java)
                 ?: throw IllegalStateException("Task not found")
         } catch (e: FirebaseFirestoreException) {
-            Log.e("TasksRepository", "Error querying task $uid", e)
+            Log.e("TasksRepository", "Error querying task $id", e)
             throw e
         }
     }
@@ -88,13 +88,13 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun onTaskUpdate(uid: String, task: Task): FirestoreResponseUseCase {
+    override suspend fun onTaskUpdate(id: String, task: Task): FirestoreResponseUseCase {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // update task in Firestore nested collection located in 'users/uid/tasks'
             firestore.collection("users").document(userUid).collection("tasks")
-                .document(uid)
+                .document(id)
                 .set(task, SetOptions.merge())
                 .await()
 
@@ -105,19 +105,19 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun onTaskDelete(uid: String): FirestoreResponseUseCase {
+    override suspend fun onTaskDelete(id: String): FirestoreResponseUseCase {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // delete task in Firestore nested collection located in 'users/uid/tasks'
             firestore.collection("users").document(userUid).collection("tasks")
-                .document(uid)
+                .document(id)
                 .delete()
                 .await()
 
             FirestoreResponseUseCase.Success("Task deleted!")
         } catch (e: Exception) {
-            Log.e("TasksRepository", "Error deleting task $uid", e)
+            Log.e("TasksRepository", "Error deleting task $id", e)
             FirestoreResponseUseCase.Error(e)
         }
     }

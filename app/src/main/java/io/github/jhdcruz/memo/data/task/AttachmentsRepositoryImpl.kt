@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
+import io.github.jhdcruz.memo.data.model.TaskAttachment
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -59,7 +60,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
 
     override suspend fun onAttachmentDelete(
         id: String,
-        filename: String
+        filename: String,
     ): FirestoreResponseUseCase {
         val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
@@ -71,6 +72,25 @@ class AttachmentsRepositoryImpl @Inject constructor(
                 .child(filename)
                 .delete()
                 .await()
+
+            // get the current attachments map
+            val taskDocRef = firestore.collection("users").document(uid)
+                .collection("tasks").document(id)
+
+            val taskSnapshot = taskDocRef.get().await()
+            val attachmentsMap =
+                taskSnapshot.get("attachments") as MutableMap<Int, TaskAttachment>
+
+            // find the key of the map entry with the matching filename
+            val keyToRemove = attachmentsMap.entries.find { it.value.name == filename }?.key
+
+            // remove the entry with the matching filename
+            if (keyToRemove != null) {
+                attachmentsMap.remove(keyToRemove)
+
+                // update the attachments map in firestore
+                taskDocRef.update("attachments", attachmentsMap).await()
+            }
 
             FirestoreResponseUseCase.Success("Attachment deleted!")
         } catch (e: StorageException) {
