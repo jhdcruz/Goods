@@ -44,6 +44,12 @@ class TasksRepositoryImpl @Inject constructor(
                 .await()
                 .id
 
+            // update task with id
+            firestore.collection("users").document(userUid).collection("tasks")
+                .document(taskId)
+                .update("id", taskId)
+                .await()
+
             FirestoreResponseUseCase.Success(taskId)
         } catch (e: Exception) {
             Log.e("TasksRepository", "Error adding new task", e)
