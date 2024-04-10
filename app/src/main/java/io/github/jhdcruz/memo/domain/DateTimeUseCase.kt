@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
@@ -26,6 +27,11 @@ fun Timestamp.toLocalDateTime(): LocalDateTime {
     return date.toInstant()
         .atZone(ZoneId.systemDefault())
         .toLocalDateTime()
+}
+
+fun Timestamp.format(): String {
+    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
+    return this.toLocalDateTime().format(formatter)
 }
 
 fun createTimestamp(millis: Long, hour: Int? = null, minute: Int? = null): Timestamp {
