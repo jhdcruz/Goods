@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 fun LocalDateTime.toTimestamp(): Timestamp {
@@ -42,4 +43,22 @@ fun createTimestamp(millis: Long, hour: Int? = null, minute: Int? = null): Times
 
     // Convert Date to Timestamp
     return Timestamp(Date.from(instant))
+}
+
+fun Timestamp.dateUntil(): String {
+    val dueDate = this.toLocalDateTime()
+    val now = LocalDateTime.now()
+
+    val months = ChronoUnit.MONTHS.between(now, dueDate)
+    val days = ChronoUnit.DAYS.between(now, dueDate)
+    val hours = ChronoUnit.HOURS.between(now, dueDate)
+    val minutes = ChronoUnit.MINUTES.between(now, dueDate)
+
+    return when {
+        minutes in 1..59 -> "${minutes}m"
+        hours in 1..23 -> "${hours}H"
+        days in 1..30 -> "${days}D"
+        months in 1..12 -> "${months}M"
+        else -> "Overdue"
+    }
 }
