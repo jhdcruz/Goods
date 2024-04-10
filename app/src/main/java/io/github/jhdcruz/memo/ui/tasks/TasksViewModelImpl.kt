@@ -8,6 +8,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
+import io.github.jhdcruz.memo.data.model.TaskAttachment
 import io.github.jhdcruz.memo.data.task.AttachmentsRepository
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.createTimestamp
@@ -33,6 +34,9 @@ class TasksViewModelImpl @Inject constructor(
     override val taskList: Flow<List<Task>> = _taskList
 
     // Populating tasks
+    private val _taskId = MutableStateFlow("")
+    override val taskId: Flow<String> = _taskId
+
     private val _taskTitle = MutableStateFlow("")
     override val taskTitle: Flow<String> = _taskTitle
 
@@ -45,8 +49,9 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskTags = MutableStateFlow<List<String>>(emptyList())
     override val taskTags: Flow<List<String>> = _taskTags
 
-    private val _taskAttachments = MutableStateFlow<List<Map<String, String>>?>(emptyList())
-    override val taskAttachments: Flow<List<Map<String, String>>?> = _taskAttachments
+    private val _taskAttachments =
+        MutableStateFlow<Map<Int, TaskAttachment>?>(null)
+    override val taskAttachments: Flow<Map<Int, TaskAttachment>?> = _taskAttachments
 
     private val _taskDueDate = MutableStateFlow<Timestamp?>(null)
     override val taskDueDate: Flow<Timestamp?> = _taskDueDate
@@ -79,6 +84,10 @@ class TasksViewModelImpl @Inject constructor(
             it.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
             it.putExtra(RecognizerIntent.EXTRA_PROMPT, "What tasks to search for?")
         }
+    }
+
+    override suspend fun onGetTasks() {
+        _taskList.value = tasksRepository.onGetTasks()
     }
 
     override suspend fun onSearch() {
@@ -167,6 +176,10 @@ class TasksViewModelImpl @Inject constructor(
         _taskCategory.value = category
     }
 
+    override fun onTaskIdChange(id: String) {
+        _taskId.value = id
+    }
+
     override fun onTaskTitleChange(title: String) {
         _taskTitle.value = title
     }
@@ -183,7 +196,7 @@ class TasksViewModelImpl @Inject constructor(
         _taskTags.value = tags
     }
 
-    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {
+    override fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?) {
         _taskAttachments.value = attachments
     }
 
@@ -222,14 +235,21 @@ class TasksViewModelImpl @Inject constructor(
         context.startActivity(intent)
     }
 
-    override fun removeTaskAttachment(
-        attachment: Map<String, String>,
-        originalAttachments: List<Map<String, String>>,
+    override suspend fun removeTaskAttachment(
+        taskId: String,
+        filename: String,
+        originalAttachments: Map<Int, TaskAttachment>,
     ) {
-        val updatedAttachments = originalAttachments.toMutableList()
-        updatedAttachments.remove(attachment)
+        withContext(Dispatchers.IO) {
+            attachmentsRepository.onAttachmentDelete(taskId, filename)
 
-        _taskAttachments.value = updatedAttachments
+            // remove attachment that contains the same filename
+            val updatedAttachments = originalAttachments.toMutableMap().apply {
+                entries.removeIf { it.value.name == filename }
+            }
+
+            _taskAttachments.value = updatedAttachments
+        }
     }
 
     override fun onTaskDueDateChange(date: Timestamp) {
@@ -261,7 +281,7 @@ class TasksViewModelImpl @Inject constructor(
         _taskDescription.value = TextFieldValue("")
         _taskCategory.value = ""
         _taskTags.value = emptyList()
-        _taskAttachments.value = emptyList()
+        _taskAttachments.value = null
         _taskLocalAttachments.value = emptyList()
         _taskDueDate.value = null
         _taskSelectedDate.value = null
@@ -269,6 +289,27 @@ class TasksViewModelImpl @Inject constructor(
         _taskSelectedMinute.value = null
         _taskPriority.value = 0
         _taskUpdated.value = LocalDateTime.now().toTimestamp()
+    }
+
+    override fun onTaskPreview(task: Task) {
+        _taskId.value = task.id!! // will never be null (handled by firestore auto-id)
+        _taskTitle.value = task.title
+        _taskDueDate.value = task.dueDate
+        _taskPriority.value = task.priority
+        _taskUpdated.value = task.updated
+
+        if (task.description?.isNotEmpty() != null) {
+            _taskDescription.value = TextFieldValue(task.description)
+        }
+        if (task.category?.isNotEmpty() != null) {
+            _taskCategory.value = task.category
+        }
+        if (task.tags?.isNotEmpty() != null) {
+            _taskTags.value = task.tags
+        }
+        if (task.attachments?.isNotEmpty() != null) {
+            _taskAttachments.value = task.attachments
+        }
     }
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {

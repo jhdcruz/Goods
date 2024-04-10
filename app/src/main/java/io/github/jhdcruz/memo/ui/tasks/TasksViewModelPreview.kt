@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
+import io.github.jhdcruz.memo.data.model.TaskAttachment
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -13,11 +14,12 @@ import kotlinx.coroutines.flow.flowOf
 class TasksViewModelPreview : TasksViewModel() {
     override val query = flowOf("Generic Query")
     override val taskList = flowOf(listOf<Task>())
+    override val taskId: Flow<String> = flowOf("Generic ID")
     override val taskTitle = flowOf("Generic Title")
     override val taskDescription = flowOf(TextFieldValue("Generic Description"))
     override val taskCategory = flowOf("Generic Category")
     override val taskTags = flowOf(listOf("Generic Tag"))
-    override val taskAttachments = flowOf(listOf<Map<String, String>>())
+    override val taskAttachments: Flow<Map<Int, TaskAttachment>?> = flowOf(null)
     override val taskDueDate: Flow<Timestamp?> = flowOf(null)
     override val taskSelectedDate = flowOf(0L)
     override val taskSelectedHour = flowOf(0)
@@ -31,6 +33,7 @@ class TasksViewModelPreview : TasksViewModel() {
     }
 
     override suspend fun onSearch() {}
+    override suspend fun onGetTasks() {}
 
     override suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase {
         return FirestoreResponseUseCase.Success("Generic Success")
@@ -78,6 +81,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTagsChange(tags: List<String>) {}
 
     override fun onCategoryChange(category: String) {}
+    override fun onTaskIdChange(id: String) {}
 
     override fun onTaskTitleChange(title: String) {}
 
@@ -86,8 +90,9 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTaskCategoryChange(category: String) {}
 
     override fun onTaskTagsChange(tags: List<String>) {}
+    override fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?) {
+    }
 
-    override fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?) {}
 
     override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {}
 
@@ -98,10 +103,10 @@ class TasksViewModelPreview : TasksViewModel() {
     }
 
     override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {}
-
-    override fun removeTaskAttachment(
-        attachment: Map<String, String>,
-        originalAttachments: List<Map<String, String>>,
+    override suspend fun removeTaskAttachment(
+        taskId: String,
+        filename: String,
+        originalAttachments: Map<Int, TaskAttachment>
     ) {
     }
 
@@ -116,7 +121,9 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTaskPriorityChange(priority: Int) {}
 
     override fun onTaskUpdatedChange(updated: Timestamp) {}
+
     override fun onClearInput() {}
+    override fun onTaskPreview(task: Task) {}
 
     override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
         return Timestamp.now()

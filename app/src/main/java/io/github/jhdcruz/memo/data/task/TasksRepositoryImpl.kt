@@ -14,6 +14,37 @@ class TasksRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth,
 ) : TasksRepository {
+    override suspend fun onGetTasks(): List<Task> {
+        val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+
+        return try {
+            // get tasks from Firestore nested collection located in 'users/uid/tasks'
+            firestore.collection("users").document(userUid).collection("tasks")
+                .get()
+                .await()
+                .toObjects(Task::class.java)
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("TasksRepository", "Error querying tasks", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun onGetTask(uid: String): Task {
+        val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+
+        return try {
+            // get task from Firestore nested collection located in 'users/uid/tasks'
+            firestore.collection("users").document(userUid).collection("tasks")
+                .document(uid)
+                .get()
+                .await()
+                .toObject(Task::class.java)
+                ?: throw IllegalStateException("Task not found")
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("TasksRepository", "Error querying task $uid", e)
+            throw e
+        }
+    }
 
     override suspend fun onSearch(query: String): List<Task> {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")

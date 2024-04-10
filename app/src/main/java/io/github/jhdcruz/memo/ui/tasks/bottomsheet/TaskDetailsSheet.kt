@@ -47,12 +47,16 @@ import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
+/**
+ * Provide [task] for viewing existing task data
+ */
 @Composable
 fun TaskDetailsSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    task: Task? = null,
 ) {
     ModalBottomSheet(
         modifier = modifier
@@ -62,6 +66,11 @@ fun TaskDetailsSheet(
         sheetState = sheetState,
         dragHandle = { }
     ) {
+        // assign existing task data to view model
+        if (task != null) {
+            tasksViewModel.onTaskPreview(task)
+        }
+
         TaskDetailsContent(tasksViewModel, sheetState)
     }
 }
@@ -78,7 +87,6 @@ private fun TaskDetailsContent(tasksViewModel: TasksViewModel, sheetState: Sheet
     val taskTags = tasksViewModel.taskTags.collectAsState(emptyList())
     val taskPriority = tasksViewModel.taskPriority.collectAsState(0)
 
-    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(emptyList())
     val taskLocalAttachments =
         tasksViewModel.taskLocalAttachments.collectAsState(emptyList())
     val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)

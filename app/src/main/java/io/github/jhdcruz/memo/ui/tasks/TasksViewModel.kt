@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
+import io.github.jhdcruz.memo.data.model.TaskAttachment
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.flow.Flow
 
@@ -15,11 +16,12 @@ abstract class TasksViewModel : ViewModel() {
     abstract val taskList: Flow<List<Task>>
 
     // Populating tasks
+    abstract val taskId: Flow<String>
     abstract val taskTitle: Flow<String>
     abstract val taskDescription: Flow<TextFieldValue>
     abstract val taskCategory: Flow<String>
     abstract val taskTags: Flow<List<String>>
-    abstract val taskAttachments: Flow<List<Map<String, String>>?>
+    abstract val taskAttachments: Flow<Map<Int, TaskAttachment>?>
 
     abstract val taskDueDate: Flow<Timestamp?>
     abstract val taskSelectedDate: Flow<Long?>
@@ -34,6 +36,9 @@ abstract class TasksViewModel : ViewModel() {
 
     abstract fun onVoiceSearch(): Intent
     abstract suspend fun onSearch()
+
+    // fetch operations
+    abstract suspend fun onGetTasks()
 
     // tasks operations
     abstract suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase
@@ -68,18 +73,20 @@ abstract class TasksViewModel : ViewModel() {
     abstract fun onTagsChange(tags: List<String>)
     abstract fun onCategoryChange(category: String)
 
+    abstract fun onTaskIdChange(id: String)
     abstract fun onTaskTitleChange(title: String)
     abstract fun onTaskDescriptionChange(description: TextFieldValue)
     abstract fun onTaskCategoryChange(category: String)
     abstract fun onTaskTagsChange(tags: List<String>)
 
-    abstract fun onTaskAttachmentsChange(attachments: List<Map<String, String>>?)
+    abstract fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?)
     abstract fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>)
     abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Map<String, String>)
     abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>)
-    abstract fun removeTaskAttachment(
-        attachment: Map<String, String>,
-        originalAttachments: List<Map<String, String>>,
+    abstract suspend fun removeTaskAttachment(
+        taskId: String,
+        filename: String,
+        originalAttachments: Map<Int, TaskAttachment>,
     )
 
     abstract fun onTaskDueDateChange(date: Timestamp)
@@ -92,5 +99,7 @@ abstract class TasksViewModel : ViewModel() {
 
 
     abstract fun onClearInput()
+    abstract fun onTaskPreview(task: Task)
+
     abstract fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp
 }

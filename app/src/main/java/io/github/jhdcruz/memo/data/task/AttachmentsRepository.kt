@@ -12,7 +12,7 @@ interface AttachmentsRepository {
 
     suspend fun onAttachmentDelete(
         id: String,
-        path: String,
+        filename: String,
     ): FirestoreResponseUseCase
 
     suspend fun onAttachmentDownload(

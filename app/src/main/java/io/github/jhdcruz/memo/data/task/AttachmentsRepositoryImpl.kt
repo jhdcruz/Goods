@@ -59,27 +59,18 @@ class AttachmentsRepositoryImpl @Inject constructor(
 
     override suspend fun onAttachmentDelete(
         id: String,
-        path: String,
+        filename: String
     ): FirestoreResponseUseCase {
         val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // delete attachment from Firestore storage
-            storage.reference.child(path)
+            storage.reference.child(uid)
+                .child("attachments")
+                .child(id)
+                .child(filename)
                 .delete()
                 .await()
-
-            // remove from firebase with matching path
-            val taskRef =
-                firestore.collection("users").document(uid).collection("tasks").document(id)
-            val taskSnapshot = taskRef.get().await()
-
-            if (taskSnapshot.exists()) {
-                val attachments = taskSnapshot["attachments"] as List<Map<String, String>>
-                val updatedAttachments = attachments.filter { it["path"] != path }
-
-                taskRef.update("attachments", updatedAttachments).await()
-            }
 
             FirestoreResponseUseCase.Success("Attachment deleted!")
         } catch (e: StorageException) {
