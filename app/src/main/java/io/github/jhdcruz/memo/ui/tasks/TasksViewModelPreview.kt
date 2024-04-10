@@ -39,11 +39,11 @@ class TasksViewModelPreview : TasksViewModel() {
         return FirestoreResponseUseCase.Success("Generic Success")
     }
 
-    override suspend fun onTaskUpdate(uid: String, task: Task) {}
+    override suspend fun onTaskUpdate(id: String, task: Task) {}
 
-    override suspend fun onTaskDelete(uid: String) {}
+    override suspend fun onTaskDelete(id: String) {}
 
-    override suspend fun onTaskCompleted(uid: String) {}
+    override suspend fun onTaskCompleted(id: String) {}
 
     override suspend fun onCategoryAdd(category: String) {}
 

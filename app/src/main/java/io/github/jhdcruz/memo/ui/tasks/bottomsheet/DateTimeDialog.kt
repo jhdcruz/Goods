@@ -30,8 +30,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun DueDatePicker(
     tasksViewModel: TasksViewModel,
+    showPicker: Boolean = false,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(showPicker) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)

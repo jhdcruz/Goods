@@ -42,9 +42,9 @@ abstract class TasksViewModel : ViewModel() {
 
     // tasks operations
     abstract suspend fun onTaskAdd(task: Task): FirestoreResponseUseCase
-    abstract suspend fun onTaskUpdate(uid: String, task: Task)
-    abstract suspend fun onTaskDelete(uid: String)
-    abstract suspend fun onTaskCompleted(uid: String)
+    abstract suspend fun onTaskUpdate(id: String, task: Task)
+    abstract suspend fun onTaskDelete(id: String)
+    abstract suspend fun onTaskCompleted(id: String)
 
     // singular tasks operations
     abstract suspend fun onCategoryAdd(category: String)

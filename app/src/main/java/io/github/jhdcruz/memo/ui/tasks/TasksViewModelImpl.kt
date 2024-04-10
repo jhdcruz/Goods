@@ -99,16 +99,41 @@ class TasksViewModelImpl @Inject constructor(
         return tasksRepository.onTaskAdd(task)
     }
 
-    override suspend fun onTaskUpdate(uid: String, task: Task) {
-        tasksRepository.onTaskUpdate(uid, task)
+    override suspend fun onTaskUpdate(id: String, task: Task) {
+        withContext(Dispatchers.IO) {
+            tasksRepository.onTaskUpdate(id, task)
+
+            _taskList.value.toMutableList().apply {
+                val index = indexOfFirst { it.id == id }
+                set(index, task)
+            }
+        }
     }
 
-    override suspend fun onTaskDelete(uid: String) {
-        tasksRepository.onTaskDelete(uid)
+    override suspend fun onTaskDelete(id: String) {
+        withContext(Dispatchers.IO) {
+            tasksRepository.onTaskDelete(id)
+
+            _taskList.value = _taskList.value.toMutableList().apply {
+                removeIf { it.id == id }
+            }
+        }
     }
 
-    override suspend fun onTaskCompleted(uid: String) {
-        tasksRepository.onTaskCompleted(uid)
+    override suspend fun onTaskCompleted(id: String) {
+        withContext(Dispatchers.IO) {
+            // update task status for AnimatedVisibility
+            _taskList.value.firstOrNull { it.id == id }?.let {
+                tasksRepository.onTaskUpdate(id, it.copy(isCompleted = true))
+            }
+
+            tasksRepository.onTaskCompleted(id)
+
+            // remove from the list
+            _taskList.value = _taskList.value.toMutableList().apply {
+                removeIf { it.id == id }
+            }
+        }
     }
 
     override suspend fun onCategoryAdd(category: String) {

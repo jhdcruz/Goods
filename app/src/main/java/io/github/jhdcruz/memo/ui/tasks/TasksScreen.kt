@@ -1,5 +1,7 @@
 package io.github.jhdcruz.memo.ui.tasks
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -165,10 +167,19 @@ private fun TasksListContent(
                             }
                         },
                         leadingContent = {
-                            Checkbox(
-                                checked = false,
-                                onCheckedChange = {}
-                            )
+                            AnimatedVisibility(
+                                visible = !task.isCompleted,
+                                enter = EnterTransition.None
+                            ) {
+                                Checkbox(
+                                    checked = task.isCompleted,
+                                    onCheckedChange = {
+                                        scope.launch {
+                                            tasksViewModel.onTaskCompleted(task.id!!)
+                                        }
+                                    }
+                                )
+                            }
                         },
                         trailingContent = {
                             if (task.attachments?.isNotEmpty() == true) {

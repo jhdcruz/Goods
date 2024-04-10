@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -22,12 +26,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +49,8 @@ import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
+import io.github.jhdcruz.memo.domain.toLocalDateTime
+import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
@@ -99,6 +108,9 @@ private fun TaskDetailsContent(
 
     val fileUris = remember { mutableStateOf(emptyList<Uri>()) }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
     val selectTaskAttachments =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
             if (uris != null) {
@@ -113,21 +125,53 @@ private fun TaskDetailsContent(
             .imePadding()
             .wrapContentHeight(),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.weight(1F),
-                value = taskTitle.value,
-                onValueChange = { tasksViewModel.onTaskTitleChange(it) },
-                singleLine = true,
-                placeholder = { Text(text = "Headline of your task") },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                )
+        if (showDeleteDialog) {
+            ConfirmDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                onConfirmation = {
+                    scope.launch {
+                        tasksViewModel.onTaskDelete(taskId.value!!)
+                    }
+                },
+                dialogTitle = "Delete task?",
+                dialogText = "This actions is permanent, this task cannot be recovered.",
+                icon = Icons.Outlined.Warning,
             )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        showDeleteDialog = true
+                    }
+                }
+            ) {
+                Image(
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+                    painter = painterResource(id = R.drawable.baseline_delete_24),
+                    contentDescription = "Delete task"
+                )
+            }
+
+            if (taskDueDate.value != null) {
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = { showDatePicker = true }
+                ) {
+                    Text(text = taskDueDate.value?.toLocalDateTime().toString())
+                }
+            } else {
+                Spacer(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f))
+            }
 
             // submit button
             IconButton(
@@ -188,12 +232,28 @@ private fun TaskDetailsContent(
                     }
                 }) {
                 Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     painter = painterResource(id = R.drawable.baseline_done_24),
-                    contentDescription = "Add task"
+                    contentDescription = "Add task",
+                    colorFilter = if (taskTitle.value.isNotEmpty()) {
+                        ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    } else {
+                        ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                    },
                 )
             }
         }
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = taskTitle.value,
+            onValueChange = { tasksViewModel.onTaskTitleChange(it) },
+            singleLine = true,
+            placeholder = { Text(text = "Headline of your task") },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent
+            )
+        )
 
         HorizontalDivider()
 
@@ -228,6 +288,7 @@ private fun TaskDetailsContent(
 
             DueDatePicker(
                 tasksViewModel = tasksViewModel,
+                showPicker = showDatePicker
             )
 
             IconButton(
