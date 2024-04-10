@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.details
+package io.github.jhdcruz.memo.ui.tasks.bottomsheet
 
 import android.content.Intent
 import android.net.Uri

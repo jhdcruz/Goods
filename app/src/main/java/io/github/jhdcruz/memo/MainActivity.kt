@@ -42,7 +42,7 @@ import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
 import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
-import io.github.jhdcruz.memo.ui.tasks.details.TaskDetailsSheet
+import io.github.jhdcruz.memo.ui.tasks.bottomsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.details
+package io.github.jhdcruz.memo.ui.tasks.bottomsheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -12,20 +12,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,58 +41,82 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun CategoryButton(
+fun TagsButton(
     modifier: Modifier = Modifier,
     viewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    var categories by remember { mutableStateOf(listOf("loading")) }
+    var tags by remember { mutableStateOf(listOf("loading")) }
 
-    val taskCategory = viewModel.taskCategory.collectAsState(initial = "")
+    val taskTags = viewModel.taskTags.collectAsState(initial = emptyList())
 
-    var showCategoryDialog by remember { mutableStateOf(false) }
-    var newCategory by remember { mutableStateOf("") }
+    var showTagsDialog by remember { mutableStateOf(false) }
+    var newTag by remember { mutableStateOf("") }
 
-    val buttonIcon = if (taskCategory.value.isEmpty()) {
-        R.drawable.baseline_folder_24
+    val buttonIcon = if (taskTags.value.isEmpty()) {
+        R.drawable.baseline_label_24
     } else {
-        R.drawable.baseline_folder_filled_24
+        R.drawable.baseline_label_filled_24
     }
 
     IconButton(
-        modifier = modifier,
+        modifier = modifier.widthIn(min = 48.dp),
         onClick = {
-            showCategoryDialog = true
+            showTagsDialog = true
 
             scope.launch {
-                categories = viewModel.onGetCategories()
+                tags = viewModel.onGetTags()
             }
         }
     ) {
-        Image(
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            painter = painterResource(id = buttonIcon),
-            contentDescription = "Set task's category"
-        )
+        BadgedBox(
+            badge = {
+                if (taskTags.value.isNotEmpty()) {
+                    Badge {
+                        Text(
+                            modifier = Modifier.semantics {
+                                contentDescription = "${taskTags.value.size} tags selected"
+                            },
+                            text = taskTags.value.size.toString(),
+                        )
+                    }
+                }
+            }
+        ) {
+            Image(
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                painter = painterResource(id = buttonIcon),
+                contentDescription = "Set task's tags"
+            )
+        }
     }
 
-    if (showCategoryDialog) {
-        var selectedCategory by remember { mutableStateOf(taskCategory.value) }
+
+    if (showTagsDialog) {
+        var selectedTag by remember { mutableStateOf(taskTags.value) }
 
         PickerDialog(
-            title = { Text(text = "Assign category for this task") },
-            onDismissRequest = { showCategoryDialog = false },
+            title = { Text(text = "Assign tags for this task") },
+            onDismissRequest = { showTagsDialog = false },
             buttons = {
                 TextButton(
-                    onClick = { showCategoryDialog = false }
+                    onClick = {
+                        showTagsDialog = false
+                    }
                 ) {
                     Text(text = "Cancel")
                 }
@@ -98,8 +124,8 @@ fun CategoryButton(
                 TextButton(
                     onClick = {
                         scope.launch {
-                            viewModel.onCategoryChange(selectedCategory)
-                            showCategoryDialog = false
+                            viewModel.onTagsChange(selectedTag)
+                            showTagsDialog = false
                         }
                     }
                 ) {
@@ -108,30 +134,30 @@ fun CategoryButton(
             }
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(18.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         modifier = Modifier.height(64.dp),
-                        value = newCategory,
+                        value = newTag,
                         onValueChange = {
                             // limit length
                             if (it.length <= 20) {
-                                newCategory = it
+                                newTag = it
                             }
                         },
-                        placeholder = { Text(text = "Create new category") },
+                        placeholder = { Text(text = "Create new tag") },
                         singleLine = true,
                         trailingIcon = {
                             FilledIconButton(
                                 modifier = Modifier.padding(horizontal = 6.dp),
                                 onClick = {
                                     scope.launch {
-                                        viewModel.onCategoryAdd(newCategory)
+                                        viewModel.onTagAdd(newTag)
 
                                         // append manually to avoid calling onGetTags again
-                                        categories = listOf(newCategory) + categories
-                                        newCategory = ""
+                                        tags = listOf(newTag) + tags
+                                        newTag = ""
                                     }
                                 }
                             ) {
@@ -147,7 +173,7 @@ fun CategoryButton(
                 HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
 
                 when {
-                    categories.contains("loading") -> {
+                    tags.contains("loading") -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -160,14 +186,14 @@ fun CategoryButton(
                         }
                     }
 
-                    categories.isEmpty() -> {
+                    tags.isEmpty() -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(8.dp)
                         ) {
-                            Text(text = "No categories created yet.")
+                            Text(text = "No tags created yet.")
                         }
                     }
 
@@ -177,6 +203,7 @@ fun CategoryButton(
                                 .fillMaxWidth()
                                 .heightIn(max = 320.dp)
                         ) {
+                            // I dunno LazyRow doesn't work here, intrinsic size error blah-blah-blah
                             Column(
                                 modifier = Modifier
                                     .verticalScroll(ScrollState(0))
@@ -184,36 +211,53 @@ fun CategoryButton(
                                     .fillMaxWidth(),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                categories.forEach { category ->
+                                tags.forEach { tag ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(48.dp)
-                                            .selectable(
-                                                selected = selectedCategory == category,
-                                                onClick = {
+                                            .toggleable(
+                                                role = Role.Checkbox,
+                                                value = selectedTag.contains(tag),
+                                                onValueChange = {
                                                     scope.launch {
-                                                        selectedCategory = category
+                                                        // selection/deselection of tags
+                                                        selectedTag =
+                                                            if (selectedTag.contains(tag)) {
+                                                                selectedTag - tag
+                                                            } else {
+                                                                selectedTag + tag
+                                                            }
                                                     }
-                                                }
-                                            ),
-                                        verticalAlignment = Alignment.CenterVertically
+                                                },
+                                            ), verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        RadioButton(
-                                            selected = selectedCategory == category,
-                                            onClick = null
+                                        Checkbox(
+                                            checked = selectedTag.contains(tag),
+                                            onCheckedChange = null
                                         )
                                         Text(
-                                            text = category,
+                                            text = tag,
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 }
                             }
                         }
+
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun TagsButtonPreview() {
+    val previewViewModel = TasksViewModelPreview()
+
+    MemoTheme {
+        TagsButton(viewModel = previewViewModel)
     }
 }

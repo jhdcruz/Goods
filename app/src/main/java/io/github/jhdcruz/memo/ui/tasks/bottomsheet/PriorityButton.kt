@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.details
+package io.github.jhdcruz.memo.ui.tasks.bottomsheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
