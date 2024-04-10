@@ -20,6 +20,7 @@ class TasksRepositoryImpl @Inject constructor(
         return try {
             // get tasks from Firestore nested collection located in 'users/uid/tasks'
             firestore.collection("users").document(userUid).collection("tasks")
+                .whereEqualTo("isCompleted", false)
                 .get()
                 .await()
                 .toObjects(Task::class.java)
