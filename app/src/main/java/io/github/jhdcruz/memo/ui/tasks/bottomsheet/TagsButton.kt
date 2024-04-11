@@ -60,8 +60,8 @@ fun TagsButton(
     viewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    var tags by remember { mutableStateOf(listOf("loading")) }
 
+    val tags = viewModel.tags.collectAsState(initial = emptyList())
     val taskTags = viewModel.taskTags.collectAsState(initial = emptyList())
 
     var showTagsDialog by remember { mutableStateOf(false) }
@@ -79,7 +79,7 @@ fun TagsButton(
             showTagsDialog = true
 
             scope.launch {
-                tags = viewModel.onGetTags()
+                viewModel.onGetTags()
             }
         }
     ) {
@@ -155,8 +155,9 @@ fun TagsButton(
                                     scope.launch {
                                         viewModel.onTagAdd(newTag)
 
+                                        val appendedTag = listOf(newTag) + tags.value
                                         // append manually to avoid calling onGetTags again
-                                        tags = listOf(newTag) + tags
+                                        viewModel.onLocalTagsChange(appendedTag)
                                         newTag = ""
                                     }
                                 }
@@ -173,7 +174,7 @@ fun TagsButton(
                 HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
 
                 when {
-                    tags.contains("loading") -> {
+                    tags.value.contains("loading") -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -186,7 +187,7 @@ fun TagsButton(
                         }
                     }
 
-                    tags.isEmpty() -> {
+                    tags.value.isEmpty() -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -211,7 +212,7 @@ fun TagsButton(
                                     .fillMaxWidth(),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                tags.forEach { tag ->
+                                tags.value.forEach { tag ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()

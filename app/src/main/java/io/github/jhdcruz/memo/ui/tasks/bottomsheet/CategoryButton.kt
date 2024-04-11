@@ -52,8 +52,8 @@ fun CategoryButton(
     viewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    var categories by remember { mutableStateOf(listOf("loading")) }
 
+    val categories = viewModel.categories.collectAsState(initial = emptyList())
     val taskCategory = viewModel.taskCategory.collectAsState(initial = "")
 
     var showCategoryDialog by remember { mutableStateOf(false) }
@@ -71,7 +71,7 @@ fun CategoryButton(
             showCategoryDialog = true
 
             scope.launch {
-                categories = viewModel.onGetCategories()
+                viewModel.onGetCategories()
             }
         }
     ) {
@@ -129,8 +129,9 @@ fun CategoryButton(
                                     scope.launch {
                                         viewModel.onCategoryAdd(newCategory)
 
-                                        // append manually to avoid calling onGetTags again
-                                        categories = listOf(newCategory) + categories
+                                        val appendedCategory =
+                                            listOf(newCategory) + categories.value
+                                        viewModel.onLocalCategoryChange(appendedCategory)
                                         newCategory = ""
                                     }
                                 }
@@ -147,7 +148,7 @@ fun CategoryButton(
                 HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
 
                 when {
-                    categories.contains("loading") -> {
+                    categories.value.contains("loading") -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -160,7 +161,7 @@ fun CategoryButton(
                         }
                     }
 
-                    categories.isEmpty() -> {
+                    categories.value.isEmpty() -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -184,7 +185,7 @@ fun CategoryButton(
                                     .fillMaxWidth(),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                categories.forEach { category ->
+                                categories.value.forEach { category ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()

@@ -38,6 +38,12 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskList = MutableStateFlow<List<Task>>(emptyList())
     override val taskList: Flow<List<Task>> = _taskList
 
+    private val _tags = MutableStateFlow<List<String>>(emptyList())
+    override val tags: Flow<List<String>> = _tags
+
+    private val _categories = MutableStateFlow<List<String>>(emptyList())
+    override val categories: Flow<List<String>> = _categories
+
     // Populating tasks
     private val _taskId = MutableStateFlow("")
     override val taskId: Flow<String> = _taskId
@@ -235,32 +241,16 @@ class TasksViewModelImpl @Inject constructor(
         }
     }
 
-    override fun onGetCategories(): List<String> {
-        var categories = mutableListOf<String>()
-
+    override fun onGetCategories() {
         viewModelScope.launch {
-            val response = async {
-                tasksRepository.onGetCategories()
-            }.await()
-
-            categories = response as MutableList<String>
+            _categories.value = tasksRepository.onGetCategories()
         }
-
-        return categories
     }
 
-    override fun onGetTags(): List<String> {
-        var tags = mutableListOf<String>()
-
+    override fun onGetTags() {
         viewModelScope.launch {
-            val response = async {
-                tasksRepository.onGetTags()
-            }.await()
-
-            tags = response as MutableList<String>
+            _tags.value = tasksRepository.onGetTags()
         }
-
-        return tags
     }
 
     override fun onIsFetchingTasksChange(isFetching: Boolean) {
@@ -275,8 +265,16 @@ class TasksViewModelImpl @Inject constructor(
         _taskList.value = taskList
     }
 
+    override fun onLocalTagsChange(tags: List<String>) {
+        _tags.value = tags
+    }
+
     override fun onTagsChange(tags: List<String>) {
         _taskTags.value = tags
+    }
+
+    override fun onLocalCategoryChange(categories: List<String>) {
+        _categories.value = categories
     }
 
     override fun onCategoryChange(category: String) {

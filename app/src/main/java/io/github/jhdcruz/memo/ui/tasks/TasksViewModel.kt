@@ -16,6 +16,9 @@ abstract class TasksViewModel : ViewModel() {
     abstract val isFetchingTasks: Flow<Boolean>
     abstract val taskList: Flow<List<Task>>
 
+    abstract val tags: Flow<List<String>>
+    abstract val categories: Flow<List<String>>
+
     // Populating tasks
     abstract val taskId: Flow<String>
     abstract val taskTitle: Flow<String>
@@ -65,14 +68,18 @@ abstract class TasksViewModel : ViewModel() {
     abstract fun onAttachmentDownload(path: String)
 
     // fetch
-    abstract fun onGetCategories(): List<String>
-    abstract fun onGetTags(): List<String>
+    abstract fun onGetCategories()
+    abstract fun onGetTags()
 
     // input handlers
     abstract fun onIsFetchingTasksChange(isFetching: Boolean)
     abstract fun onQueryChange(query: String)
     abstract fun onTaskListChange(taskList: List<Task>)
+
+    abstract fun onLocalTagsChange(tags: List<String>)
     abstract fun onTagsChange(tags: List<String>)
+
+    abstract fun onLocalCategoryChange(categories: List<String>)
     abstract fun onCategoryChange(category: String)
 
     abstract fun onTaskIdChange(id: String)

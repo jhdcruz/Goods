@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -44,11 +44,11 @@ fun Sidebar(
 ) {
     val scope = rememberCoroutineScope()
 
+    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
     var selected by remember { mutableIntStateOf(0) }
-    var categories by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(drawerState.isOpen) {
-        categories = tasksViewModel.onGetCategories()
+        tasksViewModel.onGetCategories()
     }
 
     Scaffold(
@@ -128,7 +128,7 @@ fun Sidebar(
 
 
             // loading state
-            if (drawerState.isOpen && categories.isEmpty()) {
+            if (drawerState.isOpen && categories.value.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -137,7 +137,7 @@ fun Sidebar(
             }
 
             LazyColumn {
-                itemsIndexed(categories) { index, category ->
+                itemsIndexed(categories.value) { index, category ->
                     NavigationDrawerItem(
                         label = { Text(text = category) },
                         icon = {
@@ -147,9 +147,11 @@ fun Sidebar(
                                 contentDescription = null
                             )
                         },
-                        selected = false,
+                        // +3 because there are 3 items above the categories
+                        selected = selected == index + 3,
                         onClick = {
                             scope.launch {
+                                selected = index + 3
                                 drawerState.close()
                             }
                         }

@@ -14,6 +14,8 @@ class TasksViewModelPreview : TasksViewModel() {
     override val query = flowOf("Generic Query")
     override val isFetchingTasks: Flow<Boolean> = flowOf(false)
     override val taskList = flowOf(listOf<Task>())
+    override val tags: Flow<List<String>> = flowOf(listOf("Generic Tag"))
+    override val categories: Flow<List<String>> = flowOf(listOf("Generic Category"))
     override val taskId: Flow<String> = flowOf("Generic ID")
     override val taskTitle = flowOf("Generic Title")
     override val taskDescription = flowOf(TextFieldValue("Generic Description"))
@@ -40,8 +42,9 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTaskUpdate(
         id: String,
         task: Task,
-        localAttachments: List<Pair<String, Uri>>
-    ) {}
+        localAttachments: List<Pair<String, Uri>>,
+    ) {
+    }
 
     override fun onTaskDelete(id: String) {}
 
@@ -68,21 +71,19 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onAttachmentDelete(id: String, path: String) {}
     override fun onAttachmentDownload(path: String) {}
 
-    override fun onGetCategories(): List<String> {
-        return listOf("Generic Category")
-    }
+    override fun onGetCategories() {}
 
-    override fun onGetTags(): List<String> {
-        return listOf("Generic Tag")
-    }
+    override fun onGetTags() {}
 
     override fun onIsFetchingTasksChange(isFetching: Boolean) {}
 
     override fun onQueryChange(query: String) {}
 
     override fun onTaskListChange(taskList: List<Task>) {}
+    override fun onLocalTagsChange(tags: List<String>) {}
 
     override fun onTagsChange(tags: List<String>) {}
+    override fun onLocalCategoryChange(categories: List<String>) {}
 
     override fun onCategoryChange(category: String) {}
     override fun onTaskIdChange(id: String) {}
