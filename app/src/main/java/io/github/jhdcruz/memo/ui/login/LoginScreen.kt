@@ -282,8 +282,7 @@ fun LoginForm(
 
                 scope.launch {
                     viewModel.onSignIn(context).apply {
-                        // offer to create account when not found
-                        if (this is AuthResponseUseCase.NotFound) {
+                        if (value is AuthResponseUseCase.NotFound) {
                             notFound.value = true
                         }
                     }

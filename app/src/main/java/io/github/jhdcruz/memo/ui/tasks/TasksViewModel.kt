@@ -36,37 +36,37 @@ abstract class TasksViewModel : ViewModel() {
     abstract val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
 
     abstract fun onVoiceSearch(): Intent
-    abstract suspend fun onSearch()
+    abstract fun onSearch()
 
     // fetch operations
-    abstract suspend fun onGetTasks()
+    abstract fun onGetTasks()
 
     // tasks operations
-    abstract suspend fun onTaskAdd(task: Task)
-    abstract suspend fun onTaskUpdate(id: String, task: Task)
-    abstract suspend fun onTaskDelete(id: String)
-    abstract suspend fun onTaskCompleted(id: String)
+    abstract fun onTaskAdd(task: Task, localAttachments: List<Pair<String, Uri>>)
+    abstract fun onTaskUpdate(id: String, task: Task, localAttachments: List<Pair<String, Uri>>)
+    abstract fun onTaskDelete(id: String)
+    abstract fun onTaskCompleted(id: String)
 
     // singular tasks operations
-    abstract suspend fun onCategoryAdd(category: String)
-    abstract suspend fun onCategoryUpdate(category: String, newCategory: String)
-    abstract suspend fun onCategoriesDelete(categories: List<String>)
+    abstract fun onCategoryAdd(category: String)
+    abstract fun onCategoryUpdate(category: String, newCategory: String)
+    abstract fun onCategoriesDelete(categories: List<String>)
 
-    abstract suspend fun onTagAdd(tag: String)
-    abstract suspend fun onTagUpdate(tag: String, newTag: String)
-    abstract suspend fun onTagsDelete(tags: List<String>)
+    abstract fun onTagAdd(tag: String)
+    abstract fun onTagUpdate(tag: String, newTag: String)
+    abstract fun onTagsDelete(tags: List<String>)
 
-    abstract suspend fun onAttachmentsUpload(
+    abstract fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
     )
 
-    abstract suspend fun onAttachmentDelete(id: String, path: String)
-    abstract suspend fun onAttachmentDownload(path: String)
+    abstract fun onAttachmentDelete(id: String, path: String)
+    abstract fun onAttachmentDownload(path: String)
 
     // fetch
-    abstract suspend fun onGetCategories(): List<String>
-    abstract suspend fun onGetTags(): List<String>
+    abstract fun onGetCategories(): List<String>
+    abstract fun onGetTags(): List<String>
 
     // input handlers
     abstract fun onIsFetchingTasksChange(isFetching: Boolean)
@@ -83,9 +83,9 @@ abstract class TasksViewModel : ViewModel() {
 
     abstract fun onTaskAttachmentsChange(attachments: Map<String, TaskAttachment>?)
     abstract fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>)
-    abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Map<String, String>)
-    abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>)
-    abstract suspend fun removeTaskAttachment(
+    abstract fun onTaskAttachmentPreview(context: Context, attachment: Map<String, String>)
+    abstract fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>)
+    abstract fun removeTaskAttachment(
         taskId: String,
         filename: String,
         originalAttachments: Map<String, TaskAttachment>,

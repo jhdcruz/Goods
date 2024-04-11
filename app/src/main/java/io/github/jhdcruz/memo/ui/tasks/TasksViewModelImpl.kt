@@ -16,10 +16,10 @@ import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import io.github.jhdcruz.memo.domain.toTimestamp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.Locale
 import javax.inject.Inject
@@ -96,55 +96,72 @@ class TasksViewModelImpl @Inject constructor(
         }
     }
 
-    override suspend fun onGetTasks() {
-        _isFetchingTasks.value = true
-        _taskList.value = tasksRepository.onGetTasks()
-        _isFetchingTasks.value = false
+    override fun onGetTasks() {
+        viewModelScope.launch {
+            _taskList.value = tasksRepository.onGetTasks()
+            onIsFetchingTasksChange(false)
+        }
     }
 
-    override suspend fun onSearch() {
-        val taskList = tasksRepository.onSearch(query.toString())
-        onTaskListChange(taskList)
+    override fun onSearch() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val taskList = tasksRepository.onSearch(query.toString())
+            onTaskListChange(taskList)
+        }
     }
 
-    override suspend fun onTaskAdd(task: Task) {
+    override fun onTaskAdd(
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
-            val taskId = taskJob.result as String
 
             // upload local files
-            if (_taskLocalAttachments.value.isNotEmpty()) {
-                onAttachmentsUpload(taskId, _taskLocalAttachments.value)
+            if (localAttachments.isNotEmpty()) {
+                onAttachmentsUpload(taskJob.result as String, localAttachments)
             }
 
             onClearInput()
-            onGetTasks()
+            onIsFetchingTasksChange(true)
         }
     }
 
-    override suspend fun onTaskUpdate(id: String, task: Task) {
+    override fun onTaskUpdate(
+        id: String,
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.onTaskUpdate(id, task)
 
-            // upload local filesS
-            if (_taskLocalAttachments.value.isNotEmpty()) {
-                onAttachmentsUpload(id, _taskLocalAttachments.value)
+            val taskUpdateJob = async { tasksRepository.onTaskUpdate(id, task) }
+            val attachmentsUploadJob = async {
+                if (localAttachments.isNotEmpty()) {
+                    onAttachmentsUpload(id, localAttachments)
+                }
             }
 
+            taskUpdateJob.await()
+            attachmentsUploadJob.await()
+
             onClearInput()
-            onGetTasks()
+            onIsFetchingTasksChange(true)
         }
     }
 
-    override suspend fun onTaskDelete(id: String) {
+    override fun onTaskDelete(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            tasksRepository.onTaskDelete(id)
-            attachmentsRepository.onAttachmentDeleteAll(id)
-            onGetTasks()
+            val taskDeleteJob = async { tasksRepository.onTaskDelete(id) }
+            val attachmentDeleteJob = async { attachmentsRepository.onAttachmentDeleteAll(id) }
+
+            taskDeleteJob.await()
+            attachmentDeleteJob.await()
+
+            onIsFetchingTasksChange(true)
         }
     }
 
-    override suspend fun onTaskCompleted(id: String) {
+    override fun onTaskCompleted(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             // update local task for AnimatedVisibility
             _taskList.value = _taskList.value.toMutableList().apply {
@@ -161,53 +178,89 @@ class TasksViewModelImpl @Inject constructor(
         }
     }
 
-    override suspend fun onCategoryAdd(category: String) {
-        tasksRepository.onCategoryAdd(category)
+    override fun onCategoryAdd(category: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onCategoryAdd(category)
+        }
     }
 
-    override suspend fun onCategoryUpdate(category: String, newCategory: String) {
-        tasksRepository.onCategoryUpdate(category, newCategory)
+    override fun onCategoryUpdate(category: String, newCategory: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onCategoryUpdate(category, newCategory)
+        }
     }
 
-    override suspend fun onCategoriesDelete(categories: List<String>) {
-        tasksRepository.onCategoriesDelete(categories)
+    override fun onCategoriesDelete(categories: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onCategoriesDelete(categories)
+        }
     }
 
-    override suspend fun onTagAdd(tag: String) {
-        tasksRepository.onTagAdd(tag)
+    override fun onTagAdd(tag: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onTagAdd(tag)
+        }
     }
 
-    override suspend fun onTagUpdate(tag: String, newTag: String) {
-        tasksRepository.onTagUpdate(tag, newTag)
+    override fun onTagUpdate(tag: String, newTag: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onTagUpdate(tag, newTag)
+        }
     }
 
-    override suspend fun onTagsDelete(tags: List<String>) {
-        tasksRepository.onTagsDelete(tags)
+    override fun onTagsDelete(tags: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onTagsDelete(tags)
+        }
     }
 
-    override suspend fun onAttachmentsUpload(
+    override fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
     ) {
-        withContext(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             attachmentsRepository.onAttachmentsUpload(id, attachments)
         }
     }
 
-    override suspend fun onAttachmentDelete(id: String, path: String) {
-        attachmentsRepository.onAttachmentDelete(id, path)
+    override fun onAttachmentDelete(id: String, path: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            attachmentsRepository.onAttachmentDelete(id, path)
+        }
     }
 
-    override suspend fun onAttachmentDownload(path: String) {
-        attachmentsRepository.onAttachmentDownload(path)
+    override fun onAttachmentDownload(path: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            attachmentsRepository.onAttachmentDownload(path)
+        }
     }
 
-    override suspend fun onGetCategories(): List<String> {
-        return tasksRepository.onGetCategories()
+    override fun onGetCategories(): List<String> {
+        var categories = mutableListOf<String>()
+
+        viewModelScope.launch {
+            val response = async {
+                tasksRepository.onGetCategories()
+            }.await()
+
+            categories = response as MutableList<String>
+        }
+
+        return categories
     }
 
-    override suspend fun onGetTags(): List<String> {
-        return tasksRepository.onGetTags()
+    override fun onGetTags(): List<String> {
+        var tags = mutableListOf<String>()
+
+        viewModelScope.launch {
+            val response = async {
+                tasksRepository.onGetTags()
+            }.await()
+
+            tags = response as MutableList<String>
+        }
+
+        return tags
     }
 
     override fun onIsFetchingTasksChange(isFetching: Boolean) {
@@ -258,43 +311,47 @@ class TasksViewModelImpl @Inject constructor(
         _taskLocalAttachments.value = attachments
     }
 
-    override suspend fun onTaskAttachmentPreview(
+    override fun onTaskAttachmentPreview(
         context: Context,
         attachment: Map<String, String>,
     ) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val fileProvider = context.contentResolver
+        viewModelScope.launch {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val fileProvider = context.contentResolver
 
-        intent.setDataAndType(
-            Uri.parse(attachment.values.last()),
-            fileProvider.getType(Uri.parse(attachment.values.last()))
-        ).apply {
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.setDataAndType(
+                Uri.parse(attachment.values.last()),
+                fileProvider.getType(Uri.parse(attachment.values.last()))
+            ).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+
+            context.startActivity(intent)
         }
-
-        context.startActivity(intent)
     }
 
-    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val fileProvider = context.contentResolver
+    override fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {
+        viewModelScope.launch {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val fileProvider = context.contentResolver
 
-        intent.setDataAndType(
-            attachment.second,
-            fileProvider.getType(attachment.second)
-        ).apply {
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.setDataAndType(
+                attachment.second,
+                fileProvider.getType(attachment.second)
+            ).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+
+            context.startActivity(intent)
         }
-
-        context.startActivity(intent)
     }
 
-    override suspend fun removeTaskAttachment(
+    override fun removeTaskAttachment(
         taskId: String,
         filename: String,
         originalAttachments: Map<String, TaskAttachment>,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             attachmentsRepository.onAttachmentDelete(taskId, filename)
 
             // remove attachment that contains the same filename
@@ -331,38 +388,42 @@ class TasksViewModelImpl @Inject constructor(
     }
 
     override fun onClearInput() {
-        _taskTitle.value = ""
-        _taskDescription.value = TextFieldValue("")
-        _taskCategory.value = ""
-        _taskTags.value = emptyList()
-        _taskAttachments.value = null
-        _taskLocalAttachments.value = emptyList()
-        _taskDueDate.value = null
-        _taskSelectedDate.value = null
-        _taskSelectedHour.value = null
-        _taskSelectedMinute.value = null
-        _taskPriority.value = 0
-        _taskUpdated.value = LocalDateTime.now().toTimestamp()
+        viewModelScope.launch(Dispatchers.IO) {
+            _taskTitle.value = ""
+            _taskDescription.value = TextFieldValue("")
+            _taskCategory.value = ""
+            _taskTags.value = emptyList()
+            _taskAttachments.value = null
+            _taskLocalAttachments.value = emptyList()
+            _taskDueDate.value = null
+            _taskSelectedDate.value = null
+            _taskSelectedHour.value = null
+            _taskSelectedMinute.value = null
+            _taskPriority.value = 0
+            _taskUpdated.value = LocalDateTime.now().toTimestamp()
+        }
     }
 
     override fun onTaskPreview(task: Task) {
-        _taskId.value = task.id!! // will never be null (handled by firestore auto-id)
-        _taskTitle.value = task.title
-        _taskDueDate.value = task.dueDate
-        _taskPriority.value = task.priority
-        _taskUpdated.value = task.updated
+        viewModelScope.launch {
+            _taskId.value = task.id!! // will never be null (handled by firestore auto-id)
+            _taskTitle.value = task.title
+            _taskDueDate.value = task.dueDate
+            _taskPriority.value = task.priority
+            _taskUpdated.value = task.updated
 
-        if (task.description?.isNotEmpty() != null) {
-            _taskDescription.value = TextFieldValue(task.description)
-        }
-        if (task.category?.isNotEmpty() != null) {
-            _taskCategory.value = task.category
-        }
-        if (task.tags?.isNotEmpty() != null) {
-            _taskTags.value = task.tags
-        }
-        if (task.attachments?.isNotEmpty() != null) {
-            _taskAttachments.value = task.attachments
+            if (task.description?.isNotEmpty() != null) {
+                _taskDescription.value = TextFieldValue(task.description)
+            }
+            if (task.category?.isNotEmpty() != null) {
+                _taskCategory.value = task.category
+            }
+            if (task.tags?.isNotEmpty() != null) {
+                _taskTags.value = task.tags
+            }
+            if (task.attachments?.isNotEmpty() != null) {
+                _taskAttachments.value = task.attachments
+            }
         }
     }
 

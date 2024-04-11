@@ -2,17 +2,23 @@ package io.github.jhdcruz.memo.ui.login
 
 import android.content.Context
 import android.content.Intent
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
 import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModelImpl @Inject constructor(
-    private val authenticationRepository: AuthenticationRepository
+    private val authenticationRepository: AuthenticationRepository,
 ) : LoginViewModel() {
 
     private val _email = MutableStateFlow("")
@@ -32,105 +38,65 @@ class LoginViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override suspend fun onSignIn(context: Context): AuthResponseUseCase {
-        authenticationRepository.signIn(
-            context = context,
-        ).apply {
-            return when (this) {
-                is AuthResponseUseCase.Success -> {
-                    navigateToMain(context)
-                    this
-                }
+    override fun onSignIn(context: Context): LiveData<AuthResponseUseCase> {
+        val result = MutableLiveData<AuthResponseUseCase>()
 
-                is AuthResponseUseCase.Invalid -> {
-                    _status.value = this.message
-                    this
+        viewModelScope.launch {
+            result.value = async {
+                authenticationRepository.signIn(
+                    context = context,
+                ).also { response ->
+                    if (response is AuthResponseUseCase.Success) {
+                        navigateToMain(context)
+                    }
                 }
-
-                is AuthResponseUseCase.NotFound -> {
-                    _status.value = this.message
-                    this
-                }
-
-                is AuthResponseUseCase.Error -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
-
-                is AuthResponseUseCase.Failure -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
-
-                else -> this // Do nothing
-            }
+            }.await()
         }
+
+        return result
     }
 
-    override suspend fun onGoogleSignIn(context: Context): AuthResponseUseCase {
-        authenticationRepository.googleSignIn(
-            context = context
-        ).apply {
-            return when (this) {
-                is AuthResponseUseCase.Success -> {
-                    navigateToMain(context)
-                    this
-                }
+    override fun onGoogleSignIn(context: Context): LiveData<AuthResponseUseCase> {
+        val result = MutableLiveData<AuthResponseUseCase>()
 
-                is AuthResponseUseCase.Invalid -> {
-                    _status.value = this.message
-                    this
+        viewModelScope.launch {
+            result.value = async {
+                authenticationRepository.googleSignIn(
+                    context = context,
+                ).also { response ->
+                    if (response is AuthResponseUseCase.Success) {
+                        navigateToMain(context)
+                    }
                 }
-
-                is AuthResponseUseCase.NotFound -> {
-                    _status.value = this.message
-                    this
-                }
-
-                is AuthResponseUseCase.Error -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
-
-                is AuthResponseUseCase.Failure -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
-
-                else -> this // Do nothing
-            }
+            }.await()
         }
+
+        return result
     }
 
-    override suspend fun onSignUp(context: Context): AuthResponseUseCase {
-        authenticationRepository.signUp(
-            context = context,
-            email = _email.value,
-            password = _password.value
-        ).apply {
-            return when (this) {
-                is AuthResponseUseCase.Success -> {
-                    navigateToMain(context)
-                    this
-                }
+    override fun onSignUp(context: Context): LiveData<AuthResponseUseCase> {
+        val result = MutableLiveData<AuthResponseUseCase>()
 
-                is AuthResponseUseCase.Invalid -> {
-                    _status.value = this.message
-                    this
+        viewModelScope.launch(Dispatchers.IO) {
+            result.value = async {
+                authenticationRepository.signUp(
+                    context = context,
+                    email = _email.value,
+                    password = _password.value
+                ).also { response ->
+                    if (response is AuthResponseUseCase.Success) {
+                        navigateToMain(context)
+                    }
                 }
+            }.await()
+        }
 
-                is AuthResponseUseCase.Error -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
+        return result
+    }
 
-                is AuthResponseUseCase.Failure -> {
-                    _status.value = this.exception.message ?: "An error occurred"
-                    this
-                }
-
-                else -> this // Do nothing
-            }
+    override fun onSignOut() {
+        viewModelScope.launch {
+            authenticationRepository.signOut()
         }
     }
 

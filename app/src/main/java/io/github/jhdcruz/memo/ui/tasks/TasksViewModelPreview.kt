@@ -32,43 +32,47 @@ class TasksViewModelPreview : TasksViewModel() {
         return Intent()
     }
 
-    override suspend fun onSearch() {}
-    override suspend fun onGetTasks() {}
+    override fun onSearch() {}
+    override fun onGetTasks() {}
 
-    override suspend fun onTaskAdd(task: Task) {}
+    override fun onTaskAdd(task: Task, localAttachments: List<Pair<String, Uri>>) {}
 
-    override suspend fun onTaskUpdate(id: String, task: Task) {}
+    override fun onTaskUpdate(
+        id: String,
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>
+    ) {}
 
-    override suspend fun onTaskDelete(id: String) {}
+    override fun onTaskDelete(id: String) {}
 
-    override suspend fun onTaskCompleted(id: String) {}
+    override fun onTaskCompleted(id: String) {}
 
-    override suspend fun onCategoryAdd(category: String) {}
+    override fun onCategoryAdd(category: String) {}
 
-    override suspend fun onCategoryUpdate(category: String, newCategory: String) {}
+    override fun onCategoryUpdate(category: String, newCategory: String) {}
 
-    override suspend fun onCategoriesDelete(categories: List<String>) {}
+    override fun onCategoriesDelete(categories: List<String>) {}
 
-    override suspend fun onTagAdd(tag: String) {}
+    override fun onTagAdd(tag: String) {}
 
-    override suspend fun onTagUpdate(tag: String, newTag: String) {}
+    override fun onTagUpdate(tag: String, newTag: String) {}
 
-    override suspend fun onTagsDelete(tags: List<String>) {}
+    override fun onTagsDelete(tags: List<String>) {}
 
-    override suspend fun onAttachmentsUpload(
+    override fun onAttachmentsUpload(
         id: String,
         attachments: List<Pair<String, Uri>>,
     ) {
     }
 
-    override suspend fun onAttachmentDelete(id: String, path: String) {}
-    override suspend fun onAttachmentDownload(path: String) {}
+    override fun onAttachmentDelete(id: String, path: String) {}
+    override fun onAttachmentDownload(path: String) {}
 
-    override suspend fun onGetCategories(): List<String> {
+    override fun onGetCategories(): List<String> {
         return listOf("Generic Category")
     }
 
-    override suspend fun onGetTags(): List<String> {
+    override fun onGetTags(): List<String> {
         return listOf("Generic Tag")
     }
 
@@ -96,14 +100,14 @@ class TasksViewModelPreview : TasksViewModel() {
 
     override fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>) {}
 
-    override suspend fun onTaskAttachmentPreview(
+    override fun onTaskAttachmentPreview(
         context: Context,
         attachment: Map<String, String>,
     ) {
     }
 
-    override suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {}
-    override suspend fun removeTaskAttachment(
+    override fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>) {}
+    override fun removeTaskAttachment(
         taskId: String,
         filename: String,
         originalAttachments: Map<String, TaskAttachment>,
