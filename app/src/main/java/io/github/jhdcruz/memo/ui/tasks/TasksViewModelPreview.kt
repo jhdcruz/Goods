@@ -7,7 +7,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.model.TaskAttachment
-import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -107,7 +106,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override suspend fun removeTaskAttachment(
         taskId: String,
         filename: String,
-        originalAttachments: Map<String, TaskAttachment>
+        originalAttachments: Map<String, TaskAttachment>,
     ) {
     }
 

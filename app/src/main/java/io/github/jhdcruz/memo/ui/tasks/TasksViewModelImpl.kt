@@ -112,7 +112,7 @@ class TasksViewModelImpl @Inject constructor(
             val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
             val taskId = taskJob.result as String
 
-            // upload local filesS
+            // upload local files
             if (_taskLocalAttachments.value.isNotEmpty()) {
                 onAttachmentsUpload(taskId, _taskLocalAttachments.value)
             }

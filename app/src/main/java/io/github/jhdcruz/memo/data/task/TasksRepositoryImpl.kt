@@ -124,13 +124,13 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun onTaskCompleted(uid: String): FirestoreResponseUseCase {
+    override suspend fun onTaskCompleted(id: String): FirestoreResponseUseCase {
         val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
         return try {
             // update task in Firestore nested collection located in 'users/uid/tasks'
             firestore.collection("users").document(userUid).collection("tasks")
-                .document(uid)
+                .document(id)
                 .update("isCompleted", true)
                 .await()
 
