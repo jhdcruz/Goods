@@ -18,18 +18,15 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -42,9 +39,6 @@ import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
 import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.tasks.bottomsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
@@ -53,7 +47,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ContainerScreen(
     user: FirebaseUser?,
-    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -61,7 +54,6 @@ fun ContainerScreen(
     val sheetState = rememberModalBottomSheetState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    var showAddTask by remember { mutableStateOf(false) }
     val photoUrl = remember { mutableStateOf("") }
 
     LaunchedEffect(user?.uid) {
@@ -94,7 +86,6 @@ fun ContainerScreen(
                     ExtendedFloatingActionButton(
                         onClick = {
                             scope.launch {
-                                showAddTask = true
                                 sheetState.show()
                             }
                         },
@@ -113,20 +104,6 @@ fun ContainerScreen(
                     }
                 }
             ) { innerPadding ->
-                // New task bottom sheet
-                if (showAddTask) {
-                    TaskDetailsSheet(
-                        tasksViewModel = tasksViewModel,
-                        onDismissRequest = {
-                            scope.launch {
-                                sheetState.hide()
-                                showAddTask = false
-                            }
-                        },
-                        sheetState = sheetState,
-                    )
-                }
-
                 NavHost(
                     navController,
                     startDestination = TasksDestination.route,
@@ -144,6 +121,14 @@ fun ContainerScreen(
                         )
                     }
                 }
+
+                // New task bottom sheet
+                if (sheetState.isVisible) {
+                    TaskDetailsSheet(
+                        onDismissRequest = {},
+                        sheetState = sheetState,
+                    )
+                }
             }
         }
     }
@@ -152,12 +137,9 @@ fun ContainerScreen(
 @Preview
 @Composable
 private fun ContainerScreenPreview() {
-    val tasksViewModel = TasksViewModelPreview()
-
     MemoTheme {
         ContainerScreen(
             user = null,
-            tasksViewModel = tasksViewModel
         )
     }
 }

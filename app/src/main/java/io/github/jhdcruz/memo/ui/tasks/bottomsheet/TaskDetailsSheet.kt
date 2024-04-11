@@ -56,7 +56,7 @@ import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
 /**
- * Provide [task] for viewing existing task data
+ * Provide a [task] for viewing existing task data
  */
 @Composable
 fun TaskDetailsSheet(
@@ -179,22 +179,10 @@ private fun TaskDetailsContent(
                 onClick = {
                     scope.launch {
                         // hide bottom sheet to avoid blocking UI
-                        sheetState.hide()
                         keyboardController?.hide()
+                        sheetState.hide()
 
-                        if (task == null) {
-                            // add new task
-                            tasksViewModel.onTaskAdd(
-                                Task(
-                                    priority = taskPriority.value,
-                                    dueDate = taskDueDate.value,
-                                    title = taskTitle.value,
-                                    description = taskDescription.value.text,
-                                    category = taskCategory.value,
-                                    tags = taskTags.value,
-                                )
-                            )
-                        } else {
+                        if (task != null) {
                             // update task
                             tasksViewModel.onTaskUpdate(
                                 taskId.value!!,
@@ -208,7 +196,21 @@ private fun TaskDetailsContent(
                                     tags = taskTags.value,
                                     created = task.created,
                                     updated = Timestamp.now()
-                                )
+                                ),
+                                taskLocalAttachments.value
+                            )
+                        } else {
+                            // add new task
+                            tasksViewModel.onTaskAdd(
+                                Task(
+                                    priority = taskPriority.value,
+                                    dueDate = taskDueDate.value,
+                                    title = taskTitle.value,
+                                    description = taskDescription.value.text,
+                                    category = taskCategory.value,
+                                    tags = taskTags.value,
+                                ),
+                                taskLocalAttachments.value
                             )
                         }
 
@@ -218,11 +220,11 @@ private fun TaskDetailsContent(
                 }) {
                 Image(
                     painter = painterResource(id = R.drawable.baseline_done_24),
-                    contentDescription = "Add task",
+                    contentDescription = "Save task",
                     colorFilter = if (taskTitle.value.isNotEmpty()) {
                         ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                     } else {
-                        ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                        ColorFilter.tint(Color.Gray)
                     },
                 )
             }

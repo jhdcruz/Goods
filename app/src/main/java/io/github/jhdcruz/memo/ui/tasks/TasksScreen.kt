@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package io.github.jhdcruz.memo.ui.tasks
 
 import androidx.compose.animation.AnimatedVisibility
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,17 +73,25 @@ fun TasksScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TasksListContent(
-    tasksViewModel: TasksViewModel,
-) {
+private fun TasksListContent(tasksViewModel: TasksViewModel) {
     val scope = rememberCoroutineScope()
-    val detailsSheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState()
 
-    var showTaskDetails by remember { mutableStateOf(false) }
     val isFetchingTasks = tasksViewModel.isFetchingTasks.collectAsState(true)
     val taskList = tasksViewModel.taskList.collectAsState(emptyList())
+
+    var selectedTask by remember { mutableStateOf<Task?>(null) }
+
+    LaunchedEffect(isFetchingTasks.value) {
+        if (isFetchingTasks.value) {
+            tasksViewModel.onGetTasks()
+
+            // for some reason, sheet shows up after adding/updating
+            sheetState.hide()
+            selectedTask = null
+        }
+    }
 
     when {
         isFetchingTasks.value -> {
@@ -104,13 +115,10 @@ private fun TasksListContent(
         }
 
         else -> {
-            var selectedTask by remember { mutableStateOf<Task?>(null) }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 itemsIndexed(taskList.value) { _, task ->
                     AnimatedVisibility(
                         modifier = Modifier.wrapContentHeight(),
@@ -121,8 +129,7 @@ private fun TasksListContent(
                             modifier = Modifier.clickable {
                                 scope.launch {
                                     selectedTask = task
-                                    showTaskDetails = true
-                                    detailsSheetState.show()
+                                    sheetState.show()
                                 }
                             },
                             overlineContent = {
@@ -218,17 +225,12 @@ private fun TasksListContent(
             }
 
             // preview task details
-            if (showTaskDetails) {
+            if (sheetState.isVisible) {
                 TaskDetailsSheet(
-                    task = selectedTask,
                     tasksViewModel = tasksViewModel,
-                    onDismissRequest = {
-                        scope.launch {
-                            detailsSheetState.hide()
-                            showTaskDetails = false
-                        }
-                    },
-                    sheetState = detailsSheetState,
+                    onDismissRequest = {},
+                    sheetState = sheetState,
+                    task = selectedTask!!
                 )
             }
         }
