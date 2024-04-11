@@ -26,14 +26,14 @@ data class Task(
     /**
      * Stores URL links to files or images uploaded to storage/buckets
      */
-    val attachments: Map<Int, TaskAttachment>? = null,
+    val attachments: Map<String, TaskAttachment>? = null,
 
     val created: Timestamp = Timestamp.now(),
     val updated: Timestamp? = null,
 )
 
 data class TaskAttachment(
-    val name: String,
-    val path: String,
-    val downloadUrl: String,
+    val name: String = "",
+    val path: String = "",
+    val downloadUrl: String = "",
 )

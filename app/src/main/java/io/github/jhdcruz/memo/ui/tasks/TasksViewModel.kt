@@ -21,7 +21,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract val taskDescription: Flow<TextFieldValue>
     abstract val taskCategory: Flow<String>
     abstract val taskTags: Flow<List<String>>
-    abstract val taskAttachments: Flow<Map<Int, TaskAttachment>?>
+    abstract val taskAttachments: Flow<Map<String, TaskAttachment>?>
 
     abstract val taskDueDate: Flow<Timestamp?>
     abstract val taskSelectedDate: Flow<Long?>
@@ -79,14 +79,14 @@ abstract class TasksViewModel : ViewModel() {
     abstract fun onTaskCategoryChange(category: String)
     abstract fun onTaskTagsChange(tags: List<String>)
 
-    abstract fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?)
+    abstract fun onTaskAttachmentsChange(attachments: Map<String, TaskAttachment>?)
     abstract fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>)
     abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Map<String, String>)
     abstract suspend fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>)
     abstract suspend fun removeTaskAttachment(
         taskId: String,
         filename: String,
-        originalAttachments: Map<Int, TaskAttachment>,
+        originalAttachments: Map<String, TaskAttachment>,
     )
 
     abstract fun onTaskDueDateChange(date: Timestamp)

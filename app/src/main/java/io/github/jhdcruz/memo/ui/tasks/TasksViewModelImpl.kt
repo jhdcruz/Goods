@@ -52,8 +52,8 @@ class TasksViewModelImpl @Inject constructor(
     override val taskTags: Flow<List<String>> = _taskTags
 
     private val _taskAttachments =
-        MutableStateFlow<Map<Int, TaskAttachment>?>(null)
-    override val taskAttachments: Flow<Map<Int, TaskAttachment>?> = _taskAttachments
+        MutableStateFlow<Map<String, TaskAttachment>?>(null)
+    override val taskAttachments: Flow<Map<String, TaskAttachment>?> = _taskAttachments
 
     private val _taskDueDate = MutableStateFlow<Timestamp?>(null)
     override val taskDueDate: Flow<Timestamp?> = _taskDueDate
@@ -240,7 +240,7 @@ class TasksViewModelImpl @Inject constructor(
         _taskTags.value = tags
     }
 
-    override fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?) {
+    override fun onTaskAttachmentsChange(attachments: Map<String, TaskAttachment>?) {
         _taskAttachments.value = attachments
     }
 
@@ -282,7 +282,7 @@ class TasksViewModelImpl @Inject constructor(
     override suspend fun removeTaskAttachment(
         taskId: String,
         filename: String,
-        originalAttachments: Map<Int, TaskAttachment>,
+        originalAttachments: Map<String, TaskAttachment>,
     ) {
         viewModelScope.launch {
             attachmentsRepository.onAttachmentDelete(taskId, filename)

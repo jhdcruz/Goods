@@ -19,7 +19,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override val taskDescription = flowOf(TextFieldValue("Generic Description"))
     override val taskCategory = flowOf("Generic Category")
     override val taskTags = flowOf(listOf("Generic Tag"))
-    override val taskAttachments: Flow<Map<Int, TaskAttachment>?> = flowOf(null)
+    override val taskAttachments: Flow<Map<String, TaskAttachment>?> = flowOf(null)
     override val taskDueDate: Flow<Timestamp?> = flowOf(null)
     override val taskSelectedDate = flowOf(0L)
     override val taskSelectedHour = flowOf(0)
@@ -90,7 +90,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override fun onTaskCategoryChange(category: String) {}
 
     override fun onTaskTagsChange(tags: List<String>) {}
-    override fun onTaskAttachmentsChange(attachments: Map<Int, TaskAttachment>?) {
+    override fun onTaskAttachmentsChange(attachments: Map<String, TaskAttachment>?) {
     }
 
 
@@ -106,7 +106,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override suspend fun removeTaskAttachment(
         taskId: String,
         filename: String,
-        originalAttachments: Map<Int, TaskAttachment>
+        originalAttachments: Map<String, TaskAttachment>
     ) {
     }
 
