@@ -99,6 +99,26 @@ class AttachmentsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun onAttachmentDeleteAll(
+        id: String,
+    ): FirestoreResponseUseCase {
+        val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+
+        return try {
+            // delete attachment from Firestore storage
+            storage.reference.child(uid)
+                .child("attachments")
+                .child(id)
+                .delete()
+                .await()
+
+            FirestoreResponseUseCase.Success("Attachment deleted!")
+        } catch (e: StorageException) {
+            Log.e("TasksRepository", "Error deleting attachment", e)
+            FirestoreResponseUseCase.Error(e)
+        }
+    }
+
     override suspend fun onAttachmentDownload(path: String): FirestoreResponseUseCase {
         auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 

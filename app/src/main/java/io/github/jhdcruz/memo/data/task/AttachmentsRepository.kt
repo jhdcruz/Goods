@@ -15,6 +15,10 @@ interface AttachmentsRepository {
         filename: String,
     ): FirestoreResponseUseCase
 
+    suspend fun onAttachmentDeleteAll(
+        id: String,
+    ): FirestoreResponseUseCase
+
     suspend fun onAttachmentDownload(
         path: String,
     ): FirestoreResponseUseCase

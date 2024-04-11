@@ -24,6 +24,7 @@ class TasksRepositoryImpl @Inject constructor(
                 .get()
                 .await()
                 .toObjects(Task::class.java)
+                .sortedByDescending { it.priority }
         } catch (e: FirebaseFirestoreException) {
             Log.e("TasksRepository", "Error querying tasks", e)
             emptyList()
