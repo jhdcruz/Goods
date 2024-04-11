@@ -50,7 +50,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
 import io.github.jhdcruz.memo.ui.shared.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -74,6 +73,7 @@ fun LoginScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     val authStatus = viewModel.status.collectAsState(initial = "")
 
     // Launch sign in flow on initial start
@@ -202,6 +202,8 @@ fun LoginForm(
     val email = viewModel.email.collectAsState(initial = "")
     val password = viewModel.password.collectAsState(initial = "")
 
+    val authStatus = viewModel.status.collectAsState(initial = "")
+
     Column {
 
         AnimatedVisibility(
@@ -214,7 +216,7 @@ fun LoginForm(
                 onDismissRequest = { notFound.value = false },
                 onConfirmation = {
                     scope.launch {
-                        viewModel.onSignUp(context)
+                        viewModel.onSignUp(context, email.value, password.value)
                     }.job.invokeOnCompletion {
                         notFound.value = false
                     }
@@ -282,7 +284,7 @@ fun LoginForm(
 
                 scope.launch {
                     viewModel.onSignIn(context).apply {
-                        if (value is AuthResponseUseCase.NotFound) {
+                        if (authStatus.value == "User not found") {
                             notFound.value = true
                         }
                     }

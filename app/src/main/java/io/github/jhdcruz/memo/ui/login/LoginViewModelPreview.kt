@@ -16,17 +16,11 @@ class LoginViewModelPreview : LoginViewModel() {
 
     override fun onPasswordChange(password: String) {}
 
-    override fun onSignIn(context: Context): LiveData<AuthResponseUseCase> {
-        return MutableLiveData(null)
-    }
+    override fun onSignIn(context: Context) {}
 
-    override fun onGoogleSignIn(context: Context): LiveData<AuthResponseUseCase> {
-        return MutableLiveData(null)
-    }
+    override fun onGoogleSignIn(context: Context) {}
 
-    override fun onSignUp(context: Context): LiveData<AuthResponseUseCase> {
-        return MutableLiveData(null)
-    }
+    override fun onSignUp(context: Context, email: String, password: String) {}
 
     override fun onSignOut() {}
 }

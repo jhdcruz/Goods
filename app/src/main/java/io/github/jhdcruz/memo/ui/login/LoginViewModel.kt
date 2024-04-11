@@ -14,8 +14,8 @@ abstract class LoginViewModel : ViewModel() {
     abstract fun onEmailChange(email: String)
     abstract fun onPasswordChange(password: String)
 
-    abstract fun onSignIn(context: Context): LiveData<AuthResponseUseCase>
-    abstract fun onGoogleSignIn(context: Context): LiveData<AuthResponseUseCase>
-    abstract fun onSignUp(context: Context): LiveData<AuthResponseUseCase>
+    abstract fun onSignIn(context: Context)
+    abstract fun onGoogleSignIn(context: Context)
+    abstract fun onSignUp(context: Context, email: String, password: String)
     abstract fun onSignOut()
 }

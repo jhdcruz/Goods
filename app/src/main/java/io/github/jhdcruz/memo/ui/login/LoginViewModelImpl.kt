@@ -2,15 +2,12 @@ package io.github.jhdcruz.memo.ui.login
 
 import android.content.Context
 import android.content.Intent
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.data.auth.AuthenticationRepository
 import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -38,60 +35,74 @@ class LoginViewModelImpl @Inject constructor(
         _password.value = password
     }
 
-    override fun onSignIn(context: Context): LiveData<AuthResponseUseCase> {
-        val result = MutableLiveData<AuthResponseUseCase>()
-
+    override fun onSignIn(context: Context) {
         viewModelScope.launch {
-            result.value = async {
-                authenticationRepository.signIn(
-                    context = context,
-                ).also { response ->
-                    if (response is AuthResponseUseCase.Success) {
+            authenticationRepository.signIn(
+                context = context,
+            ).also { response ->
+                when (response) {
+                    is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
-                }
-            }.await()
-        }
 
-        return result
+                    is AuthResponseUseCase.Error -> _status.value =
+                        response.exception.message.toString()
+
+                    is AuthResponseUseCase.Failure -> _status.value =
+                        response.exception.message.toString()
+
+                    is AuthResponseUseCase.NotFound -> _status.value = "User not found"
+                    else -> {}
+                }
+            }
+        }
     }
 
-    override fun onGoogleSignIn(context: Context): LiveData<AuthResponseUseCase> {
-        val result = MutableLiveData<AuthResponseUseCase>()
-
+    override fun onGoogleSignIn(context: Context) {
         viewModelScope.launch {
-            result.value = async {
-                authenticationRepository.googleSignIn(
-                    context = context,
-                ).also { response ->
-                    if (response is AuthResponseUseCase.Success) {
+            authenticationRepository.googleSignIn(
+                context = context,
+            ).also { response ->
+                when (response) {
+                    is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
-                }
-            }.await()
-        }
 
-        return result
+                    is AuthResponseUseCase.Error -> _status.value =
+                        response.exception.message.toString()
+
+                    is AuthResponseUseCase.Failure -> _status.value =
+                        response.exception.message.toString()
+
+                    is AuthResponseUseCase.NotFound -> _status.value = "User not found"
+                    else -> {}
+                }
+            }
+        }
     }
 
-    override fun onSignUp(context: Context): LiveData<AuthResponseUseCase> {
-        val result = MutableLiveData<AuthResponseUseCase>()
-
+    override fun onSignUp(context: Context, email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            result.value = async {
-                authenticationRepository.signUp(
-                    context = context,
-                    email = _email.value,
-                    password = _password.value
-                ).also { response ->
-                    if (response is AuthResponseUseCase.Success) {
+            authenticationRepository.signUp(
+                context = context,
+                email = email,
+                password = password,
+            ).also { response ->
+                when (response) {
+                    is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
-                }
-            }.await()
-        }
 
-        return result
+                    is AuthResponseUseCase.Error -> _status.value =
+                        response.exception.message.toString()
+
+                    is AuthResponseUseCase.Failure -> _status.value =
+                        response.exception.message.toString()
+
+                    else -> {}
+                }
+            }
+        }
     }
 
     override fun onSignOut() {
@@ -101,9 +112,11 @@ class LoginViewModelImpl @Inject constructor(
     }
 
     private fun navigateToMain(context: Context) {
-        Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            context.startActivity(this)
+        viewModelScope.launch {
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(this)
+            }
         }
     }
 }
