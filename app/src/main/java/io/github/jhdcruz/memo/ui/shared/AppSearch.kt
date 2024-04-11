@@ -128,7 +128,6 @@ fun AppSearch(
                         contentDescription = "Profile icon",
                         placeholder = painterResource(id = R.drawable.baseline_user_circle_24),
                         error = painterResource(id = R.drawable.baseline_user_circle_24),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     )
 
                     DropdownMenu(
