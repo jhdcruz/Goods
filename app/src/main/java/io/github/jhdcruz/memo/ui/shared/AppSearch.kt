@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +40,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.login.LoginViewModel
+import io.github.jhdcruz.memo.ui.login.LoginViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
@@ -45,12 +53,15 @@ import kotlinx.coroutines.launch
 fun AppSearch(
     modifier: Modifier = Modifier,
     navController: NavController,
-    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
     drawerState: DrawerState,
     profile: String? = null,
+    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    loginViewModel: LoginViewModel = hiltViewModel<LoginViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
     val query = tasksViewModel.query.collectAsState(initial = "").value
+
+    var showProfileMenu by remember { mutableStateOf(false) }
 
     val voiceSearch =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
@@ -108,7 +119,7 @@ fun AppSearch(
                         contentDescription = "Search tasks using voice input"
                     )
                 }
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { showProfileMenu = true }) {
                     AsyncImage(
                         modifier = Modifier
                             .size(32.dp)
@@ -117,7 +128,18 @@ fun AppSearch(
                         contentDescription = "Profile icon",
                         placeholder = painterResource(id = R.drawable.baseline_user_circle_24),
                         error = painterResource(id = R.drawable.baseline_user_circle_24),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     )
+
+                    DropdownMenu(
+                        expanded = showProfileMenu,
+                        onDismissRequest = { showProfileMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Sign out") },
+                            onClick = { loginViewModel.onSignOut() }
+                        )
+                    }
                 }
             }
         },

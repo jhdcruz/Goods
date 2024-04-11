@@ -202,6 +202,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun signOut() {
+        auth.signOut()
+    }
+
     private suspend fun handleSignIn(credential: Credential): AuthResponseUseCase {
         // handle authentication based on selected credential
         return when (credential) {

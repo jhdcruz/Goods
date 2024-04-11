@@ -14,4 +14,5 @@ interface AuthenticationRepository {
 
     suspend fun signIn(context: Context): AuthResponseUseCase
     suspend fun signUp(context: Context, email: String, password: String): AuthResponseUseCase
+    suspend fun signOut()
 }
