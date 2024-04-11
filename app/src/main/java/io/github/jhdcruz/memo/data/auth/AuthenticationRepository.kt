@@ -6,10 +6,12 @@ import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 
 interface AuthenticationRepository {
+    suspend fun getUser(): FirebaseUser?
+    suspend fun saveUser(user: FirebaseUser): FirestoreResponseUseCase
+
     suspend fun passwordSignIn(email: String, password: String): AuthResponseUseCase
     suspend fun googleSignIn(context: Context): AuthResponseUseCase
 
     suspend fun signIn(context: Context): AuthResponseUseCase
     suspend fun signUp(context: Context, email: String, password: String): AuthResponseUseCase
-    suspend fun saveUser(user: FirebaseUser): FirestoreResponseUseCase
 }

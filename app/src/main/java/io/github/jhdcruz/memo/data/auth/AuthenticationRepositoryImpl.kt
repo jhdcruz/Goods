@@ -41,6 +41,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
     private val nonceSize = 32
 
+    override suspend fun getUser(): FirebaseUser? {
+        return auth.currentUser
+    }
+
     /**
      * Save user data to database,
      * also used for updating user data
