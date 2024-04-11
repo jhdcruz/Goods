@@ -4,8 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -46,9 +47,8 @@ fun Sidebar(
     var selected by remember { mutableIntStateOf(0) }
     var categories by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(drawerState.isOpen) {
         categories = tasksViewModel.onGetCategories()
-
     }
 
     Scaffold(
@@ -125,6 +125,16 @@ fun Sidebar(
                 text = "Categories",
                 modifier = Modifier.padding(16.dp),
             )
+
+
+            // loading state
+            if (drawerState.isOpen && categories.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(16.dp)
+                )
+            }
 
             LazyColumn {
                 itemsIndexed(categories) { index, category ->

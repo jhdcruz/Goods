@@ -32,6 +32,9 @@ class TasksViewModelImpl @Inject constructor(
     private val _query = MutableStateFlow("")
     override val query: Flow<String> = _query
 
+    private val _isFetchingTasks = MutableStateFlow(false)
+    override val isFetchingTasks: Flow<Boolean> = _isFetchingTasks
+
     private val _taskList = MutableStateFlow<List<Task>>(emptyList())
     override val taskList: Flow<List<Task>> = _taskList
 
@@ -67,7 +70,6 @@ class TasksViewModelImpl @Inject constructor(
     private val _taskSelectedMinute = MutableStateFlow<Int?>(null)
     override val taskSelectedMinute: Flow<Int?> = _taskSelectedMinute
 
-
     private val _taskPriority = MutableStateFlow(0)
     override val taskPriority: Flow<Int> = _taskPriority
 
@@ -95,7 +97,9 @@ class TasksViewModelImpl @Inject constructor(
     }
 
     override suspend fun onGetTasks() {
+        _isFetchingTasks.value = true
         _taskList.value = tasksRepository.onGetTasks()
+        _isFetchingTasks.value = false
     }
 
     override suspend fun onSearch() {
@@ -103,47 +107,49 @@ class TasksViewModelImpl @Inject constructor(
         onTaskListChange(taskList)
     }
 
-    override suspend fun onTaskAdd(task: Task): String {
-        val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
-        val taskId = taskJob.result as String
+    override suspend fun onTaskAdd(task: Task) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
+            val taskId = taskJob.result as String
 
-        // query task
-        val newTask = tasksRepository.onGetTask(taskId)
+            // upload local filesS
+            if (_taskLocalAttachments.value.isNotEmpty()) {
+                onAttachmentsUpload(taskId, _taskLocalAttachments.value)
+            }
 
-        // append to taskList
-        _taskList.value = _taskList.value.toMutableList().apply {
-            add(newTask)
+            onClearInput()
+            onGetTasks()
         }
-
-        return taskId
     }
 
     override suspend fun onTaskUpdate(id: String, task: Task) {
-        viewModelScope.launch {
-            _taskList.value.toMutableList().apply {
-                val index = indexOfFirst { it.id == id }
-                set(index, task)
+        viewModelScope.launch(Dispatchers.IO) {
+            tasksRepository.onTaskUpdate(id, task)
+
+            // upload local filesS
+            if (_taskLocalAttachments.value.isNotEmpty()) {
+                onAttachmentsUpload(id, _taskLocalAttachments.value)
             }
 
-            tasksRepository.onTaskUpdate(id, task)
+            onClearInput()
+            onGetTasks()
         }
     }
 
     override suspend fun onTaskDelete(id: String) {
-        viewModelScope.launch {
-            _taskList.value = _taskList.value.toMutableList().apply {
-                removeIf { it.id == id }
-            }
-
+        viewModelScope.launch(Dispatchers.IO) {
             tasksRepository.onTaskDelete(id)
+            attachmentsRepository.onAttachmentDeleteAll(id)
+            onGetTasks()
         }
     }
 
     override suspend fun onTaskCompleted(id: String) {
-        viewModelScope.launch {
-            // update task status for AnimatedVisibility
-            _taskList.value.firstOrNull { it.id == id }?.let {
-                tasksRepository.onTaskUpdate(id, it.copy(isCompleted = true))
+        viewModelScope.launch(Dispatchers.IO) {
+            // update local task for AnimatedVisibility
+            _taskList.value = _taskList.value.toMutableList().apply {
+                val index = indexOfFirst { it.id == id }
+                set(index, get(index).copy(isCompleted = true))
             }
 
             // remove from the list
@@ -202,6 +208,10 @@ class TasksViewModelImpl @Inject constructor(
 
     override suspend fun onGetTags(): List<String> {
         return tasksRepository.onGetTags()
+    }
+
+    override fun onIsFetchingTasksChange(isFetching: Boolean) {
+        _isFetchingTasks.value = isFetching
     }
 
     override fun onQueryChange(query: String) {

@@ -182,12 +182,9 @@ private fun TaskDetailsContent(
                         sheetState.hide()
                         keyboardController?.hide()
 
-                        var id: String =
-                            if (taskId.value?.isNotEmpty() == true) taskId.value!! else ""
-
                         if (task == null) {
                             // add new task
-                            id = tasksViewModel.onTaskAdd(
+                            tasksViewModel.onTaskAdd(
                                 Task(
                                     priority = taskPriority.value,
                                     dueDate = taskDueDate.value,
@@ -202,6 +199,7 @@ private fun TaskDetailsContent(
                             tasksViewModel.onTaskUpdate(
                                 taskId.value!!,
                                 Task(
+                                    id = taskId.value,
                                     priority = taskPriority.value,
                                     dueDate = taskDueDate.value,
                                     title = taskTitle.value,
@@ -212,19 +210,10 @@ private fun TaskDetailsContent(
                                     updated = Timestamp.now()
                                 )
                             )
-
                         }
 
-                        // upload local files
-                        if (taskLocalAttachments.value.isNotEmpty()) {
-                            tasksViewModel.onAttachmentsUpload(
-                                id = id,
-                                attachments = taskLocalAttachments.value
-                            )
-                        }
-                        // reset values
+                        // reset selected files
                         fileUris.value = emptyList()
-                        tasksViewModel.onClearInput()
                     }
                 }) {
                 Image(

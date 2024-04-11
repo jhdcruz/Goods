@@ -16,6 +16,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.dateUntil
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
@@ -77,10 +79,19 @@ private fun TasksListContent(
     val detailsSheetState = rememberModalBottomSheetState()
 
     var showTaskDetails by remember { mutableStateOf(false) }
+    val isFetchingTasks = tasksViewModel.isFetchingTasks.collectAsState(true)
     val taskList = tasksViewModel.taskList.collectAsState(emptyList())
 
     when {
-        taskList.value.isEmpty() -> {
+        isFetchingTasks.value -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+        }
+
+        !isFetchingTasks.value && taskList.value.isEmpty() -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -93,48 +104,60 @@ private fun TasksListContent(
         }
 
         else -> {
+            var selectedTask by remember { mutableStateOf<Task?>(null) }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                itemsIndexed(taskList.value) { _, task ->
-                    AnimatedVisibility(visible = true) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                        ) {
-                            ListItem(
-                                modifier = Modifier.clickable {
-                                    scope.launch {
-                                        showTaskDetails = true
-                                        detailsSheetState.show()
-                                    }
-                                },
-                                overlineContent = {
-                                    if (task.category?.isNotEmpty() == true) {
-                                        Text(text = task.category ?: "Inbox")
-                                    }
-                                },
-                                headlineContent = {
-                                    Text(
-                                        fontWeight = FontWeight.SemiBold,
-                                        text = task.title
-                                    )
-                                },
-                                supportingContent = {
-                                    if (task.description?.isNotBlank() == true) {
-                                        Text(
-                                            text = task.description,
-                                            maxLines = 6,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    }
 
-                                },
-                                leadingContent = {
+                itemsIndexed(taskList.value) { _, task ->
+                    AnimatedVisibility(
+                        modifier = Modifier.wrapContentHeight(),
+                        visible = !task.isCompleted,
+                        label = "Task completion anim"
+                    ) {
+                        ListItem(
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    selectedTask = task
+                                    showTaskDetails = true
+                                    detailsSheetState.show()
+                                }
+                            },
+                            overlineContent = {
+                                Text(
+                                    text = if (task.category?.isNotBlank() == true) {
+                                        task.category
+                                    } else {
+                                        "Inbox"
+                                    }
+                                )
+                            },
+                            headlineContent = {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    fontWeight = FontWeight.SemiBold,
+                                    text = task.title
+                                )
+                            },
+                            supportingContent = {
+                                if (task.description?.isNotBlank() == true) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = task.description,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+
+                            },
+                            leadingContent = {
+                                Box(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    contentAlignment = Alignment.BottomCenter,
+                                ) {
                                     Checkbox(
-                                        modifier = Modifier.fillMaxHeight(),
                                         checked = task.isCompleted,
                                         onCheckedChange = {
                                             scope.launch {
@@ -142,11 +165,15 @@ private fun TasksListContent(
                                             }
                                         }
                                     )
-                                },
-                                trailingContent = {
+                                }
+                            },
+                            trailingContent = {
+                                Box(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    contentAlignment = Alignment.BottomCenter,
+                                ) {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxHeight()
                                             .padding(horizontal = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -178,31 +205,31 @@ private fun TasksListContent(
                                         }
                                     }
                                 }
-                            )
-
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp)
-                            )
-                        }
-                    }
-
-                    // preview task details
-                    if (showTaskDetails) {
-                        TaskDetailsSheet(
-                            task = task,
-                            onDismissRequest = {
-                                scope.launch {
-                                    detailsSheetState.hide()
-                                    tasksViewModel.onClearInput()
-                                    showTaskDetails = false
-                                }
-                            },
-                            sheetState = detailsSheetState,
+                            }
                         )
                     }
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp, horizontal = 16.dp)
+                    )
                 }
+            }
+
+            // preview task details
+            if (showTaskDetails) {
+                TaskDetailsSheet(
+                    task = selectedTask,
+                    tasksViewModel = tasksViewModel,
+                    onDismissRequest = {
+                        scope.launch {
+                            detailsSheetState.hide()
+                            showTaskDetails = false
+                        }
+                    },
+                    sheetState = detailsSheetState,
+                )
             }
         }
     }

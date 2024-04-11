@@ -8,11 +8,12 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.model.TaskAttachment
-import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
 import kotlinx.coroutines.flow.Flow
 
 abstract class TasksViewModel : ViewModel() {
     abstract val query: Flow<String>
+
+    abstract val isFetchingTasks: Flow<Boolean>
     abstract val taskList: Flow<List<Task>>
 
     // Populating tasks
@@ -41,7 +42,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract suspend fun onGetTasks()
 
     // tasks operations
-    abstract suspend fun onTaskAdd(task: Task): String
+    abstract suspend fun onTaskAdd(task: Task)
     abstract suspend fun onTaskUpdate(id: String, task: Task)
     abstract suspend fun onTaskDelete(id: String)
     abstract suspend fun onTaskCompleted(id: String)
@@ -68,6 +69,7 @@ abstract class TasksViewModel : ViewModel() {
     abstract suspend fun onGetTags(): List<String>
 
     // input handlers
+    abstract fun onIsFetchingTasksChange(isFetching: Boolean)
     abstract fun onQueryChange(query: String)
     abstract fun onTaskListChange(taskList: List<Task>)
     abstract fun onTagsChange(tags: List<String>)

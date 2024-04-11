@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flowOf
 
 class TasksViewModelPreview : TasksViewModel() {
     override val query = flowOf("Generic Query")
+    override val isFetchingTasks: Flow<Boolean> = flowOf(false)
     override val taskList = flowOf(listOf<Task>())
     override val taskId: Flow<String> = flowOf("Generic ID")
     override val taskTitle = flowOf("Generic Title")
@@ -35,9 +36,7 @@ class TasksViewModelPreview : TasksViewModel() {
     override suspend fun onSearch() {}
     override suspend fun onGetTasks() {}
 
-    override suspend fun onTaskAdd(task: Task): String {
-        return "id"
-    }
+    override suspend fun onTaskAdd(task: Task) {}
 
     override suspend fun onTaskUpdate(id: String, task: Task) {}
 
@@ -73,6 +72,8 @@ class TasksViewModelPreview : TasksViewModel() {
     override suspend fun onGetTags(): List<String> {
         return listOf("Generic Tag")
     }
+
+    override fun onIsFetchingTasksChange(isFetching: Boolean) {}
 
     override fun onQueryChange(query: String) {}
 
