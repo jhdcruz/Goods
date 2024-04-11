@@ -27,8 +27,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
@@ -37,7 +39,7 @@ import kotlinx.coroutines.launch
 fun Sidebar(
     modifier: Modifier = Modifier,
     drawerState: DrawerState,
-    tasksViewModel: TasksViewModel,
+    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
 

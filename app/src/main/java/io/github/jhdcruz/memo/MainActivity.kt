@@ -86,9 +86,7 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState,
                         drawerContent = {
                             ModalDrawerSheet {
-                                Sidebar(
-                                    drawerState = drawerState,
-                                )
+                                Sidebar(drawerState = drawerState)
                             }
                         },
                     ) {
