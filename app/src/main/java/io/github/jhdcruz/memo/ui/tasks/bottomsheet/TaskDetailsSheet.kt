@@ -63,8 +63,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun TaskDetailsSheet(
     modifier: Modifier = Modifier,
-    onDismissRequest: () -> Unit,
     sheetState: SheetState,
+    onDismissRequest: () -> Unit = {},
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
     task: Task? = null,
 ) {

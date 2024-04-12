@@ -125,7 +125,7 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
             if (sheetState.isVisible) {
                 TaskDetailsSheet(
                     tasksViewModel = tasksViewModel,
-                    onDismissRequest = {},
+                    onDismissRequest = { selectedTask = null },
                     sheetState = sheetState,
                     task = selectedTask!!
                 )
