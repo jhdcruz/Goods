@@ -1,6 +1,7 @@
 package io.github.jhdcruz.memo.ui.shared
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +12,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -19,13 +21,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,10 +49,10 @@ fun Sidebar(
 ) {
     val scope = rememberCoroutineScope()
 
-    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
+    val categories = tasksViewModel.categories.collectAsState(initial = listOf("loading"))
     var selected by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(drawerState.isOpen) {
+    LaunchedEffect(drawerState.isOpen, categories.value) {
         tasksViewModel.onGetCategories()
     }
 
@@ -128,35 +133,90 @@ fun Sidebar(
 
 
             // loading state
-            if (drawerState.isOpen && categories.value.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(16.dp)
-                )
+            when {
+                drawerState.isOpen && categories.value.contains("loading") ->
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(16.dp)
+                    )
+
+                drawerState.isOpen && categories.value.isEmpty() ->
+                    EmptyCategory(tasksViewModel = tasksViewModel)
+
+                else ->
+                    LazyColumn {
+                        itemsIndexed(categories.value) { index, category ->
+                            NavigationDrawerItem(
+                                label = { Text(text = category) },
+                                icon = {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.baseline_folder_24),
+                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                                        contentDescription = null
+                                    )
+                                },
+                                // +3 because there are 3 items above the categories
+                                selected = selected == index + 3,
+                                onClick = {
+                                    scope.launch {
+                                        selected = index + 3
+                                        drawerState.close()
+                                    }
+                                }
+                            )
+                        }
+                    }
             }
 
-            LazyColumn {
-                itemsIndexed(categories.value) { index, category ->
-                    NavigationDrawerItem(
-                        label = { Text(text = category) },
-                        icon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_folder_24),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
-                                contentDescription = null
-                            )
-                        },
-                        // +3 because there are 3 items above the categories
-                        selected = selected == index + 3,
-                        onClick = {
-                            scope.launch {
-                                selected = index + 3
-                                drawerState.close()
-                            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyCategory(
+    tasksViewModel: TasksViewModel,
+) {
+    val scope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier.padding(vertical = 8.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        var showCategoryDialog by remember { mutableStateOf(false) }
+        val newCategory = remember { mutableStateOf("") }
+
+        Column {
+            Text(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = "No categories",
+                modifier = Modifier.padding(16.dp)
+            )
+
+            if (showCategoryDialog) {
+                ConfirmDialog(
+                    onDismissRequest = { showCategoryDialog = false },
+                    onConfirmation = {
+                        scope.launch {
+                            tasksViewModel.onCategoryAdd(newCategory.value)
+                            showCategoryDialog = false
                         }
-                    )
-                }
+                    },
+                    dialogTitle = {
+                        Text(text = "Add new category")
+                    },
+                    dialogContent = {
+                        OutlinedTextField(
+                            value = newCategory.value,
+                            onValueChange = { newCategory.value = it })
+                    },
+                    icon = {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_folder_24),
+                            contentDescription = null
+                        )
+                    }
+                )
             }
         }
     }
