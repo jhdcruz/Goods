@@ -53,19 +53,21 @@ import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
-
+/**
+ * Icon button for use with the bottom sheet task detail panel
+ * which shows dialog for complete tags list, and input for adding one.
+ */
 @Composable
 fun TagsButton(
     modifier: Modifier = Modifier,
-    viewModel: TasksViewModel,
+    tasksViewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
 
-    val tags = viewModel.tags.collectAsState(initial = emptyList())
-    val taskTags = viewModel.taskTags.collectAsState(initial = emptyList())
+    val tags = tasksViewModel.tags.collectAsState(initial = emptyList())
+    val taskTags = tasksViewModel.taskTags.collectAsState(initial = emptyList())
 
     var showTagsDialog by remember { mutableStateOf(false) }
-    var newTag by remember { mutableStateOf("") }
 
     val buttonIcon = if (taskTags.value.isEmpty()) {
         R.drawable.baseline_label_24
@@ -79,7 +81,7 @@ fun TagsButton(
             showTagsDialog = true
 
             scope.launch {
-                viewModel.onGetTags()
+                tasksViewModel.onGetTags()
             }
         }
     ) {
@@ -105,147 +107,133 @@ fun TagsButton(
         }
     }
 
-
     if (showTagsDialog) {
         var selectedTag by remember { mutableStateOf(taskTags.value) }
 
-        PickerDialog(
-            title = { Text(text = "Assign tags for this task") },
+        TagSelectionDialog(
+            tasksViewModel = tasksViewModel,
             onDismissRequest = { showTagsDialog = false },
-            buttons = {
-                TextButton(
-                    onClick = {
-                        showTagsDialog = false
-                    }
-                ) {
-                    Text(text = "Cancel")
+            onConfirm = {
+                scope.launch {
+                    tasksViewModel.onTagsChange(selectedTag)
+                    showTagsDialog = false
                 }
-
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            viewModel.onTagsChange(selectedTag)
-                            showTagsDialog = false
-                        }
+            },
+            tags = tags.value,
+            selectedTags = selectedTag,
+            onTagSelected = { tag ->
+                scope.launch {
+                    selectedTag = if (selectedTag.contains(tag)) {
+                        selectedTag - tag
+                    } else {
+                        selectedTag + tag
                     }
-                ) {
-                    Text(text = "Confirm")
                 }
             }
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        modifier = Modifier.height(64.dp),
-                        value = newTag,
-                        onValueChange = {
-                            // limit length
-                            if (it.length <= 20) {
-                                newTag = it
-                            }
-                        },
-                        placeholder = { Text(text = "Create new tag") },
-                        singleLine = true,
-                        trailingIcon = {
-                            FilledIconButton(
-                                modifier = Modifier.padding(horizontal = 6.dp),
-                                onClick = {
-                                    scope.launch {
-                                        viewModel.onTagAdd(newTag)
+        )
+    }
+}
 
-                                        val appendedTag = listOf(newTag) + tags.value
-                                        // append manually to avoid calling onGetTags again
-                                        viewModel.onLocalTagsChange(appendedTag)
-                                        newTag = ""
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Create new tag"
-                                )
-                            }
-                        }
-                    )
+@Composable
+private fun TagSelectionDialog(
+    tasksViewModel: TasksViewModel,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+    tags: List<String>,
+    selectedTags: List<String>,
+    onTagSelected: (String) -> Unit,
+) {
+    PickerDialog(
+        title = { Text(text = "Assign tags for this task") },
+        onDismissRequest = onDismissRequest,
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "Cancel")
+            }
+
+            TextButton(onClick = onConfirm) {
+                Text(text = "Confirm")
+            }
+        }
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            TagInputField(tasksViewModel = tasksViewModel)
+            HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
+            TagList(tags = tags, selectedTags = selectedTags, onTagSelected = onTagSelected)
+        }
+    }
+}
+
+@Composable
+private fun TagInputField(
+    tasksViewModel: TasksViewModel,
+) {
+    val scope = rememberCoroutineScope()
+    val tags = tasksViewModel.tags.collectAsState(initial = emptyList())
+
+    var newTag by remember { mutableStateOf("") }
+    OutlinedTextField(
+        modifier = Modifier.height(64.dp),
+        value = newTag,
+        onValueChange = {
+            // limit length
+            if (it.length <= 20) {
+                newTag = it
+            }
+        },
+        placeholder = { Text(text = "Create new tag") },
+        singleLine = true,
+        trailingIcon = {
+            FilledIconButton(
+                modifier = Modifier.padding(horizontal = 6.dp),
+                onClick = {
+                    scope.launch {
+                        tasksViewModel.onTagAdd(newTag)
+
+                        val appendedTag = listOf(newTag) + tags.value
+                        // append manually to avoid calling onGetTags again
+                        tasksViewModel.onLocalTagsChange(appendedTag)
+                        newTag = ""
+                    }
                 }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Create new tag"
+                )
+            }
+        }
+    )
+}
 
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
-
-                when {
-                    tags.value.contains("loading") -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                    }
-
-                    tags.value.isEmpty() -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            Text(text = "No tags created yet.")
-                        }
-                    }
-
-                    else -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 320.dp)
-                        ) {
-                            // I dunno LazyRow doesn't work here, intrinsic size error blah-blah-blah
-                            Column(
-                                modifier = Modifier
-                                    .verticalScroll(ScrollState(0))
-                                    .selectableGroup()
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                tags.value.forEach { tag ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(48.dp)
-                                            .toggleable(
-                                                role = Role.Checkbox,
-                                                value = selectedTag.contains(tag),
-                                                onValueChange = {
-                                                    scope.launch {
-                                                        // selection/deselection of tags
-                                                        selectedTag =
-                                                            if (selectedTag.contains(tag)) {
-                                                                selectedTag - tag
-                                                            } else {
-                                                                selectedTag + tag
-                                                            }
-                                                    }
-                                                },
-                                            ), verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Checkbox(
-                                            checked = selectedTag.contains(tag),
-                                            onCheckedChange = null
-                                        )
-                                        Text(
-                                            text = tag,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
+@Composable
+private fun TagList(
+    tags: List<String>,
+    selectedTags: List<String>,
+    onTagSelected: (String) -> Unit,
+) {
+    when {
+        tags.contains("loading") -> LoadingState()
+        tags.isEmpty() -> EmptyState()
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 320.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(ScrollState(0))
+                        .selectableGroup()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    tags.forEach { tag ->
+                        TagRow(
+                            tag = tag,
+                            isSelected = selectedTags.contains(tag),
+                            onTagSelected = onTagSelected
+                        )
                     }
                 }
             }
@@ -254,11 +242,62 @@ fun TagsButton(
 }
 
 @Composable
+private fun TagRow(tag: String, isSelected: Boolean, onTagSelected: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .toggleable(
+                role = Role.Checkbox,
+                value = isSelected,
+                onValueChange = { onTagSelected(tag) }
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = isSelected,
+            onCheckedChange = null
+        )
+        Text(
+            text = tag,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(40.dp)
+        )
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        Text(text = "No tags created yet")
+    }
+}
+
+
+@Composable
 @Preview(showBackground = true)
 private fun TagsButtonPreview() {
     val previewViewModel = TasksViewModelPreview()
 
     MemoTheme {
-        TagsButton(viewModel = previewViewModel)
+        TagsButton(tasksViewModel = previewViewModel)
     }
 }

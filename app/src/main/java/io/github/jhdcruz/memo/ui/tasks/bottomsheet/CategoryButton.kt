@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,19 +44,17 @@ import io.github.jhdcruz.memo.ui.shared.PickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryButton(
     modifier: Modifier = Modifier,
-    viewModel: TasksViewModel,
+    tasksViewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
 
-    val categories = viewModel.categories.collectAsState(initial = emptyList())
-    val taskCategory = viewModel.taskCategory.collectAsState(initial = "")
+    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
+    val taskCategory = tasksViewModel.taskCategory.collectAsState(initial = "")
 
     var showCategoryDialog by remember { mutableStateOf(false) }
-    var newCategory by remember { mutableStateOf("") }
 
     val buttonIcon = if (taskCategory.value.isEmpty()) {
         R.drawable.baseline_folder_24
@@ -71,7 +68,7 @@ fun CategoryButton(
             showCategoryDialog = true
 
             scope.launch {
-                viewModel.onGetCategories()
+                tasksViewModel.onGetCategories()
             }
         }
     ) {
@@ -85,136 +82,187 @@ fun CategoryButton(
     if (showCategoryDialog) {
         var selectedCategory by remember { mutableStateOf(taskCategory.value) }
 
-        PickerDialog(
-            title = { Text(text = "Assign category for this task") },
+        CategorySelectionDialog(
+            tasksViewModel = tasksViewModel,
             onDismissRequest = { showCategoryDialog = false },
-            buttons = {
-                TextButton(
-                    onClick = { showCategoryDialog = false }
-                ) {
-                    Text(text = "Cancel")
+            onConfirm = {
+                scope.launch {
+                    tasksViewModel.onCategoryChange(selectedCategory)
+                    showCategoryDialog = false
                 }
-
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            viewModel.onCategoryChange(selectedCategory)
-                            showCategoryDialog = false
-                        }
-                    }
-                ) {
-                    Text(text = "Confirm")
+            },
+            categories = categories.value,
+            selectedCategory = selectedCategory,
+            onCategorySelected = { category ->
+                scope.launch {
+                    selectedCategory = category
                 }
             }
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        modifier = Modifier.height(64.dp),
-                        value = newCategory,
-                        onValueChange = {
-                            // limit length
-                            if (it.length <= 20) {
-                                newCategory = it
-                            }
-                        },
-                        placeholder = { Text(text = "Create new category") },
-                        singleLine = true,
-                        trailingIcon = {
-                            FilledIconButton(
-                                modifier = Modifier.padding(horizontal = 6.dp),
-                                onClick = {
-                                    scope.launch {
-                                        viewModel.onCategoryAdd(newCategory)
+        )
+    }
+}
 
-                                        val appendedCategory =
-                                            listOf(newCategory) + categories.value
-                                        viewModel.onLocalCategoryChange(appendedCategory)
-                                        newCategory = ""
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Create new tag"
-                                )
-                            }
-                        }
-                    )
+@Composable
+fun CategorySelectionDialog(
+    tasksViewModel: TasksViewModel,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+    categories: List<String>,
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit,
+) {
+    PickerDialog(
+        title = { Text(text = "Assign category for this task") },
+        onDismissRequest = onDismissRequest,
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "Cancel")
+            }
+
+            TextButton(onClick = onConfirm) {
+                Text(text = "Confirm")
+            }
+        }
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CategoryInputField(tasksViewModel = tasksViewModel)
+            HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
+            CategoryList(
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = onCategorySelected
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryInputField(
+    tasksViewModel: TasksViewModel,
+) {
+    val scope = rememberCoroutineScope()
+    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
+
+    var newCategory by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        modifier = Modifier.height(64.dp),
+        value = newCategory,
+        onValueChange = {
+            // limit length
+            if (it.length <= 20) {
+                newCategory = it
+            }
+        },
+        placeholder = { Text(text = "Create new tag") },
+        singleLine = true,
+        trailingIcon = {
+            FilledIconButton(
+                modifier = Modifier.padding(horizontal = 6.dp),
+                onClick = {
+                    scope.launch {
+                        tasksViewModel.onCategoryAdd(newCategory)
+
+                        val appendedTag = listOf(newCategory) + categories.value
+                        // append manually to avoid calling onGetTags again
+                        tasksViewModel.onLocalCategoryChange(appendedTag)
+                        newCategory = ""
+                    }
                 }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Create new category"
+                )
+            }
+        }
+    )
+}
 
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
-
-                when {
-                    categories.value.contains("loading") -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                    }
-
-                    categories.value.isEmpty() -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            Text(text = "No categories created yet.")
-                        }
-                    }
-
-                    else -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 320.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .verticalScroll(ScrollState(0))
-                                    .selectableGroup()
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                categories.value.forEach { category ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(48.dp)
-                                            .selectable(
-                                                selected = selectedCategory == category,
-                                                onClick = {
-                                                    scope.launch {
-                                                        selectedCategory = category
-                                                    }
-                                                }
-                                            ),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        RadioButton(
-                                            selected = selectedCategory == category,
-                                            onClick = null
-                                        )
-                                        Text(
-                                            text = category,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+@Composable
+private fun CategoryList(
+    categories: List<String>,
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit,
+) {
+    when {
+        categories.contains("loading") -> LoadingState()
+        categories.isEmpty() -> EmptyState()
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 320.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(ScrollState(0))
+                        .selectableGroup()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    categories.forEach { category ->
+                        CategoryRow(
+                            category = category,
+                            isSelected = selectedCategory == category,
+                            onCategorySelected = onCategorySelected
+                        )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CategoryRow(
+    category: String,
+    isSelected: Boolean,
+    onCategorySelected: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .selectable(
+                selected = isSelected,
+                onClick = { onCategorySelected(category) }
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null
+        )
+        Text(
+            text = category,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(40.dp)
+        )
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        Text(text = "No categories created yet.")
     }
 }

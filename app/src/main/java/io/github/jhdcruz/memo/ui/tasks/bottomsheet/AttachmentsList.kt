@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.data.model.TaskAttachment
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 
@@ -36,13 +38,10 @@ fun AttachmentsList(
     tasksViewModel: TasksViewModel,
     localFiles: List<Uri>?,
 ) {
-    val scope = rememberCoroutineScope()
-
     val appContext = LocalContext.current.applicationContext
     val contentResolver = appContext.contentResolver
 
     // for existing tasks
-    val taskId = tasksViewModel.taskId.collectAsState(null)
     val taskAttachments = tasksViewModel.taskAttachments.collectAsState(null)
 
     val selectedAttachments = remember { mutableStateListOf<Pair<String, Uri>>() }
@@ -77,101 +76,128 @@ fun AttachmentsList(
     LazyRow {
         // for local files to be uploaded
         items(taskLocalAttachments.value) { attachment ->
-            InputChip(
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 4.dp)
-                    .width(140.dp)
-                    .height(32.dp),
-                selected = false,
-                label = {
-                    // add ellipsis on text on overflow
-                    Text(
-                        text = attachment.first,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                avatar = {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_cloud_upload_24),
-                        contentDescription = "File yet to be uploaded",
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    )
-                },
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            selectedAttachments.remove(attachment)
-                            tasksViewModel.onTaskLocalAttachmentsChange(selectedAttachments)
-                        }) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Remove attachment"
-                        )
-                    }
-                },
-                onClick = {
-                    // Preview file
-                    scope.launch {
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(
-                                attachment.second,
-                                contentResolver.getType(attachment.second)
-                            )
-                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        }
-                        appContext.startActivity(intent)
-                    }
-                },
-            )
+            AttachmentSelected(tasksViewModel, selectedAttachments, attachment)
         }
 
         if (taskAttachments.value?.entries?.isNotEmpty() == true) {
             items(taskAttachments.value!!.entries.toList()) { attachment ->
-                val file = attachment.value
-
-                InputChip(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp, horizontal = 4.dp)
-                        .width(140.dp)
-                        .height(32.dp),
-                    selected = false,
-                    label = {
-                        // add ellipsis on text on overflow
-                        Text(
-                            text = file.name,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    tasksViewModel.removeTaskAttachment(
-                                        taskId = taskId.value!!,
-                                        filename = file.name,
-                                        originalAttachments = taskAttachments.value!!
-                                    )
-                                }
-                            }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Remove attachment"
-                            )
-                        }
-                    },
-                    onClick = {
-                        scope.launch {
-                            // Open the URL link
-                            val intent = Intent(Intent.ACTION_VIEW).apply {
-                                data = Uri.parse(file.downloadUrl)
-                            }
-                            appContext.startActivity(intent)
-                        }
-                    },
-                )
+                AttachmentUploaded(tasksViewModel, attachment)
             }
         }
     }
+}
+
+@Composable
+private fun AttachmentSelected(
+    tasksViewModel: TasksViewModel,
+    selectedAttachments: SnapshotStateList<Pair<String, Uri>>,
+    attachment: Pair<String, Uri>,
+) {
+    val scope = rememberCoroutineScope()
+    val appContext = LocalContext.current.applicationContext
+    val contentResolver = appContext.contentResolver
+
+    InputChip(
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+            .width(140.dp)
+            .height(32.dp),
+        selected = false,
+        label = {
+            // add ellipsis on text on overflow
+            Text(
+                text = attachment.first,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        avatar = {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_cloud_upload_24),
+                contentDescription = "File yet to be uploaded",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    selectedAttachments.remove(attachment)
+                    tasksViewModel.onTaskLocalAttachmentsChange(selectedAttachments)
+                }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Remove attachment"
+                )
+            }
+        },
+        onClick = {
+            // Preview file
+            scope.launch {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(
+                        attachment.second,
+                        contentResolver.getType(attachment.second)
+                    )
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                appContext.startActivity(intent)
+            }
+        },
+    )
+}
+
+@Composable
+private fun AttachmentUploaded(
+    tasksViewModel: TasksViewModel,
+    attachment: Map.Entry<String, TaskAttachment>,
+) {
+    val scope = rememberCoroutineScope()
+    val appContext = LocalContext.current.applicationContext
+
+    val taskId = tasksViewModel.taskId.collectAsState(null)
+    val taskAttachments = tasksViewModel.taskAttachments.collectAsState(null)
+
+    val file = attachment.value
+
+    InputChip(
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+            .width(140.dp)
+            .height(32.dp),
+        selected = false,
+        label = {
+            // add ellipsis on text on overflow
+            Text(
+                text = file.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        tasksViewModel.removeTaskAttachment(
+                            taskId = taskId.value!!,
+                            filename = file.name,
+                            originalAttachments = taskAttachments.value!!
+                        )
+                    }
+                }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Remove attachment"
+                )
+            }
+        },
+        onClick = {
+            scope.launch {
+                // Open the URL link
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(file.downloadUrl)
+                }
+                appContext.startActivity(intent)
+            }
+        },
+    )
 }

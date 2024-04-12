@@ -271,7 +271,7 @@ private fun TaskDetailsContent(
                 tasksViewModel = tasksViewModel
             )
 
-            CategoryButton(viewModel = tasksViewModel)
+            CategoryButton(tasksViewModel = tasksViewModel)
 
             DueDatePicker(
                 tasksViewModel = tasksViewModel,
@@ -294,7 +294,7 @@ private fun TaskDetailsContent(
             // space-between
             Spacer(modifier = Modifier.weight(1F))
 
-            TagsButton(viewModel = tasksViewModel)
+            TagsButton(tasksViewModel = tasksViewModel)
         }
     }
 }

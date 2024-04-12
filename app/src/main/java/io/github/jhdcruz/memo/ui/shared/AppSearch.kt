@@ -52,7 +52,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppSearch(
     modifier: Modifier = Modifier,
-    navController: NavController,
     drawerState: DrawerState,
     profile: String? = null,
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
@@ -156,12 +155,10 @@ fun AppSearch(
 @Preview
 @Composable
 private fun AppSearchPreview() {
-    val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     MemoTheme {
         AppSearch(
-            navController = navController,
             tasksViewModel = TasksViewModelPreview(),
             drawerState = drawerState,
         )

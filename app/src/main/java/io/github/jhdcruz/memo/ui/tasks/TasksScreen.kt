@@ -86,145 +86,33 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
     LaunchedEffect(isFetchingTasks.value) {
         if (isFetchingTasks.value) {
             tasksViewModel.onGetTasks()
-
-            // for some reason, sheet shows up after adding/updating
             sheetState.hide()
             selectedTask = null
         }
     }
 
     when {
-        isFetchingTasks.value -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-        }
-
-        !isFetchingTasks.value && taskList.value.isEmpty() -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No tasks created yet",
-                    color = Color.Gray,
-                )
-            }
-        }
-
+        isFetchingTasks.value -> LoadingState()
+        !isFetchingTasks.value && taskList.value.isEmpty() -> EmptyState()
         else -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 itemsIndexed(taskList.value) { _, task ->
-                    AnimatedVisibility(
-                        modifier = Modifier.wrapContentHeight(),
-                        visible = !task.isCompleted,
-                        label = "Task completion anim"
-                    ) {
-                        ListItem(
-                            modifier = Modifier.clickable {
-                                scope.launch {
-                                    selectedTask = task
-                                    sheetState.show()
-                                }
-                            },
-                            overlineContent = {
-                                Text(
-                                    text = if (task.category?.isNotBlank() == true) {
-                                        task.category
-                                    } else {
-                                        "Inbox"
-                                    }
-                                )
-                            },
-                            headlineContent = {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    fontWeight = FontWeight.SemiBold,
-                                    text = task.title
-                                )
-                            },
-                            supportingContent = {
-                                if (task.description?.isNotBlank() == true) {
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = task.description,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-
-                            },
-                            leadingContent = {
-                                Box(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    contentAlignment = Alignment.BottomCenter,
-                                ) {
-                                    Checkbox(
-                                        checked = task.isCompleted,
-                                        onCheckedChange = {
-                                            scope.launch {
-                                                tasksViewModel.onTaskCompleted(task.id!!)
-                                            }
-                                        }
-                                    )
-                                }
-                            },
-                            trailingContent = {
-                                Box(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    contentAlignment = Alignment.BottomCenter,
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .padding(horizontal = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Image(
-                                            modifier = Modifier.padding(horizontal = 4.dp),
-                                            colorFilter = ColorFilter.tint(
-                                                when (task.priority) {
-                                                    3 -> Color.Red
-                                                    2 -> Color.Yellow
-                                                    1 -> Color.Blue
-                                                    else -> MaterialTheme.colorScheme.onSurface
-                                                }
-                                            ),
-                                            painter = painterResource(
-                                                id = if (task.priority != 0) {
-                                                    R.drawable.baseline_flag_filled_24
-                                                } else {
-                                                    R.drawable.baseline_flag_24
-                                                }
-                                            ),
-                                            contentDescription = "Set task's priority"
-                                        )
-
-                                        if (task.dueDate != null) {
-                                            Text(
-                                                text = task.dueDate.dateUntil(),
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
+                    TaskItem(
+                        task = task,
+                        onTaskClick = {
+                            scope.launch {
+                                selectedTask = it
+                                sheetState.show()
                             }
-                        )
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp, horizontal = 16.dp)
+                        },
+                        onTaskCompleted = { tasksViewModel.onTaskCompleted(it.id!!) }
                     )
                 }
             }
 
-            // preview task details
             if (sheetState.isVisible) {
                 TaskDetailsSheet(
                     tasksViewModel = tasksViewModel,
@@ -234,6 +122,133 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TaskItem(
+    task: Task,
+    onTaskClick: (Task) -> Unit,
+    onTaskCompleted: (Task) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
+    AnimatedVisibility(
+        modifier = Modifier.wrapContentHeight(),
+        visible = !task.isCompleted,
+        label = "Task completion anim"
+    ) {
+        ListItem(
+            modifier = Modifier.clickable { onTaskClick(task) },
+            overlineContent = {
+                Text(
+                    text = task.category ?: "Inbox"
+                )
+            },
+            headlineContent = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.SemiBold,
+                    text = task.title
+                )
+            },
+            supportingContent = {
+                if (task.description?.isNotBlank() == true) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = task.description,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            },
+            leadingContent = {
+                Box(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
+                    Checkbox(
+                        checked = task.isCompleted,
+                        onCheckedChange = {
+                            scope.launch {
+                                onTaskCompleted(task)
+                            }
+                        }
+                    )
+                }
+            },
+            trailingContent = {
+                TaskTrailingContent(task)
+            }
+        )
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp, horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
+private fun TaskTrailingContent(task: Task) {
+    Box(
+        modifier = Modifier.fillMaxHeight(),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                colorFilter = ColorFilter.tint(
+                    when (task.priority) {
+                        3 -> Color.Red
+                        2 -> Color.Yellow
+                        1 -> Color.Blue
+                        else -> MaterialTheme.colorScheme.onSurface
+                    }
+                ),
+                painter = painterResource(
+                    id = if (task.priority != 0) {
+                        R.drawable.baseline_flag_filled_24
+                    } else {
+                        R.drawable.baseline_flag_24
+                    }
+                ),
+                contentDescription = "Set task's priority"
+            )
+
+            if (task.dueDate != null) {
+                Text(
+                    text = task.dueDate.dateUntil(),
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "No tasks created yet",
+            color = Color.Gray,
+        )
     }
 }
 
@@ -247,7 +262,6 @@ private fun TasksScreenPreview() {
         Scaffold(
             topBar = {
                 AppSearch(
-                    navController = navController,
                     tasksViewModel = TasksViewModelPreview(),
                     drawerState = drawerState,
                 )

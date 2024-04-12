@@ -30,7 +30,7 @@ fun Timestamp.toLocalDateTime(): LocalDateTime {
 }
 
 fun Timestamp.format(): String {
-    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
+    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm a")
     return this.toLocalDateTime().format(formatter)
 }
 
