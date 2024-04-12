@@ -3,15 +3,20 @@
 package io.github.jhdcruz.memo.ui.tasks
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Checkbox
@@ -44,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
@@ -58,7 +62,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TasksScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
     Scaffold(
@@ -110,6 +113,12 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
                         },
                         onTaskCompleted = { tasksViewModel.onTaskCompleted(it.id!!) }
                     )
+
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp, horizontal = 16.dp)
+                    )
                 }
             }
 
@@ -136,6 +145,8 @@ private fun TaskItem(
     AnimatedVisibility(
         modifier = Modifier.wrapContentHeight(),
         visible = !task.isCompleted,
+        enter = fadeIn(),
+        exit = fadeOut(),
         label = "Task completion anim"
     ) {
         ListItem(
@@ -199,11 +210,6 @@ private fun TaskItem(
                 TaskTrailingContent(task)
             }
         )
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp, horizontal = 16.dp)
-        )
     }
 }
 
@@ -213,35 +219,52 @@ private fun TaskTrailingContent(task: Task) {
         modifier = Modifier.fillMaxHeight(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.wrapContentSize(),
+            horizontalAlignment = Alignment.End,
         ) {
-            Image(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                colorFilter = ColorFilter.tint(
-                    when (task.priority) {
-                        3 -> Color.Red
-                        2 -> Color.Yellow
-                        1 -> Color.Blue
-                        else -> MaterialTheme.colorScheme.onSurface
-                    }
-                ),
-                painter = painterResource(
-                    id = if (task.priority != 0) {
-                        R.drawable.baseline_flag_filled_24
-                    } else {
-                        R.drawable.baseline_flag_24
-                    }
-                ),
-                contentDescription = "Set task's priority"
-            )
+            // due date & priority
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (task.dueDate != null) {
+                    Text(
+                        text = task.dueDate.dateUntil(),
+                        maxLines = 1
+                    )
+                }
 
-            if (task.dueDate != null) {
-                Text(
-                    text = task.dueDate.dateUntil(),
-                    maxLines = 1
+                Image(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    colorFilter = ColorFilter.tint(
+                        when (task.priority) {
+                            3 -> Color.Red
+                            2 -> Color.Yellow
+                            1 -> Color.Blue
+                            else -> MaterialTheme.colorScheme.onSurface
+                        }
+                    ),
+                    painter = painterResource(
+                        id = if (task.priority != 0) {
+                            R.drawable.baseline_flag_filled_24
+                        } else {
+                            R.drawable.baseline_flag_24
+                        }
+                    ),
+                    contentDescription = "Set task's priority"
+                )
+            }
+
+            if (task.attachments != null) {
+                // attachment indicator
+                Image(
+                    modifier = Modifier.padding(end = 12.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                    painter = painterResource(id = R.drawable.baseline_attach_24),
+                    contentDescription = "This task has ${task.attachments.size} attachment",
                 )
             }
         }
@@ -290,7 +313,6 @@ private fun TasksScreenPreview() {
         ) { innerPadding ->
             TasksScreen(
                 modifier = Modifier.padding(innerPadding),
-                navController = navController,
                 tasksViewModel = TasksViewModelPreview(),
             )
         }
