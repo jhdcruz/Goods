@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -131,9 +132,15 @@ private fun TaskDetailsContent(
                         tasksViewModel.onTaskDelete(taskId.value!!)
                     }
                 },
-                dialogTitle = "Delete task?",
-                dialogText = "This actions is permanent, this task cannot be recovered.",
-                icon = Icons.Outlined.Warning,
+                dialogTitle = {
+                    Text(text = "Delete task?")
+                },
+                dialogContent = {
+                    Text(text = "This actions is permanent, this task cannot be recovered.")
+                },
+                icon = {
+                    Icon(imageVector = Icons.Outlined.Warning, contentDescription = null)
+                },
             )
         }
 
