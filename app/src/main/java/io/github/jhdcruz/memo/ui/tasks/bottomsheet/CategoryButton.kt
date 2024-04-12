@@ -6,18 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,6 +37,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.shared.EmptyState
+import io.github.jhdcruz.memo.ui.shared.LoadingState
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import kotlinx.coroutines.launch
@@ -187,7 +186,7 @@ private fun CategoryList(
 ) {
     when {
         categories.contains("loading") -> LoadingState()
-        categories.isEmpty() -> EmptyState()
+        categories.isEmpty() -> EmptyState("No categories created yet.")
         else -> {
             Box(
                 modifier = Modifier
@@ -238,31 +237,5 @@ private fun CategoryRow(
             text = category,
             modifier = Modifier.padding(start = 8.dp)
         )
-    }
-}
-
-@Composable
-private fun LoadingState() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(40.dp)
-        )
-    }
-}
-
-@Composable
-private fun EmptyState() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        Text(text = "No categories created yet.")
     }
 }
