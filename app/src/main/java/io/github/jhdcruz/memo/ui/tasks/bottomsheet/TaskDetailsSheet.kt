@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -91,6 +92,8 @@ private fun TaskDetailsContent(
     task: Task? = null,
 ) {
     val scope = rememberCoroutineScope()
+
+    val appContext = LocalContext.current.applicationContext
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // Populating tasks
@@ -170,7 +173,7 @@ private fun TaskDetailsContent(
                     modifier = Modifier.weight(1f),
                     onClick = { showDatePicker = true }
                 ) {
-                    Text(text = taskDueDate.value!!.format())
+                    Text(text = taskDueDate.value!!.format(appContext))
                 }
             } else {
                 Spacer(

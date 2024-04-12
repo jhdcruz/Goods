@@ -1,5 +1,7 @@
 package io.github.jhdcruz.memo.domain
 
+import android.content.Context
+import android.text.format.DateFormat
 import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -29,8 +31,16 @@ fun Timestamp.toLocalDateTime(): LocalDateTime {
         .toLocalDateTime()
 }
 
-fun Timestamp.format(): String {
-    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm a")
+fun Timestamp.format(context: Context): String {
+    // check if system uses 24 hour time format
+
+    val is24Hour = DateFormat.is24HourFormat(context)
+    val formatter = if (is24Hour) {
+        DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
+    } else {
+        DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a")
+    }
+
     return this.toLocalDateTime().format(formatter)
 }
 

@@ -2,6 +2,7 @@
 
 package io.github.jhdcruz.memo.ui.tasks.bottomsheet
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.Image
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -21,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.domain.createTimestamp
@@ -143,6 +145,7 @@ fun TaskTimePickerDialog(
     onDismissRequest: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current.applicationContext
 
     val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(null)
     val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)
@@ -155,9 +158,11 @@ fun TaskTimePickerDialog(
         timeInMillis = taskDueDate.value?.toDate()?.time ?: System.currentTimeMillis()
     }.get(Calendar.MINUTE)
 
+    val is24HourFormat = DateFormat.is24HourFormat(context)
     val timeState = rememberTimePickerState(
         initialHour = taskHours,
         initialMinute = taskMinutes,
+        is24Hour = is24HourFormat
     )
 
     TimePickerDialog(

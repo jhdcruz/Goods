@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package io.github.jhdcruz.memo.ui.shared
 
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +46,6 @@ import androidx.compose.ui.window.DialogProperties
 import java.util.Calendar
 
 // https://stackoverflow.com/a/77804191
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
     modifier: Modifier = Modifier,
@@ -52,7 +53,6 @@ fun TimePickerDialog(
     onCancel: () -> Unit,
     onConfirm: (TimePickerState) -> Unit,
 ) {
-
     val time = Calendar.getInstance()
     time.timeInMillis = System.currentTimeMillis()
 
@@ -90,7 +90,6 @@ fun TimePickerDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DisplayModeToggleButton(
     displayMode: DisplayMode,
@@ -120,7 +119,6 @@ private fun DisplayModeToggleButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickerDialog(
     onDismissRequest: () -> Unit,
