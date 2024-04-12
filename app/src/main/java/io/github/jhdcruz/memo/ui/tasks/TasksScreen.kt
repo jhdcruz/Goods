@@ -95,7 +95,7 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
     }
 
     when {
-        isFetchingTasks.value -> LoadingState()
+        isFetchingTasks.value -> LoadingState(isFetchingTasks.value)
         !isFetchingTasks.value && taskList.value.isEmpty() -> EmptyState()
         else -> {
             LazyColumn(
@@ -272,11 +272,13 @@ private fun TaskTrailingContent(task: Task) {
 }
 
 @Composable
-private fun LoadingState() {
+private fun LoadingState(isLoading: Boolean) {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        AnimatedVisibility(visible = isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
 }
 
