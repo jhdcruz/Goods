@@ -62,7 +62,7 @@ class TasksRepositoryImpl @Inject constructor(
             Log.i("TasksRepository", "Tasks search yields ${result.size} results")
             return result
         } catch (e: FirebaseFirestoreException) {
-            Log.i("TasksRepository", "Tasks search yields no results", e)
+            Log.e("TasksRepository", "Error searching tasks", e)
             emptyList()
         }
     }
