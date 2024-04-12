@@ -1,6 +1,7 @@
 package io.github.jhdcruz.memo.ui.shared
 
 import android.app.Activity
+import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,12 +12,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,13 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import io.github.jhdcruz.memo.AuthActivity
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.login.LoginViewModel
 import io.github.jhdcruz.memo.ui.login.LoginViewModelImpl
@@ -58,6 +62,8 @@ fun AppSearch(
     loginViewModel: LoginViewModel = hiltViewModel<LoginViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     val query = tasksViewModel.query.collectAsState(initial = "").value
 
     var showProfileMenu by remember { mutableStateOf(false) }
@@ -135,7 +141,24 @@ fun AppSearch(
                     ) {
                         DropdownMenuItem(
                             text = { Text(text = "Sign out") },
-                            onClick = { loginViewModel.onSignOut() }
+                            onClick = {
+                                scope.launch {
+                                    loginViewModel.onSignOut()
+
+                                    // go back to login activity
+                                    Intent(context, AuthActivity::class.java).apply {
+                                        flags =
+                                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                        context.startActivity(this)
+                                    }
+                                }
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                    contentDescription = null
+                                )
+                            }
                         )
                     }
                 }
