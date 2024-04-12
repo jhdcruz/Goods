@@ -79,7 +79,9 @@ fun TasksScreen(
 @Composable
 private fun TasksListContent(tasksViewModel: TasksViewModel) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     val isFetchingTasks = tasksViewModel.isFetchingTasks.collectAsState(true)
     val taskList = tasksViewModel.taskList.collectAsState(emptyList())

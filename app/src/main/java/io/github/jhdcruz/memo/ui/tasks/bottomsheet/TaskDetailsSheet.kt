@@ -268,8 +268,8 @@ private fun TaskDetailsContent(
             modifier = Modifier.fillMaxWidth(),
             value = taskDescription.value,
             onValueChange = { tasksViewModel.onTaskDescriptionChange(it) },
-            minLines = 10,
-            maxLines = 30,
+            minLines = 7,
+            maxLines = 7,
             placeholder = { Text(text = "Elaborate the details of your task") },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Transparent,
