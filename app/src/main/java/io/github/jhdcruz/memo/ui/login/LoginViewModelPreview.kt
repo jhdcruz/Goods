@@ -1,9 +1,6 @@
 package io.github.jhdcruz.memo.ui.login
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import io.github.jhdcruz.memo.domain.response.AuthResponseUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
