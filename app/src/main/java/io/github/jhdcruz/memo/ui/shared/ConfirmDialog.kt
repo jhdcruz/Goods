@@ -35,7 +35,7 @@ fun ConfirmDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text("Cancel")
             }
         }
     )
