@@ -154,20 +154,30 @@ private fun TaskDetailsContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        showDeleteDialog = true
+            // delete task button
+            if (task != null) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            showDeleteDialog = true
+                        }
                     }
+                ) {
+                    Image(
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+                        painter = painterResource(id = R.drawable.baseline_delete_24),
+                        contentDescription = "Delete task"
+                    )
                 }
-            ) {
-                Image(
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
-                    painter = painterResource(id = R.drawable.baseline_delete_24),
-                    contentDescription = "Delete task"
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 )
             }
 
+            // task due date
             if (taskDueDate.value != null) {
                 TextButton(
                     modifier = Modifier.weight(1f),
