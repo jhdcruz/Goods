@@ -76,7 +76,6 @@ fun ContainerScreen(
             Scaffold(
                 topBar = {
                     AppSearch(
-                        navController = navController,
                         profile = photoUrl.value,
                         drawerState = drawerState,
                     )
