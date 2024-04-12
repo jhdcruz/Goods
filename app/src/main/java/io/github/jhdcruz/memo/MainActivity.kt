@@ -30,11 +30,11 @@ class MainActivity : ComponentActivity() {
             val intent = Intent(this, AuthActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
-        }
-
-        setContent {
-            MemoTheme {
-                ContainerScreen(user = auth.currentUser)
+        } else {
+            setContent {
+                MemoTheme {
+                    ContainerScreen(user = auth.currentUser)
+                }
             }
         }
     }
