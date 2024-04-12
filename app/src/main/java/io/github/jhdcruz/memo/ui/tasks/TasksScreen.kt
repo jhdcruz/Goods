@@ -141,9 +141,27 @@ private fun TaskItem(
         ListItem(
             modifier = Modifier.clickable { onTaskClick(task) },
             overlineContent = {
-                Text(
-                    text = task.category ?: "Inbox"
-                )
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        modifier = Modifier.size(16.dp),
+                        painter = painterResource(id = R.drawable.baseline_folder_24),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 4.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = if (task.category?.isNotBlank() == true) {
+                            task.category
+                        } else {
+                            "Inbox"
+                        }
+                    )
+                }
             },
             headlineContent = {
                 Text(

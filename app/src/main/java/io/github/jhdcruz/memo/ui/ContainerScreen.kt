@@ -114,7 +114,6 @@ fun ContainerScreen(
                 ) {
                     composable(TasksDestination.route) {
                         TasksScreen(
-                            navController = navController,
                             tasksViewModel = tasksViewModel,
                         )
                     }
