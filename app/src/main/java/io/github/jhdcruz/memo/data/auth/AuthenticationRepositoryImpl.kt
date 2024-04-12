@@ -243,7 +243,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
      * Handles third-part login services
      */
     private suspend fun customSignIn(credential: Credential): AuthResponseUseCase {
-        when (credential.type) {
+        return when (credential.type) {
             // Handles Google sign-in
             GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL -> {
                 return try {
@@ -268,7 +268,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
                 Log.e("Authentication", "Unexpected type of custom credential used.")
                 crashlytics.log("Unexpected type of custom credential used.")
 
-                return AuthResponseUseCase.Invalid("Unexpected type of custom credential used.")
+                AuthResponseUseCase.Invalid("Unexpected type of custom credential used.")
             }
         }
     }
