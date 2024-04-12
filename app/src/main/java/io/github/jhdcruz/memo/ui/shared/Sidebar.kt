@@ -1,15 +1,24 @@
 package io.github.jhdcruz.memo.ui.shared
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
@@ -28,9 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -179,45 +187,62 @@ private fun EmptyCategory(
 ) {
     val scope = rememberCoroutineScope()
 
-    Box(
-        modifier = Modifier.padding(vertical = 8.dp),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        var showCategoryDialog by remember { mutableStateOf(false) }
-        val newCategory = remember { mutableStateOf("") }
+    var showCategoryDialog by remember { mutableStateOf(false) }
+    val newCategory = remember { mutableStateOf("") }
 
-        Column {
-            Text(
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                text = "No categories",
-                modifier = Modifier.padding(16.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            text = "No categories",
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+
             )
 
-            if (showCategoryDialog) {
-                ConfirmDialog(
-                    onDismissRequest = { showCategoryDialog = false },
-                    onConfirmation = {
-                        scope.launch {
-                            tasksViewModel.onCategoryAdd(newCategory.value)
-                            showCategoryDialog = false
-                        }
-                    },
-                    dialogTitle = {
-                        Text(text = "Add new category")
-                    },
-                    dialogContent = {
-                        OutlinedTextField(
-                            value = newCategory.value,
-                            onValueChange = { newCategory.value = it })
-                    },
-                    icon = {
-                        Image(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_folder_24),
-                            contentDescription = null
-                        )
-                    }
-                )
+        FilledTonalButton(
+            modifier = Modifier.height(46.dp),
+            onClick = { showCategoryDialog = true }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+                Text(text = "Create new category")
             }
+        }
+
+        if (showCategoryDialog) {
+            ConfirmDialog(
+                onDismissRequest = { showCategoryDialog = false },
+                onConfirmation = {
+                    scope.launch {
+                        tasksViewModel.onCategoryAdd(newCategory.value)
+                        showCategoryDialog = false
+                    }
+                },
+                dialogTitle = {
+                    Text(text = "Add new category")
+                },
+                dialogContent = {
+                    OutlinedTextField(
+                        label = { Text(text = "Category") },
+                        value = newCategory.value,
+                        onValueChange = { newCategory.value = it })
+                },
+                icon = {
+                    Icon(
+                        modifier = Modifier.size(38.dp),
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     }
 }
