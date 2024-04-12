@@ -1,31 +1,22 @@
 package io.github.jhdcruz.memo.ui.shared
 
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun ConfirmDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
+    dialogTitle: @Composable (() -> Unit),
+    dialogContent: @Composable (() -> Unit),
+    icon: @Composable (() -> Unit),
 ) {
     AlertDialog(
-        icon = {
-            // decorative image
-            Icon(icon, contentDescription = "")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
+        icon = icon,
+        title = dialogTitle,
+        text = dialogContent,
         onDismissRequest = {
             onDismissRequest()
         },

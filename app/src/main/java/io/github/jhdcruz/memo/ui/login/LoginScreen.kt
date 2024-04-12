@@ -221,9 +221,15 @@ fun LoginForm(
                         notFound.value = false
                     }
                 },
-                dialogTitle = "Create new account?",
-                dialogText = "We couldn't find an account with the email you provided. Would you like to create one?",
-                icon = Icons.Outlined.Info,
+                dialogTitle = {
+                    Text(text = "Create account?")
+                },
+                dialogContent = {
+                    Text(text = "We couldn't find an account with the email you provided. Would you like to create one?")
+                },
+                icon = {
+                    Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                }
             )
         }
 
