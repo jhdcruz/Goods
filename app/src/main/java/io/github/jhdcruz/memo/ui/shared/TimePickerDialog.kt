@@ -47,16 +47,16 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
+    modifier: Modifier = Modifier,
+    timeState: TimePickerState = rememberTimePickerState(),
     onCancel: () -> Unit,
     onConfirm: (TimePickerState) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
 
     val time = Calendar.getInstance()
     time.timeInMillis = System.currentTimeMillis()
 
     var mode: DisplayMode by remember { mutableStateOf(DisplayMode.Picker) }
-    val timeState: TimePickerState = rememberTimePickerState()
 
     fun onConfirmClicked() {
         onConfirm(timeState)

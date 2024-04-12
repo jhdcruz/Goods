@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import io.github.jhdcruz.memo.domain.createTimestamp
 import io.github.jhdcruz.memo.ui.shared.TimePickerDialog
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun DueDatePicker(
@@ -90,7 +92,11 @@ fun TaskDatePickerDialog(
     onConfirmRequest: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val datePickerState = rememberDatePickerState()
+
+    val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = taskDueDate.value?.toDate()?.time ?: System.currentTimeMillis()
+    )
 
     DatePickerDialog(
         modifier = modifier,
@@ -137,10 +143,26 @@ fun TaskTimePickerDialog(
     onDismissRequest: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+
     val taskSelectedDate = tasksViewModel.taskSelectedDate.collectAsState(null)
+    val taskDueDate = tasksViewModel.taskDueDate.collectAsState(null)
+
+    val taskHours = Calendar.getInstance().apply {
+        timeInMillis = taskDueDate.value?.toDate()?.time ?: System.currentTimeMillis()
+    }.get(Calendar.HOUR_OF_DAY)
+
+    val taskMinutes = Calendar.getInstance().apply {
+        timeInMillis = taskDueDate.value?.toDate()?.time ?: System.currentTimeMillis()
+    }.get(Calendar.MINUTE)
+
+    val timeState = rememberTimePickerState(
+        initialHour = taskHours,
+        initialMinute = taskMinutes,
+    )
 
     TimePickerDialog(
         modifier = modifier,
+        timeState = timeState,
         onCancel = {
             onDismissRequest()
         },
