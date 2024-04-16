@@ -83,7 +83,7 @@ fun AppSearch(
 
     DockedSearchBar(
         modifier = modifier
-            .padding(16.dp)
+            .padding(vertical = 16.dp, horizontal = 4.dp)
             .fillMaxWidth(),
         query = query,
         onQueryChange = tasksViewModel::onQueryChange,

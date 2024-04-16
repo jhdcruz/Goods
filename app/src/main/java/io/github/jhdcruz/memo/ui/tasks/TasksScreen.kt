@@ -64,14 +64,8 @@ fun TasksScreen(
     modifier: Modifier = Modifier,
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
-    Scaffold(
-        modifier = modifier,
-    ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(innerPadding),
-        ) {
-            TasksListContent(tasksViewModel = tasksViewModel)
-        }
+    Surface(modifier = modifier) {
+        TasksListContent(tasksViewModel = tasksViewModel)
     }
 }
 

@@ -1,8 +1,9 @@
-package io.github.jhdcruz.memo
+package io.github.jhdcruz.memo.ui.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import io.github.jhdcruz.memo.R
 
 interface Destination {
     val route: String

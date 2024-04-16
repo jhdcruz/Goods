@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -31,11 +31,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseUser
-import io.github.jhdcruz.memo.CalendarDestination
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.TasksDestination
 import io.github.jhdcruz.memo.ui.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
+import io.github.jhdcruz.memo.ui.navigation.CalendarDestination
+import io.github.jhdcruz.memo.ui.navigation.TasksDestination
 import io.github.jhdcruz.memo.ui.shared.AppSearch
 import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
@@ -62,69 +62,70 @@ fun ContainerScreen(
         photoUrl.value = user?.photoUrl.toString()
     }
 
-    Box(Modifier.safeDrawingPadding()) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet {
-                    Sidebar(drawerState = drawerState)
-                }
-            },
-        ) {
-            Scaffold(
-                topBar = {
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Sidebar(drawerState = drawerState)
+            }
+        },
+    ) {
+        Scaffold(
+            topBar = {
+                Box(modifier = Modifier.statusBarsPadding()) {
                     AppSearch(
                         profile = photoUrl.value,
                         drawerState = drawerState,
                     )
-                },
-                bottomBar = {
-                    BottomNavigation(
-                        navController = navController,
-                    )
-                },
-                floatingActionButton = {
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        },
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Image(
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                                painter = painterResource(id = R.drawable.baseline_add_24),
-                                contentDescription = null
-                            )
-                            Text(text = "New task")
+                }
+            },
+            bottomBar = {
+                BottomNavigation(
+                    navController = navController,
+                )
+            },
+            floatingActionButton = {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        scope.launch {
+                            sheetState.show()
                         }
-                    }
-                }
-            ) { innerPadding ->
-                NavHost(
-                    navController,
-                    startDestination = TasksDestination.route,
-                    Modifier.padding(innerPadding)
+                    },
                 ) {
-                    composable(TasksDestination.route) {
-                        TasksScreen()
-                    }
-
-                    composable(CalendarDestination.route) {
-                        CalendarScreen(
-                            navController = navController,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Image(
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                            painter = painterResource(id = R.drawable.baseline_add_24),
+                            contentDescription = null
                         )
+                        Text(text = "New task")
                     }
                 }
-
-                // New task bottom sheet
-                if (sheetState.isVisible) {
-                    TaskDetailsSheet(sheetState = sheetState)
+            }
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = TasksDestination.route,
+            ) {
+                composable(TasksDestination.route) {
+                    TasksScreen(
+                        modifier = Modifier.padding(innerPadding),
+                    )
                 }
+
+                composable(CalendarDestination.route) {
+                    CalendarScreen(
+                        modifier = Modifier.padding(innerPadding),
+                    )
+                }
+            }
+
+            // New task bottom sheet
+            if (sheetState.isVisible) {
+                TaskDetailsSheet(sheetState = sheetState)
             }
         }
     }

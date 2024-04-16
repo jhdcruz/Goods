@@ -20,8 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import io.github.jhdcruz.memo.CalendarDestination
-import io.github.jhdcruz.memo.TasksDestination
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 
 @Composable
