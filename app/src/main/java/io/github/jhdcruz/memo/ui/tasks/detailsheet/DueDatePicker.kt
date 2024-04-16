@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.bottomsheet
+package io.github.jhdcruz.memo.ui.tasks.detailsheet
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.Image

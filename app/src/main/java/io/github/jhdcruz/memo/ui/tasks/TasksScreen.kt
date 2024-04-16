@@ -54,7 +54,7 @@ import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.dateUntil
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
-import io.github.jhdcruz.memo.ui.tasks.bottomsheet.TaskDetailsSheet
+import io.github.jhdcruz.memo.ui.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 

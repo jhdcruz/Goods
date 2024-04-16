@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.bottomsheet
+package io.github.jhdcruz.memo.ui.tasks.detailsheet
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

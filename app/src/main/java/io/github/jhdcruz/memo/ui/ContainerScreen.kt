@@ -41,7 +41,7 @@ import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.bottomsheet.TaskDetailsSheet
+import io.github.jhdcruz.memo.ui.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
