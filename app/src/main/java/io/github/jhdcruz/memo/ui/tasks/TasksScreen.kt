@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +68,6 @@ fun TasksScreen(
     }
 }
 
-
 @Composable
 private fun TasksListContent(tasksViewModel: TasksViewModel) {
     val scope = rememberCoroutineScope()
@@ -81,14 +79,6 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
     val taskList = tasksViewModel.taskList.collectAsState(emptyList())
 
     var selectedTask by remember { mutableStateOf<Task?>(null) }
-
-    LaunchedEffect(isFetchingTasks.value) {
-        if (isFetchingTasks.value) {
-            tasksViewModel.onGetTasks()
-            sheetState.hide()
-            selectedTask = null
-        }
-    }
 
     when {
         isFetchingTasks.value -> LoadingState(isFetchingTasks.value)
@@ -149,7 +139,7 @@ private fun TaskItem(
             modifier = Modifier.clickable { onTaskClick(task) },
             overlineContent = {
                 Row(
-                    modifier = Modifier.wrapContentSize(),
+                    modifier = Modifier.wrapContentSize().padding(bottom = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(

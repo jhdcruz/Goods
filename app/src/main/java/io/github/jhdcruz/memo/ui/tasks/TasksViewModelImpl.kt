@@ -104,6 +104,7 @@ class TasksViewModelImpl @Inject constructor(
 
     override fun onGetTasks() {
         viewModelScope.launch {
+            onIsFetchingTasksChange(true)
             _taskList.value = tasksRepository.onGetTasks()
             onIsFetchingTasksChange(false)
         }
@@ -111,8 +112,16 @@ class TasksViewModelImpl @Inject constructor(
 
     override fun onSearch() {
         viewModelScope.launch(Dispatchers.IO) {
-            val taskList = tasksRepository.onSearch(query.toString())
-            onTaskListChange(taskList)
+            if (_query.value.isNotEmpty()) {
+                onIsFetchingTasksChange(true)
+
+                val taskList = tasksRepository.onSearch(_query.value)
+                onTaskListChange(taskList)
+
+                onIsFetchingTasksChange(false)
+            } else {
+                onGetTasks()
+            }
         }
     }
 
@@ -122,14 +131,15 @@ class TasksViewModelImpl @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
+            val taskId = taskJob.result as String
 
             // upload local files
             if (localAttachments.isNotEmpty()) {
-                onAttachmentsUpload(taskJob.result as String, localAttachments)
+                onAttachmentsUpload(taskId, localAttachments)
             }
 
             onClearInput()
-            onIsFetchingTasksChange(true)
+            onGetTasks()
         }
     }
 
@@ -151,7 +161,7 @@ class TasksViewModelImpl @Inject constructor(
             attachmentsUploadJob.await()
 
             onClearInput()
-            onIsFetchingTasksChange(true)
+            onGetTasks()
         }
     }
 
@@ -163,7 +173,7 @@ class TasksViewModelImpl @Inject constructor(
             taskDeleteJob.await()
             attachmentDeleteJob.await()
 
-            onIsFetchingTasksChange(true)
+            onGetTasks()
         }
     }
 
