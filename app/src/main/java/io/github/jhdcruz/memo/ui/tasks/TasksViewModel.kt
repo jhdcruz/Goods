@@ -1,7 +1,6 @@
 package io.github.jhdcruz.memo.ui.tasks
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
@@ -11,15 +10,6 @@ import io.github.jhdcruz.memo.data.model.TaskAttachment
 import kotlinx.coroutines.flow.Flow
 
 abstract class TasksViewModel : ViewModel() {
-    abstract val query: Flow<String>
-
-    abstract val isFetchingTasks: Flow<Boolean>
-    abstract val taskList: Flow<List<Task>>
-
-    abstract val tags: Flow<List<String>>
-    abstract val categories: Flow<List<String>>
-
-    // Populating tasks
     abstract val taskId: Flow<String>
     abstract val taskTitle: Flow<String>
     abstract val taskDescription: Flow<TextFieldValue>
@@ -38,48 +28,9 @@ abstract class TasksViewModel : ViewModel() {
     // Attachments to be uploaded
     abstract val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
 
-    abstract fun onVoiceSearch(): Intent
-    abstract fun onSearch()
+    abstract fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp
 
-    // fetch operations
-    abstract fun onGetTasks()
-
-    // tasks operations
-    abstract fun onTaskAdd(task: Task, localAttachments: List<Pair<String, Uri>>)
-    abstract fun onTaskUpdate(id: String, task: Task, localAttachments: List<Pair<String, Uri>>)
-    abstract fun onTaskDelete(id: String)
-    abstract fun onTaskCompleted(id: String)
-
-    // singular tasks operations
-    abstract fun onCategoryAdd(category: String)
-    abstract fun onCategoryUpdate(category: String, newCategory: String)
-    abstract fun onCategoriesDelete(categories: List<String>)
-
-    abstract fun onTagAdd(tag: String)
-    abstract fun onTagUpdate(tag: String, newTag: String)
-    abstract fun onTagsDelete(tags: List<String>)
-
-    abstract fun onAttachmentsUpload(
-        id: String,
-        attachments: List<Pair<String, Uri>>,
-    )
-
-    abstract fun onAttachmentDelete(id: String, path: String)
-    abstract fun onAttachmentDownload(path: String)
-
-    // fetch
-    abstract fun onGetCategories()
-    abstract fun onGetTags()
-
-    // input handlers
-    abstract fun onIsFetchingTasksChange(isFetching: Boolean)
-    abstract fun onQueryChange(query: String)
-    abstract fun onTaskListChange(taskList: List<Task>)
-
-    abstract fun onLocalTagsChange(tags: List<String>)
     abstract fun onTagsChange(tags: List<String>)
-
-    abstract fun onLocalCategoryChange(categories: List<String>)
     abstract fun onCategoryChange(category: String)
 
     abstract fun onTaskIdChange(id: String)
@@ -109,6 +60,4 @@ abstract class TasksViewModel : ViewModel() {
 
     abstract fun onClearInput()
     abstract fun onTaskPreview(task: Task)
-
-    abstract fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp
 }

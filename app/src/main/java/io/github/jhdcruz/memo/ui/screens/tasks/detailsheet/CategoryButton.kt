@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -37,20 +37,22 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.ContainerViewModel
 import io.github.jhdcruz.memo.ui.shared.EmptyState
 import io.github.jhdcruz.memo.ui.shared.LoadingState
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryButton(
     modifier: Modifier = Modifier,
+    containerViewModel: ContainerViewModel,
     tasksViewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
 
-    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
+    val categories = containerViewModel.categories.collectAsState(initial = emptyList())
     val taskCategory = tasksViewModel.taskCategory.collectAsState(initial = "")
 
     var showCategoryDialog by remember { mutableStateOf(false) }
@@ -67,7 +69,7 @@ fun CategoryButton(
             showCategoryDialog = true
 
             scope.launch {
-                tasksViewModel.onGetCategories()
+                containerViewModel.onGetCategories()
             }
         }
     ) {
@@ -82,7 +84,7 @@ fun CategoryButton(
         var selectedCategory by remember { mutableStateOf(taskCategory.value) }
 
         CategorySelectionDialog(
-            tasksViewModel = tasksViewModel,
+            containerViewModel = containerViewModel,
             onDismissRequest = { showCategoryDialog = false },
             onConfirm = {
                 scope.launch {
@@ -103,7 +105,7 @@ fun CategoryButton(
 
 @Composable
 fun CategorySelectionDialog(
-    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     categories: List<String>,
@@ -124,7 +126,7 @@ fun CategorySelectionDialog(
         }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            CategoryInputField(tasksViewModel = tasksViewModel)
+            CategoryInputField(containerViewModel = containerViewModel)
             HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
             CategoryList(
                 categories = categories,
@@ -137,10 +139,10 @@ fun CategorySelectionDialog(
 
 @Composable
 private fun CategoryInputField(
-    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    val categories = tasksViewModel.categories.collectAsState(initial = emptyList())
+    val categories = containerViewModel.categories.collectAsState(initial = emptyList())
 
     var newCategory by remember { mutableStateOf("") }
 
@@ -160,11 +162,11 @@ private fun CategoryInputField(
                 modifier = Modifier.padding(horizontal = 6.dp),
                 onClick = {
                     scope.launch {
-                        tasksViewModel.onCategoryAdd(newCategory)
+                        containerViewModel.onCategoryAdd(newCategory)
 
                         val appendedTag = listOf(newCategory) + categories.value
                         // append manually to avoid calling onGetTags again
-                        tasksViewModel.onLocalCategoryChange(appendedTag)
+                        containerViewModel.onLocalCategoryChange(appendedTag)
                         newCategory = ""
                     }
                 }

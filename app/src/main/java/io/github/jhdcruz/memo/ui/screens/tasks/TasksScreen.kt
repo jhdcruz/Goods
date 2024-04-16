@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks
+package io.github.jhdcruz.memo.ui.screens.tasks
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -52,31 +52,40 @@ import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.dateUntil
+import io.github.jhdcruz.memo.ui.ContainerViewModel
+import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.shared.AppSearch
-import io.github.jhdcruz.memo.ui.tasks.detailsheet.TaskDetailsSheet
+import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
 @Composable
 fun TasksScreen(
     modifier: Modifier = Modifier,
+    containerViewModel: ContainerViewModel,
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
 ) {
     Surface(modifier = modifier) {
-        TasksListContent(tasksViewModel = tasksViewModel)
+        TasksListContent(
+            tasksViewModel = tasksViewModel,
+            containerViewModel = containerViewModel,
+        )
     }
 }
 
 @Composable
-private fun TasksListContent(tasksViewModel: TasksViewModel) {
+private fun TasksListContent(
+    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
+) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
-    val isFetchingTasks = tasksViewModel.isFetchingTasks.collectAsState(true)
-    val taskList = tasksViewModel.taskList.collectAsState(emptyList())
+    val isFetchingTasks = containerViewModel.isFetchingTasks.collectAsState(true)
+    val taskList = containerViewModel.taskList.collectAsState(emptyList())
 
     var selectedTask by remember { mutableStateOf<Task?>(null) }
 
@@ -97,7 +106,7 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
                                 sheetState.show()
                             }
                         },
-                        onTaskCompleted = { tasksViewModel.onTaskCompleted(it.id!!) }
+                        onTaskCompleted = { containerViewModel.onTaskCompleted(it.id!!) }
                     )
 
                     HorizontalDivider(
@@ -111,6 +120,7 @@ private fun TasksListContent(tasksViewModel: TasksViewModel) {
             if (sheetState.isVisible) {
                 TaskDetailsSheet(
                     tasksViewModel = tasksViewModel,
+                    containerViewModel = containerViewModel,
                     onDismissRequest = { selectedTask = null },
                     sheetState = sheetState,
                     task = selectedTask!!
@@ -139,7 +149,9 @@ private fun TaskItem(
             modifier = Modifier.clickable { onTaskClick(task) },
             overlineContent = {
                 Row(
-                    modifier = Modifier.wrapContentSize().padding(bottom = 6.dp),
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(bottom = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
@@ -291,8 +303,8 @@ private fun TasksScreenPreview() {
         Scaffold(
             topBar = {
                 AppSearch(
-                    tasksViewModel = TasksViewModelPreview(),
                     drawerState = drawerState,
+                    containerViewModel = ContainerViewModelPreview(),
                 )
             },
             bottomBar = {
@@ -301,6 +313,7 @@ private fun TasksScreenPreview() {
         ) { innerPadding ->
             TasksScreen(
                 modifier = Modifier.padding(innerPadding),
+                containerViewModel = hiltViewModel<ContainerViewModel>(),
                 tasksViewModel = TasksViewModelPreview(),
             )
         }

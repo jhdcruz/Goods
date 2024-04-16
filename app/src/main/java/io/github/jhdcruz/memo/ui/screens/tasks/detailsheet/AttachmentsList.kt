@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import android.content.Intent
 import android.net.Uri
@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.TaskAttachment
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 
 @Composable

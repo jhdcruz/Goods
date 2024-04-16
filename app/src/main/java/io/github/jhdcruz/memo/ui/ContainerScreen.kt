@@ -33,15 +33,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseUser
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.calendar.CalendarScreen
+import io.github.jhdcruz.memo.ui.screens.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.navigation.RootScreens
 import io.github.jhdcruz.memo.ui.shared.AppSearch
 import io.github.jhdcruz.memo.ui.shared.Sidebar
-import io.github.jhdcruz.memo.ui.tasks.TasksScreen
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.detailsheet.TaskDetailsSheet
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksScreen
+import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -49,7 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ContainerScreen(
     user: FirebaseUser?,
-    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModel>(),
 ) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -79,6 +77,7 @@ fun ContainerScreen(
                     AppSearch(
                         profile = photoUrl.value,
                         drawerState = drawerState,
+                        containerViewModel = containerViewModel,
                     )
                 }
             },
@@ -116,7 +115,7 @@ fun ContainerScreen(
                 composable(RootScreens.Tasks.route) {
                     TasksScreen(
                         modifier = Modifier.padding(innerPadding),
-                        tasksViewModel = tasksViewModel,
+                        containerViewModel = containerViewModel,
                     )
                 }
 
@@ -131,7 +130,7 @@ fun ContainerScreen(
             if (sheetState.isVisible) {
                 TaskDetailsSheet(
                     sheetState = sheetState,
-                    tasksViewModel = tasksViewModel
+                    containerViewModel = containerViewModel,
                 )
             }
         }
@@ -144,6 +143,7 @@ private fun ContainerScreenPreview() {
     MemoTheme {
         ContainerScreen(
             user = null,
+            containerViewModel = ContainerViewModelPreview()
         )
     }
 }

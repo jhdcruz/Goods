@@ -17,17 +17,17 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindAuthenticationRepository(
-        authenticationRepositoryImpl: AuthenticationRepositoryImpl
+        authenticationRepositoryImpl: AuthenticationRepositoryImpl,
     ): AuthenticationRepository
 
     @Binds
     abstract fun bindTasksRepository(
-        tasksRepositoryImpl: TasksRepositoryImpl
+        tasksRepositoryImpl: TasksRepositoryImpl,
     ): TasksRepository
 
     @Binds
     abstract fun bindAttachmentsRepository(
-        attachmentsRepositoryImpl: AttachmentsRepositoryImpl
+        attachmentsRepositoryImpl: AttachmentsRepositoryImpl,
     ): AttachmentsRepository
 
 }

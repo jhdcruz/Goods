@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -44,11 +44,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.ContainerViewModel
+import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.shared.EmptyState
 import io.github.jhdcruz.memo.ui.shared.LoadingState
 import io.github.jhdcruz.memo.ui.shared.PickerDialog
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -59,11 +61,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun TagsButton(
     modifier: Modifier = Modifier,
+    containerViewModel: ContainerViewModel,
     tasksViewModel: TasksViewModel,
 ) {
     val scope = rememberCoroutineScope()
 
-    val tags = tasksViewModel.tags.collectAsState(initial = emptyList())
+    val tags = containerViewModel.tags.collectAsState(initial = emptyList())
     val taskTags = tasksViewModel.taskTags.collectAsState(initial = emptyList())
 
     var showTagsDialog by remember { mutableStateOf(false) }
@@ -80,7 +83,7 @@ fun TagsButton(
             showTagsDialog = true
 
             scope.launch {
-                tasksViewModel.onGetTags()
+                containerViewModel.onGetTags()
             }
         }
     ) {
@@ -110,7 +113,7 @@ fun TagsButton(
         var selectedTag by remember { mutableStateOf(taskTags.value) }
 
         TagSelectionDialog(
-            tasksViewModel = tasksViewModel,
+            containerViewModel = containerViewModel,
             onDismissRequest = { showTagsDialog = false },
             onConfirm = {
                 scope.launch {
@@ -135,7 +138,7 @@ fun TagsButton(
 
 @Composable
 private fun TagSelectionDialog(
-    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     tags: List<String>,
@@ -156,7 +159,7 @@ private fun TagSelectionDialog(
         }
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            TagInputField(tasksViewModel = tasksViewModel)
+            TagInputField(containerViewModel = containerViewModel)
             HorizontalDivider(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
             TagList(tags = tags, selectedTags = selectedTags, onTagSelected = onTagSelected)
         }
@@ -165,10 +168,10 @@ private fun TagSelectionDialog(
 
 @Composable
 private fun TagInputField(
-    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    val tags = tasksViewModel.tags.collectAsState(initial = emptyList())
+    val tags = containerViewModel.tags.collectAsState(initial = emptyList())
 
     var newTag by remember { mutableStateOf("") }
     OutlinedTextField(
@@ -187,11 +190,11 @@ private fun TagInputField(
                 modifier = Modifier.padding(horizontal = 6.dp),
                 onClick = {
                     scope.launch {
-                        tasksViewModel.onTagAdd(newTag)
+                        containerViewModel.onTagAdd(newTag)
 
                         val appendedTag = listOf(newTag) + tags.value
                         // append manually to avoid calling onGetTags again
-                        tasksViewModel.onLocalTagsChange(appendedTag)
+                        containerViewModel.onLocalTagsChange(appendedTag)
                         newTag = ""
                     }
                 }
@@ -267,9 +270,13 @@ private fun TagRow(tag: String, isSelected: Boolean, onTagSelected: (String) -> 
 @Composable
 @Preview(showBackground = true)
 private fun TagsButtonPreview() {
+    val containerViewModel = ContainerViewModelPreview()
     val previewViewModel = TasksViewModelPreview()
 
     MemoTheme {
-        TagsButton(tasksViewModel = previewViewModel)
+        TagsButton(
+            containerViewModel = containerViewModel,
+            tasksViewModel = previewViewModel,
+        )
     }
 }

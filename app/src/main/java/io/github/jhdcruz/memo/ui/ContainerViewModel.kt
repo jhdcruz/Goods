@@ -1,0 +1,69 @@
+package io.github.jhdcruz.memo.ui
+
+import android.content.Intent
+import android.net.Uri
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jhdcruz.memo.data.model.Task
+import kotlinx.coroutines.flow.Flow
+
+@HiltViewModel
+abstract class ContainerViewModel : ViewModel() {
+    abstract val query: Flow<String>
+
+    abstract val isFetchingTasks: Flow<Boolean>
+    abstract val taskList: Flow<List<Task>>
+
+    abstract val tags: Flow<List<String>>
+    abstract val categories: Flow<List<String>>
+
+    abstract fun onVoiceSearch(): Intent
+    abstract fun onSearch()
+    abstract fun onGetTasks()
+
+    abstract fun onTaskAdd(
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    )
+
+    abstract fun onTaskUpdate(
+        id: String,
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    )
+
+    abstract fun onTaskDelete(id: String)
+
+    abstract fun onTaskCompleted(id: String)
+
+    abstract fun onCategoryAdd(category: String)
+
+    abstract fun onCategoryUpdate(category: String, newCategory: String)
+
+    abstract fun onCategoriesDelete(categories: List<String>)
+
+    abstract fun onTagAdd(tag: String)
+
+    abstract fun onTagUpdate(tag: String, newTag: String)
+
+    abstract fun onTagsDelete(tags: List<String>)
+
+    abstract fun onAttachmentsUpload(
+        id: String,
+        attachments: List<Pair<String, Uri>>,
+    )
+
+    abstract fun onGetCategories()
+
+    abstract fun onGetTags()
+
+    abstract fun onIsFetchingTasksChange(isFetching: Boolean)
+
+    abstract fun onQueryChange(query: String)
+
+    abstract fun onTaskListChange(taskList: List<Task>)
+
+    abstract fun onLocalTagsChange(tags: List<String>)
+
+    abstract fun onLocalCategoryChange(categories: List<String>)
+}

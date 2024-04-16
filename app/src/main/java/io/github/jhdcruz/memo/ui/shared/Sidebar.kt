@@ -43,9 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.ContainerViewModel
+import io.github.jhdcruz.memo.ui.ContainerViewModelImpl
+import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -53,15 +53,15 @@ import kotlinx.coroutines.launch
 fun Sidebar(
     modifier: Modifier = Modifier,
     drawerState: DrawerState,
-    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
 
-    val categories = tasksViewModel.categories.collectAsState(initial = listOf("loading"))
+    val categories = containerViewModel.categories.collectAsState(initial = listOf("loading"))
     var selected by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(drawerState.isOpen, categories.value) {
-        tasksViewModel.onGetCategories()
+        containerViewModel.onGetCategories()
     }
 
     Scaffold(
@@ -150,7 +150,7 @@ fun Sidebar(
                     )
 
                 drawerState.isOpen && categories.value.isEmpty() ->
-                    EmptyCategory(tasksViewModel = tasksViewModel)
+                    EmptyCategory(containerViewModel = containerViewModel)
 
                 else ->
                     LazyColumn {
@@ -183,7 +183,7 @@ fun Sidebar(
 
 @Composable
 private fun EmptyCategory(
-    tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -222,7 +222,7 @@ private fun EmptyCategory(
                 onDismissRequest = { showCategoryDialog = false },
                 onConfirmation = {
                     scope.launch {
-                        tasksViewModel.onCategoryAdd(newCategory.value)
+                        containerViewModel.onCategoryAdd(newCategory.value)
                         showCategoryDialog = false
                     }
                 },
@@ -252,8 +252,8 @@ private fun EmptyCategory(
 private fun SidebarPreview() {
     MemoTheme {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val tasksViewModel = TasksViewModelPreview()
+        val containerViewModel = ContainerViewModelPreview()
 
-        Sidebar(drawerState = drawerState, tasksViewModel = tasksViewModel)
+        Sidebar(drawerState = drawerState, containerViewModel = containerViewModel)
     }
 }

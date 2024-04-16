@@ -1,7 +1,6 @@
 package io.github.jhdcruz.memo.ui.tasks
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Timestamp
@@ -11,11 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 class TasksViewModelPreview : TasksViewModel() {
-    override val query = flowOf("Generic Query")
-    override val isFetchingTasks: Flow<Boolean> = flowOf(false)
-    override val taskList = flowOf(listOf<Task>())
-    override val tags: Flow<List<String>> = flowOf(listOf("Generic Tag"))
-    override val categories: Flow<List<String>> = flowOf(listOf("Generic Category"))
     override val taskId: Flow<String> = flowOf("Generic ID")
     override val taskTitle = flowOf("Generic Title")
     override val taskDescription = flowOf(TextFieldValue("Generic Description"))
@@ -30,60 +24,11 @@ class TasksViewModelPreview : TasksViewModel() {
     override val taskUpdated = flowOf(Timestamp.now())
     override val taskLocalAttachments = flowOf(listOf<Pair<String, Uri>>())
 
-    override fun onVoiceSearch(): Intent {
-        return Intent()
+    override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
+        return Timestamp.now()
     }
-
-    override fun onSearch() {}
-    override fun onGetTasks() {}
-
-    override fun onTaskAdd(task: Task, localAttachments: List<Pair<String, Uri>>) {}
-
-    override fun onTaskUpdate(
-        id: String,
-        task: Task,
-        localAttachments: List<Pair<String, Uri>>,
-    ) {
-    }
-
-    override fun onTaskDelete(id: String) {}
-
-    override fun onTaskCompleted(id: String) {}
-
-    override fun onCategoryAdd(category: String) {}
-
-    override fun onCategoryUpdate(category: String, newCategory: String) {}
-
-    override fun onCategoriesDelete(categories: List<String>) {}
-
-    override fun onTagAdd(tag: String) {}
-
-    override fun onTagUpdate(tag: String, newTag: String) {}
-
-    override fun onTagsDelete(tags: List<String>) {}
-
-    override fun onAttachmentsUpload(
-        id: String,
-        attachments: List<Pair<String, Uri>>,
-    ) {
-    }
-
-    override fun onAttachmentDelete(id: String, path: String) {}
-    override fun onAttachmentDownload(path: String) {}
-
-    override fun onGetCategories() {}
-
-    override fun onGetTags() {}
-
-    override fun onIsFetchingTasksChange(isFetching: Boolean) {}
-
-    override fun onQueryChange(query: String) {}
-
-    override fun onTaskListChange(taskList: List<Task>) {}
-    override fun onLocalTagsChange(tags: List<String>) {}
 
     override fun onTagsChange(tags: List<String>) {}
-    override fun onLocalCategoryChange(categories: List<String>) {}
 
     override fun onCategoryChange(category: String) {}
     override fun onTaskIdChange(id: String) {}
@@ -129,8 +74,4 @@ class TasksViewModelPreview : TasksViewModel() {
 
     override fun onClearInput() {}
     override fun onTaskPreview(task: Task) {}
-
-    override fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp {
-        return Timestamp.now()
-    }
 }

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -50,10 +50,12 @@ import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.format
+import io.github.jhdcruz.memo.ui.ContainerViewModel
+import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelImpl
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -64,8 +66,9 @@ import kotlinx.coroutines.launch
 fun TaskDetailsSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState,
-    onDismissRequest: () -> Unit = {},
+    containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModel>(),
     tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    onDismissRequest: () -> Unit = {},
     task: Task? = null,
 ) {
     ModalBottomSheet(
@@ -81,13 +84,19 @@ fun TaskDetailsSheet(
             tasksViewModel.onTaskPreview(task)
         }
 
-        TaskDetailsContent(tasksViewModel, sheetState, task)
+        TaskDetailsContent(
+            tasksViewModel = tasksViewModel,
+            containerViewModel = containerViewModel,
+            sheetState = sheetState,
+            task = task
+        )
     }
 }
 
 @Composable
 private fun TaskDetailsContent(
     tasksViewModel: TasksViewModel,
+    containerViewModel: ContainerViewModel,
     sheetState: SheetState,
     task: Task? = null,
 ) {
@@ -131,7 +140,7 @@ private fun TaskDetailsContent(
                 onDismissRequest = { showDeleteDialog = false },
                 onConfirmation = {
                     scope.launch {
-                        tasksViewModel.onTaskDelete(taskId.value!!)
+                        containerViewModel.onTaskDelete(taskId.value!!)
                     }
                 },
                 dialogTitle = {
@@ -203,7 +212,7 @@ private fun TaskDetailsContent(
 
                         if (task != null) {
                             // update task
-                            tasksViewModel.onTaskUpdate(
+                            containerViewModel.onTaskUpdate(
                                 taskId.value!!,
                                 Task(
                                     id = taskId.value,
@@ -220,7 +229,7 @@ private fun TaskDetailsContent(
                             )
                         } else {
                             // add new task
-                            tasksViewModel.onTaskAdd(
+                            containerViewModel.onTaskAdd(
                                 Task(
                                     priority = taskPriority.value,
                                     dueDate = taskDueDate.value,
@@ -290,7 +299,10 @@ private fun TaskDetailsContent(
                 tasksViewModel = tasksViewModel
             )
 
-            CategoryButton(tasksViewModel = tasksViewModel)
+            CategoryButton(
+                containerViewModel = containerViewModel,
+                tasksViewModel = tasksViewModel
+            )
 
             DueDatePicker(
                 tasksViewModel = tasksViewModel,
@@ -313,7 +325,10 @@ private fun TaskDetailsContent(
             // space-between
             Spacer(modifier = Modifier.weight(1F))
 
-            TagsButton(tasksViewModel = tasksViewModel)
+            TagsButton(
+                containerViewModel = containerViewModel,
+                tasksViewModel = tasksViewModel
+            )
         }
     }
 }
@@ -323,9 +338,15 @@ private fun TaskDetailsContent(
 @Preview(showBackground = true)
 private fun TaskDetailsContentPreview() {
     val previewViewModel = TasksViewModelPreview()
+    val containerViewModel = ContainerViewModelPreview()
+
     val sheetState = rememberModalBottomSheetState()
 
     MemoTheme {
-        TaskDetailsContent(previewViewModel, sheetState)
+        TaskDetailsContent(
+            tasksViewModel = previewViewModel,
+            containerViewModel = containerViewModel,
+            sheetState = sheetState
+        )
     }
 }

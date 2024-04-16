@@ -44,11 +44,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.AuthActivity
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.login.LoginViewModel
-import io.github.jhdcruz.memo.ui.login.LoginViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelImpl
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModelPreview
+import io.github.jhdcruz.memo.ui.ContainerViewModel
+import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
+import io.github.jhdcruz.memo.ui.screens.login.LoginViewModelImpl
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 
@@ -57,14 +56,14 @@ import kotlinx.coroutines.launch
 fun AppSearch(
     modifier: Modifier = Modifier,
     drawerState: DrawerState,
-    profile: String? = null,
-    tasksViewModel: TasksViewModel = hiltViewModel<TasksViewModelImpl>(),
+    containerViewModel: ContainerViewModel,
     loginViewModel: LoginViewModel = hiltViewModel<LoginViewModelImpl>(),
+    profile: String? = null,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val query = tasksViewModel.query.collectAsState(initial = "").value
+    val query = containerViewModel.query.collectAsState(initial = "").value
 
     var showProfileMenu by remember { mutableStateOf(false) }
 
@@ -75,8 +74,8 @@ fun AppSearch(
                 val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
 
                 scope.launch {
-                    tasksViewModel.onQueryChange(matches?.get(0) ?: "")
-                    tasksViewModel.onSearch()
+                    containerViewModel.onQueryChange(matches?.get(0) ?: "")
+                    containerViewModel.onSearch()
                 }
             }
         }
@@ -86,10 +85,10 @@ fun AppSearch(
             .padding(vertical = 8.dp, horizontal = 16.dp)
             .fillMaxWidth(),
         query = query,
-        onQueryChange = tasksViewModel::onQueryChange,
+        onQueryChange = containerViewModel::onQueryChange,
         onSearch = {
             scope.launch {
-                tasksViewModel.onSearch()
+                containerViewModel.onSearch()
             }
         },
         leadingIcon = {
@@ -116,7 +115,7 @@ fun AppSearch(
                 IconButton(
                     modifier = Modifier.offset(x = 4.dp),
                     onClick = {
-                        voiceSearch.launch(tasksViewModel.onVoiceSearch())
+                        voiceSearch.launch(containerViewModel.onVoiceSearch())
                     }) {
                     Image(
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
@@ -182,7 +181,7 @@ private fun AppSearchPreview() {
 
     MemoTheme {
         AppSearch(
-            tasksViewModel = TasksViewModelPreview(),
+            containerViewModel = ContainerViewModelPreview(),
             drawerState = drawerState,
         )
     }
