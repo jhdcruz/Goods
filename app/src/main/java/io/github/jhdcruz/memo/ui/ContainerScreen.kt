@@ -51,8 +51,10 @@ fun ContainerScreen(
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
 
-    val sheetState = rememberModalBottomSheetState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     val photoUrl = remember { mutableStateOf("") }
 
