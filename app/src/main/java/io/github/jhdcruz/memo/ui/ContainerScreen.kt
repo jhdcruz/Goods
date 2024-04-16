@@ -34,8 +34,7 @@ import com.google.firebase.auth.FirebaseUser
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
-import io.github.jhdcruz.memo.ui.navigation.CalendarDestination
-import io.github.jhdcruz.memo.ui.navigation.TasksDestination
+import io.github.jhdcruz.memo.ui.navigation.RootScreens
 import io.github.jhdcruz.memo.ui.shared.AppSearch
 import io.github.jhdcruz.memo.ui.shared.Sidebar
 import io.github.jhdcruz.memo.ui.tasks.TasksScreen
@@ -108,15 +107,15 @@ fun ContainerScreen(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = TasksDestination.route,
+                startDestination = RootScreens.Tasks.route,
             ) {
-                composable(TasksDestination.route) {
+                composable(RootScreens.Tasks.route) {
                     TasksScreen(
                         modifier = Modifier.padding(innerPadding),
                     )
                 }
 
-                composable(CalendarDestination.route) {
+                composable(RootScreens.Calendar.route) {
                     CalendarScreen(
                         modifier = Modifier.padding(innerPadding),
                     )

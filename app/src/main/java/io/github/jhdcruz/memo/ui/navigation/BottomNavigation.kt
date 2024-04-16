@@ -25,10 +25,14 @@ import io.github.jhdcruz.memo.ui.theme.MemoTheme
 @Composable
 fun BottomNavigation(navController: NavHostController) {
     var selected by remember { mutableIntStateOf(0) }
-    val items = listOf(TasksDestination, CalendarDestination)
+    val rootScreens = listOf(
+        RootScreens.Tasks,
+        RootScreens.Calendar,
+        RootScreens.Settings,
+    )
 
     NavigationBar {
-        items.forEachIndexed { index, item ->
+        rootScreens.forEachIndexed { index, item ->
             NavigationBarItem(
                 alwaysShowLabel = true,
                 label = {
@@ -60,9 +64,10 @@ fun BottomNavigation(navController: NavHostController) {
 
                     navController.navigate(
                         when (selected) {
-                            0 -> TasksDestination.route
-                            1 -> CalendarDestination.route
-                            else -> TasksDestination.route
+                            0 -> RootScreens.Tasks.route
+                            1 -> RootScreens.Calendar.route
+                            2 -> RootScreens.Settings.route
+                            else -> RootScreens.Tasks.route
                         }
                     )
                 }

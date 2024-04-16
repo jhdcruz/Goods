@@ -1,14 +1,7 @@
 package io.github.jhdcruz.memo.ui.navigation
 
 import androidx.annotation.DrawableRes
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import io.github.jhdcruz.memo.R
-
-interface Destination {
-    val route: String
-    val title: String
-}
 
 interface RootDestination : Destination {
     @get:DrawableRes
@@ -18,32 +11,32 @@ interface RootDestination : Destination {
     val inactiveIcon: Int
 }
 
-// TASKS
-object TasksDestination : RootDestination {
-    override val route = "tasks"
-    override val title = "Tasks"
-    override val activeIcon = R.drawable.baseline_tasks_filled_24
-    override val inactiveIcon = R.drawable.baseline_tasks_24
+interface Destination {
+    val route: String
+    val title: String
 }
 
-object TaskDetailsDestination : Destination {
-    override val route = "task_details"
-    override val title = "Task Details"
+object RootScreens {
+    object Tasks : RootDestination {
+        override val route = "tasks"
+        override val title = "Tasks"
+        override val activeIcon = R.drawable.baseline_tasks_filled_24
+        override val inactiveIcon = R.drawable.baseline_tasks_24
+    }
 
-    const val taskId = "id"
+    object Calendar : RootDestination {
+        override val route = "calendar"
+        override val title = "Calendar"
 
-    val args = listOf(navArgument(name = taskId) {
-        type = NavType.StringType
-    })
+        override val activeIcon = R.drawable.baseline_calendar_filled_24
+        override val inactiveIcon = R.drawable.baseline_calendar_24
+    }
 
-    fun createRouteWithParam(taskId: String) = "$route/${taskId}"
-}
+    object Settings : RootDestination {
+        override val route = "settings"
+        override val title = "Settings"
 
-// CALENDAR
-object CalendarDestination : RootDestination {
-    override val route = "calendar"
-    override val title = "Calendar"
-
-    override val activeIcon = R.drawable.baseline_calendar_filled_24
-    override val inactiveIcon = R.drawable.baseline_calendar_24
+        override val activeIcon = R.drawable.baseline_settings_24
+        override val inactiveIcon = R.drawable.baseline_settings_filled_24
+    }
 }
