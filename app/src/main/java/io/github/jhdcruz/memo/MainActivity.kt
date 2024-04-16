@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.jhdcruz.memo.ui.ContainerScreen
+import io.github.jhdcruz.memo.ui.screens.container.ContainerScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import javax.inject.Inject
 

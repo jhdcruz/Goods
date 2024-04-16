@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.shared
+package io.github.jhdcruz.memo.ui.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

@@ -1,9 +1,10 @@
-package io.github.jhdcruz.memo.ui
+package io.github.jhdcruz.memo.ui.screens.container
 
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.task.AttachmentsRepository
 import io.github.jhdcruz.memo.data.task.TasksRepository
@@ -15,11 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Singleton
 
-//
-// @HiltViewModel
-@Singleton
+@HiltViewModel
 class ContainerViewModelImpl @Inject constructor(
     private val tasksRepository: TasksRepository,
     private val attachmentsRepository: AttachmentsRepository,

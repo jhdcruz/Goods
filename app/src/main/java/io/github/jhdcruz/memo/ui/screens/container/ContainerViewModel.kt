@@ -1,13 +1,11 @@
-package io.github.jhdcruz.memo.ui
+package io.github.jhdcruz.memo.ui.screens.container
 
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
 import kotlinx.coroutines.flow.Flow
 
-@HiltViewModel
 abstract class ContainerViewModel : ViewModel() {
     abstract val query: Flow<String>
 

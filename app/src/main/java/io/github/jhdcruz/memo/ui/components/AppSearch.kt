@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.shared
+package io.github.jhdcruz.memo.ui.components
 
 import android.app.Activity
 import android.content.Intent
@@ -44,8 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.AuthActivity
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModelImpl
 import io.github.jhdcruz.memo.ui.theme.MemoTheme

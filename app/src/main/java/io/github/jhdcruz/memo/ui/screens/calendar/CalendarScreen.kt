@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.calendar
+package io.github.jhdcruz.memo.ui.screens.calendar
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold

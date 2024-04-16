@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui
+package io.github.jhdcruz.memo.ui.screens.container
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +36,8 @@ import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.ui.screens.calendar.CalendarScreen
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.navigation.RootScreens
-import io.github.jhdcruz.memo.ui.shared.AppSearch
-import io.github.jhdcruz.memo.ui.shared.Sidebar
+import io.github.jhdcruz.memo.ui.components.AppSearch
+import io.github.jhdcruz.memo.ui.components.Sidebar
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksScreen
 import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme

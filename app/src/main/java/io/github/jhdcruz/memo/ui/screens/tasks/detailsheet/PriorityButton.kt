@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 
 @Composable
 fun PriorityButton(

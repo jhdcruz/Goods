@@ -50,9 +50,9 @@ import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.format
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
-import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.components.ConfirmDialog
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelPreview

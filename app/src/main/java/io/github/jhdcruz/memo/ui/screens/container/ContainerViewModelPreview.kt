@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui
+package io.github.jhdcruz.memo.ui.screens.container
 
 import android.content.Intent
 import android.net.Uri

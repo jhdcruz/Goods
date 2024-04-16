@@ -44,11 +44,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
-import io.github.jhdcruz.memo.ui.shared.EmptyState
-import io.github.jhdcruz.memo.ui.shared.LoadingState
-import io.github.jhdcruz.memo.ui.shared.PickerDialog
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.components.EmptyState
+import io.github.jhdcruz.memo.ui.components.LoadingState
+import io.github.jhdcruz.memo.ui.components.PickerDialog
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme

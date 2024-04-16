@@ -37,10 +37,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.shared.EmptyState
-import io.github.jhdcruz.memo.ui.shared.LoadingState
-import io.github.jhdcruz.memo.ui.shared.PickerDialog
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.components.EmptyState
+import io.github.jhdcruz.memo.ui.components.LoadingState
+import io.github.jhdcruz.memo.ui.components.PickerDialog
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 

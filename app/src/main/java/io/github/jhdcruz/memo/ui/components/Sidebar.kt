@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.shared
+package io.github.jhdcruz.memo.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -43,9 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelImpl
-import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelImpl
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
 

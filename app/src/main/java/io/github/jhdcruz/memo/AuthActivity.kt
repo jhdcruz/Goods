@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.jhdcruz.memo.ui.login.LoginScreen
+import io.github.jhdcruz.memo.ui.screens.login.LoginScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 
 @AndroidEntryPoint

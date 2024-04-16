@@ -58,6 +58,7 @@ class AttachmentsRepositoryImpl @Inject constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override suspend fun onAttachmentDelete(
         id: String,
         filename: String,

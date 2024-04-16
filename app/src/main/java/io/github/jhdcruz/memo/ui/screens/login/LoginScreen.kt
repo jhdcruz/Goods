@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.login
+package io.github.jhdcruz.memo.ui.screens.login
 
 import android.content.Context
 import android.content.Intent
@@ -51,8 +51,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.jhdcruz.memo.ui.shared.ConfirmDialog
-import io.github.jhdcruz.memo.ui.shared.GoogleButton
+import io.github.jhdcruz.memo.ui.components.ConfirmDialog
+import io.github.jhdcruz.memo.ui.components.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.job

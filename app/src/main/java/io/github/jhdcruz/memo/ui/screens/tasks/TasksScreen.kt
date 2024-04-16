@@ -52,10 +52,10 @@ import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.dateUntil
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelPreview
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
-import io.github.jhdcruz.memo.ui.shared.AppSearch
+import io.github.jhdcruz.memo.ui.components.AppSearch
 import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch

@@ -4,8 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import io.github.jhdcruz.memo.ui.ContainerViewModel
-import io.github.jhdcruz.memo.ui.ContainerViewModelImpl
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
+import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel

@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.shared
+package io.github.jhdcruz.memo.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.ui.theme.MemoTheme
 
 @Composable
 fun GoogleButton(
@@ -37,5 +38,7 @@ fun GoogleButton(
 @Preview
 @Composable
 private fun GoogleButtonPreview() {
-    GoogleButton {}
+    MemoTheme {
+        GoogleButton {}
+    }
 }

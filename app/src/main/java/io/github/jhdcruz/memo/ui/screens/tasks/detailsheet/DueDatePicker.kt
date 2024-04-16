@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package io.github.jhdcruz.memo.ui.tasks.detailsheet
+package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.Image
@@ -26,8 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.domain.createTimestamp
-import io.github.jhdcruz.memo.ui.shared.TimePickerDialog
-import io.github.jhdcruz.memo.ui.tasks.TasksViewModel
+import io.github.jhdcruz.memo.ui.components.TimePickerDialog
+import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 

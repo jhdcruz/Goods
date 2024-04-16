@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.login
+package io.github.jhdcruz.memo.ui.screens.login
 
 import android.content.Context
 import android.content.Intent

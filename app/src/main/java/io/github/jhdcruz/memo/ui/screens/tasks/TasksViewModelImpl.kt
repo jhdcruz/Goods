@@ -1,4 +1,4 @@
-package io.github.jhdcruz.memo.ui.tasks
+package io.github.jhdcruz.memo.ui.screens.tasks
 
 import android.content.Context
 import android.content.Intent

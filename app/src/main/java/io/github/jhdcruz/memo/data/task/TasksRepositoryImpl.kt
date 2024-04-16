@@ -258,6 +258,7 @@ class TasksRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    @Suppress("UNCHECKED_CAST")
     override suspend fun onGetCategories(): List<String> {
         val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
@@ -276,6 +277,7 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override suspend fun onGetTags(): List<String> {
         val uid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
 
