@@ -74,6 +74,8 @@ android {
             isShrinkResources = true
             isDebuggable = false
 
+            signingConfig = signingConfigs.getByName("release")
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -94,7 +96,6 @@ android {
                 "GCP_CLIENT",
                 "\"${properties.getProperty("gcp.client.release")}\""
             )
-            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
