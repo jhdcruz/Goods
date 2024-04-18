@@ -1,13 +1,18 @@
 package io.github.jhdcruz.memo
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jhdcruz.memo.service.reminders.ReminderService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import javax.inject.Inject
@@ -18,6 +23,16 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var auth: FirebaseAuth
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        if (permissions.values.all { isGranted -> isGranted }) {
+            Intent(this, ReminderService::class.java).apply {
+                startService(this)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,15 +42,52 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "User timed out, Redirecting to login.", Toast.LENGTH_SHORT).show()
 
             // navigate to AuthActivity
-            val intent = Intent(this, AuthActivity::class.java).apply {
+            Intent(this, AuthActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(this)
             }
-            startActivity(intent)
         } else {
+            checkServicePermissions()
+
             setContent {
                 MemoTheme {
                     ContainerScreen(user = auth.currentUser)
                 }
+            }
+        }
+    }
+
+    private fun checkServicePermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
+                )
+            } else {
+                Intent(this, ReminderService::class.java).apply {
+                    startService(this)
+                }
+            }
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.SCHEDULE_EXACT_ALARM
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.SCHEDULE_EXACT_ALARM,
+                        android.Manifest.permission.SET_ALARM,
+                        android.Manifest.permission.USE_EXACT_ALARM,
+                    )
+                )
             }
         }
     }

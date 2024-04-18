@@ -2,7 +2,9 @@ package io.github.jhdcruz.memo.ui.components
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -40,10 +42,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.AuthActivity
 import io.github.jhdcruz.memo.R
+import io.github.jhdcruz.memo.service.reminders.ReminderService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
@@ -80,6 +84,20 @@ fun AppSearch(
             }
         }
 
+    val requestVoicePermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            voiceSearch.launch(containerViewModel.onVoiceSearch())
+        } else {
+            Toast.makeText(
+                context,
+                "Microphone permission is required.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     DockedSearchBar(
         modifier = modifier
             .padding(vertical = 8.dp, horizontal = 16.dp)
@@ -115,7 +133,19 @@ fun AppSearch(
                 IconButton(
                     modifier = Modifier.offset(x = 4.dp),
                     onClick = {
-                        voiceSearch.launch(containerViewModel.onVoiceSearch())
+                        scope.launch {
+                            // check first if voice permission is granted
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.RECORD_AUDIO
+                                ) ==
+                                PackageManager.PERMISSION_GRANTED
+                            ) {
+                                voiceSearch.launch(containerViewModel.onVoiceSearch())
+                            } else {
+                                requestVoicePermission.launch(android.Manifest.permission.RECORD_AUDIO)
+                            }
+                        }
                     }) {
                     Image(
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
@@ -144,11 +174,23 @@ fun AppSearch(
                                 scope.launch {
                                     loginViewModel.onSignOut()
 
+                                    val appContext = context.applicationContext
+                                    // terminate the reminder service
+                                    Intent(
+                                        appContext,
+                                        ReminderService::class.java
+                                    ).apply {
+                                        appContext.applicationContext.stopService(this)
+                                    }
+
                                     // go back to login activity
-                                    Intent(context, AuthActivity::class.java).apply {
+                                    Intent(
+                                        appContext,
+                                        AuthActivity::class.java
+                                    ).apply {
                                         flags =
                                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                        context.startActivity(this)
+                                        appContext.applicationContext.startActivity(this)
                                     }
                                 }
                             },

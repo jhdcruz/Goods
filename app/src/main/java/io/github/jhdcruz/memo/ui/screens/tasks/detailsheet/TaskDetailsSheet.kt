@@ -2,7 +2,9 @@
 
 package io.github.jhdcruz.memo.ui.screens.tasks.detailsheet
 
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -45,14 +47,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.Timestamp
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.format
+import io.github.jhdcruz.memo.ui.components.ConfirmDialog
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
-import io.github.jhdcruz.memo.ui.components.ConfirmDialog
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelPreview
@@ -102,7 +105,7 @@ private fun TaskDetailsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val appContext = LocalContext.current.applicationContext
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // Populating tasks
@@ -123,12 +126,22 @@ private fun TaskDetailsContent(
     var showDatePicker by remember { mutableStateOf(false) }
 
     val selectTaskAttachments =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri>? ->
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenMultipleDocuments()
+        ) { uris: List<Uri>? ->
             if (uris != null) {
                 // append selected files, instead of overwriting
                 fileUris.value = uris
             }
         }
+
+    val requestMediaPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) {
+        if (it.values.any { granted -> granted }) {
+            selectTaskAttachments.launch(arrayOf("*/*"))
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -191,7 +204,7 @@ private fun TaskDetailsContent(
                     modifier = Modifier.weight(1f),
                     onClick = { showDatePicker = true }
                 ) {
-                    Text(text = taskDueDate.value!!.format(appContext))
+                    Text(text = taskDueDate.value!!.format(context.applicationContext))
                 }
             } else {
                 Spacer(
@@ -309,10 +322,46 @@ private fun TaskDetailsContent(
                 showPicker = showDatePicker
             )
 
+            // attachments button
             IconButton(
                 onClick = {
                     scope.launch {
-                        selectTaskAttachments.launch(arrayOf("*/*"))
+                        // ask runtime storage permissions
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            // Android 13 and above
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.READ_MEDIA_IMAGES
+                                ) == PackageManager.PERMISSION_GRANTED &&
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.READ_MEDIA_VIDEO
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                selectTaskAttachments.launch(arrayOf("*/*"))
+                            } else {
+                                // Request permissions
+                                requestMediaPermission.launch(
+                                    arrayOf(
+                                        android.Manifest.permission.READ_MEDIA_IMAGES,
+                                        android.Manifest.permission.READ_MEDIA_VIDEO
+                                    ),
+                                )
+                            }
+                        } else
+                        // Android 11 and below
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                selectTaskAttachments.launch(arrayOf("*/*"))
+                            } else {
+                                // Request permissions
+                                requestMediaPermission.launch(
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                                )
+                            }
                     }
                 }) {
                 Image(
