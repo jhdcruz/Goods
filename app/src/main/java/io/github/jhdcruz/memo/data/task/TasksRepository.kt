@@ -24,4 +24,7 @@ interface TasksRepository {
 
     suspend fun onGetCategories(): List<String>
     suspend fun onGetTags(): List<String>
+
+    suspend fun onFilterCategory(category: String): List<Task>
+    suspend fun onFilterTag(tag: String): List<Task>
 }

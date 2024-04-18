@@ -192,6 +192,8 @@ fun Sidebar(
                                 onClick = {
                                     scope.launch {
                                         selected = index + 3
+
+                                        containerViewModel.onFilterCategory(category)
                                         drawerState.close()
                                     }
                                 }

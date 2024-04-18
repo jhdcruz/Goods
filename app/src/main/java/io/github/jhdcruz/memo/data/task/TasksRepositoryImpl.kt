@@ -295,4 +295,38 @@ class TasksRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun onFilterCategory(category: String): List<Task> {
+        val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+
+        return try {
+            // filter tasks by category in Firestore nested collection located in 'users/uid/tasks'
+            firestore.collection("users").document(userUid).collection("tasks")
+                .whereEqualTo("category", category)
+                .get()
+                .await()
+                .toObjects(Task::class.java)
+                .sortedByDescending { it.priority }
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("TasksRepository", "Error filtering tasks by category", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun onFilterTag(tag: String): List<Task> {
+        val userUid = auth.currentUser?.uid ?: throw IllegalStateException("User not signed in")
+
+        return try {
+            // filter tasks by tag in Firestore nested collection located in 'users/uid/tasks'
+            firestore.collection("users").document(userUid).collection("tasks")
+                .whereArrayContains("tags", tag)
+                .get()
+                .await()
+                .toObjects(Task::class.java)
+                .sortedByDescending { it.priority }
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("TasksRepository", "Error filtering tasks by tag", e)
+            emptyList()
+        }
+    }
 }

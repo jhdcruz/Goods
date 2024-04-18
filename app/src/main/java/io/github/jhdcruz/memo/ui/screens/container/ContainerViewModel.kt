@@ -52,8 +52,9 @@ abstract class ContainerViewModel : ViewModel() {
     )
 
     abstract fun onGetCategories()
-
     abstract fun onGetTags()
+    abstract fun onFilterCategory(category: String)
+    abstract fun onFilterTag(tag: String)
 
     abstract fun onIsFetchingTasksChange(isFetching: Boolean)
 

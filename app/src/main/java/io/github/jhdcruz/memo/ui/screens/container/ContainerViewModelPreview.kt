@@ -62,6 +62,12 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override fun onGetTags() {
     }
 
+    override fun onFilterCategory(category: String) {
+    }
+
+    override fun onFilterTag(tag: String) {
+    }
+
     override fun onIsFetchingTasksChange(isFetching: Boolean) {
     }
 

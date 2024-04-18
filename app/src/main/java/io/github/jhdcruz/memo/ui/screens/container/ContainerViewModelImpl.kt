@@ -82,6 +82,8 @@ class ContainerViewModelImpl @Inject constructor(
         localAttachments: List<Pair<String, Uri>>,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
             val taskJob = tasksRepository.onTaskAdd(task) as FirestoreResponseUseCase.Success
             val taskId = taskJob.result as String
 
@@ -89,6 +91,8 @@ class ContainerViewModelImpl @Inject constructor(
             if (localAttachments.isNotEmpty()) {
                 onAttachmentsUpload(taskId, localAttachments)
             }
+
+            onIsFetchingTasksChange(false)
         }
     }
 
@@ -98,6 +102,7 @@ class ContainerViewModelImpl @Inject constructor(
         localAttachments: List<Pair<String, Uri>>,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
 
             val taskUpdateJob = async { tasksRepository.onTaskUpdate(id, task) }
             val attachmentsUploadJob = async {
@@ -108,16 +113,22 @@ class ContainerViewModelImpl @Inject constructor(
 
             taskUpdateJob.await()
             attachmentsUploadJob.await()
+
+            onIsFetchingTasksChange(false)
         }
     }
 
     override fun onTaskDelete(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
             val taskDeleteJob = async { tasksRepository.onTaskDelete(id) }
             val attachmentDeleteJob = async { attachmentsRepository.onAttachmentDeleteAll(id) }
 
             taskDeleteJob.await()
             attachmentDeleteJob.await()
+
+            onIsFetchingTasksChange(true)
         }
     }
 
@@ -192,6 +203,28 @@ class ContainerViewModelImpl @Inject constructor(
     override fun onGetTags() {
         viewModelScope.launch {
             _tags.value = tasksRepository.onGetTags()
+        }
+    }
+
+    override fun onFilterCategory(category: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
+            val taskList = tasksRepository.onFilterCategory(category)
+            onTaskListChange(taskList)
+
+            onIsFetchingTasksChange(false)
+        }
+    }
+
+    override fun onFilterTag(tag: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
+            val taskList = tasksRepository.onFilterTag(tag)
+            onTaskListChange(taskList)
+
+            onIsFetchingTasksChange(false)
         }
     }
 
