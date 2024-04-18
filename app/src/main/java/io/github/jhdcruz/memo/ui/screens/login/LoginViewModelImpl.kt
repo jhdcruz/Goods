@@ -39,17 +39,17 @@ class LoginViewModelImpl @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.signIn(
                 context = context,
-            ).also { response ->
-                when (response) {
+            ).apply {
+                when (this) {
                     is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
 
                     is AuthResponseUseCase.Error -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     is AuthResponseUseCase.Failure -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     is AuthResponseUseCase.NotFound -> _status.value = "User not found"
                     else -> {}
@@ -62,17 +62,17 @@ class LoginViewModelImpl @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.googleSignIn(
                 context = context,
-            ).also { response ->
-                when (response) {
+            ).apply {
+                when (this) {
                     is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
 
                     is AuthResponseUseCase.Error -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     is AuthResponseUseCase.Failure -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     is AuthResponseUseCase.NotFound -> _status.value = "User not found"
                     else -> {}
@@ -87,17 +87,17 @@ class LoginViewModelImpl @Inject constructor(
                 context = context,
                 email = email,
                 password = password,
-            ).also { response ->
-                when (response) {
+            ).apply {
+                when (this) {
                     is AuthResponseUseCase.Success -> {
                         navigateToMain(context)
                     }
 
                     is AuthResponseUseCase.Error -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     is AuthResponseUseCase.Failure -> _status.value =
-                        response.exception.message.toString()
+                        this.exception.message.toString()
 
                     else -> {}
                 }
@@ -113,10 +113,10 @@ class LoginViewModelImpl @Inject constructor(
 
     private fun navigateToMain(context: Context) {
         viewModelScope.launch {
-            Intent(context, MainActivity::class.java).apply {
+            val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                context.startActivity(this)
             }
+            context.startActivity(intent)
         }
     }
 }

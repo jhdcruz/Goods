@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,8 +53,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jhdcruz.memo.ui.components.ConfirmDialog
 import io.github.jhdcruz.memo.ui.components.GoogleButton
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 /**
@@ -93,7 +90,6 @@ fun LoginScreen(
     }
 
     Scaffold(
-        modifier = Modifier.safeDrawingPadding(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
@@ -115,7 +111,6 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             LoginForm(
-                scope = scope,
                 viewModel = viewModel,
                 modifier = modifier,
                 context = context,
@@ -169,10 +164,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             ClickableText(
-                style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 38.dp),
+                style = MaterialTheme.typography.labelSmall,
                 text = buildAnnotatedString {
                     withStyle(
                         SpanStyle(
@@ -196,7 +191,6 @@ fun LoginScreen(
 @Composable
 fun LoginForm(
     viewModel: LoginViewModel = hiltViewModel(),
-    scope: CoroutineScope = rememberCoroutineScope(),
     modifier: Modifier,
     context: Context,
 ) {
@@ -217,11 +211,7 @@ fun LoginForm(
             ConfirmDialog(
                 onDismissRequest = { notFound.value = false },
                 onConfirmation = {
-                    scope.launch {
-                        viewModel.onSignUp(context, email.value, password.value)
-                    }.job.invokeOnCompletion {
-                        notFound.value = false
-                    }
+                    viewModel.onSignUp(context, email.value, password.value)
                 },
                 dialogTitle = {
                     Text(text = "Create account?")
@@ -290,11 +280,9 @@ fun LoginForm(
             onClick = {
                 localSoftwareKeyboardController?.hide()
 
-                scope.launch {
-                    viewModel.onSignIn(context).apply {
-                        if (authStatus.value == "User not found") {
-                            notFound.value = true
-                        }
+                viewModel.onSignIn(context).apply {
+                    if (authStatus.value == "User not found") {
+                        notFound.value = true
                     }
                 }
             }) {
