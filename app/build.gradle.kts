@@ -41,6 +41,15 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(properties.getProperty("signing.release.store.file"))
+            storePassword = properties.getProperty("signing.release.store.password")
+            keyAlias = properties.getProperty("signing.release.key.alias")
+            keyPassword = properties.getProperty("signing.release.key.password")
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -55,7 +64,7 @@ android {
 
             buildConfigField(
                 "String",
-                "GCP_CLIENT_DEBUG",
+                "GCP_CLIENT",
                 "\"${properties.getProperty("gcp.client.debug")}\""
             )
         }
@@ -82,9 +91,10 @@ android {
 
             buildConfigField(
                 "String",
-                "GCP_CLIENT_RELEASE",
+                "GCP_CLIENT",
                 "\"${properties.getProperty("gcp.client.release")}\""
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
