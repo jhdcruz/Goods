@@ -33,11 +33,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseUser
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.ui.screens.calendar.CalendarScreen
-import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
-import io.github.jhdcruz.memo.ui.navigation.RootScreens
 import io.github.jhdcruz.memo.ui.components.AppSearch
 import io.github.jhdcruz.memo.ui.components.Sidebar
+import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
+import io.github.jhdcruz.memo.ui.navigation.RootScreens
+import io.github.jhdcruz.memo.ui.screens.calendar.CalendarScreen
+import io.github.jhdcruz.memo.ui.screens.settings.SettingsScreen
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksScreen
 import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -47,7 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ContainerScreen(
     user: FirebaseUser?,
-    containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModel>(),
+    containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -121,6 +122,12 @@ fun ContainerScreen(
 
                 composable(RootScreens.Calendar.route) {
                     CalendarScreen(
+                        modifier = Modifier.padding(innerPadding),
+                    )
+                }
+
+                composable(RootScreens.Settings.route) {
+                    SettingsScreen(
                         modifier = Modifier.padding(innerPadding),
                     )
                 }
