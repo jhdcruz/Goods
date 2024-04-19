@@ -28,13 +28,14 @@ firebase-bom = "32.8.1"
 firebase-perf-plugin = "1.4.2"
 firebase-crashlytics-gradle = "2.9.9"
 gradle = "8.3.2"
+work-manager = "2.9.0"
 
 [bundles]
 android-credentials = ["android-identity-googleid", "credentials", "credentials-play-services"]
 appcompat = ["compat-app", "compat-resources"]
 compose-debug = ["ui-tooling", "ui-test-manifest"]
 compose-ui = ["ui", "ui-navigation", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3"]
-core = ["activity-compose", "core-ktx", "coroutines"]
+core = ["activity-compose", "core-ktx", "coroutines", "work-manager"]
 firebase = ["firebase-firestore", "firebase-auth", "firebase-storage", "firebase-perf", "firebase-analytics", "firebase-crashlytics"]
 hilt = ["hilt-android", "hilt-compiler", "hilt-navigation-compose"]
 lifecycle = ["lifecycle-runtime", "lifecycle-runtime-compose", "lifecycle-viewmodel", "lifecycle-viewmodel-compose"]
@@ -81,6 +82,7 @@ ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+work-manager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-manager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

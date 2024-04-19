@@ -72,7 +72,9 @@ fun AppSearch(
     var showProfileMenu by remember { mutableStateOf(false) }
 
     val voiceSearch =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // matches[0] will contain the result of voice input
                 val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
@@ -84,24 +86,26 @@ fun AppSearch(
             }
         }
 
-    val requestVoicePermission = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            voiceSearch.launch(containerViewModel.onVoiceSearch())
-        } else {
-            Toast.makeText(
-                context,
-                "Microphone permission is required.",
-                Toast.LENGTH_SHORT
-            ).show()
+    val requestVoicePermission =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                voiceSearch.launch(containerViewModel.onVoiceSearch())
+            } else {
+                Toast.makeText(
+                    context,
+                    "Microphone permission is required.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
         }
-    }
 
     DockedSearchBar(
-        modifier = modifier
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .fillMaxWidth(),
+        modifier =
+            modifier
+                .padding(vertical = 8.dp, horizontal = 16.dp)
+                .fillMaxWidth(),
         query = query,
         onQueryChange = containerViewModel::onQueryChange,
         onSearch = {
@@ -117,12 +121,12 @@ fun AppSearch(
                             if (isClosed) open() else close()
                         }
                     }
-                }
+                },
             ) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     painter = painterResource(id = R.drawable.baseline_menu_24),
-                    contentDescription = "Tasks menu"
+                    contentDescription = "Tasks menu",
                 )
             }
         },
@@ -137,27 +141,31 @@ fun AppSearch(
                             // check first if voice permission is granted
                             if (ContextCompat.checkSelfPermission(
                                     context,
-                                    android.Manifest.permission.RECORD_AUDIO
+                                    android.Manifest.permission.RECORD_AUDIO,
                                 ) ==
                                 PackageManager.PERMISSION_GRANTED
                             ) {
                                 voiceSearch.launch(containerViewModel.onVoiceSearch())
                             } else {
-                                requestVoicePermission.launch(android.Manifest.permission.RECORD_AUDIO)
+                                requestVoicePermission.launch(
+                                    android.Manifest.permission.RECORD_AUDIO,
+                                )
                             }
                         }
-                    }) {
+                    },
+                ) {
                     Image(
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                         painter = painterResource(id = R.drawable.baseline_mic_24),
-                        contentDescription = "Search tasks using voice input"
+                        contentDescription = "Search tasks using voice input",
                     )
                 }
                 IconButton(onClick = { showProfileMenu = true }) {
                     AsyncImage(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape),
+                        modifier =
+                            Modifier
+                                .size(32.dp)
+                                .clip(CircleShape),
                         model = profile,
                         contentDescription = "Profile icon",
                         placeholder = painterResource(id = R.drawable.baseline_user_circle_24),
@@ -166,7 +174,7 @@ fun AppSearch(
 
                     DropdownMenu(
                         expanded = showProfileMenu,
-                        onDismissRequest = { showProfileMenu = false }
+                        onDismissRequest = { showProfileMenu = false },
                     ) {
                         DropdownMenuItem(
                             text = { Text(text = "Sign out") },
@@ -178,7 +186,7 @@ fun AppSearch(
                                     // terminate the reminder service
                                     Intent(
                                         appContext,
-                                        ReminderService::class.java
+                                        ReminderService::class.java,
                                     ).apply {
                                         appContext.applicationContext.stopService(this)
                                     }
@@ -186,7 +194,7 @@ fun AppSearch(
                                     // go back to login activity
                                     Intent(
                                         appContext,
-                                        AuthActivity::class.java
+                                        AuthActivity::class.java,
                                     ).apply {
                                         flags =
                                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -197,15 +205,14 @@ fun AppSearch(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
-                            }
+                            },
                         )
                     }
                 }
             }
         },
-
         // we don't need the search bar content, we filter directly
         active = false,
         onActiveChange = {},

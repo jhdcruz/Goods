@@ -48,15 +48,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun ContainerScreen(
     user: FirebaseUser?,
+    modifier: Modifier = Modifier,
     containerViewModel: ContainerViewModel = hiltViewModel<ContainerViewModelImpl>(),
 ) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+        )
 
     val photoUrl = remember { mutableStateOf("") }
 
@@ -65,6 +67,7 @@ fun ContainerScreen(
     }
 
     ModalNavigationDrawer(
+        modifier = modifier,
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
@@ -102,12 +105,12 @@ fun ContainerScreen(
                         Image(
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                             painter = painterResource(id = R.drawable.baseline_add_24),
-                            contentDescription = null
+                            contentDescription = null,
                         )
                         Text(text = "New task")
                     }
                 }
-            }
+            },
         ) { innerPadding ->
             NavHost(
                 navController = navController,
@@ -150,7 +153,7 @@ private fun ContainerScreenPreview() {
     MemoTheme {
         ContainerScreen(
             user = null,
-            containerViewModel = ContainerViewModelPreview()
+            containerViewModel = ContainerViewModelPreview(),
         )
     }
 }

@@ -13,25 +13,33 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jhdcruz.memo.service.reminders.ReminderService
+import io.github.jhdcruz.memo.service.reminders.ReminderSyncService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject
     lateinit var auth: FirebaseAuth
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions(),
-    ) { permissions ->
-        if (permissions.values.all { isGranted -> isGranted }) {
-            Intent(this, ReminderService::class.java).apply {
-                startService(this)
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            // Start services if all permissions are granted
+            if (permissions.values.all { isGranted -> isGranted }) {
+                Intent(this, ReminderSyncService::class.java).apply {
+                    startService(this)
+                }
+            } else {
+                Toast.makeText(
+                    this,
+                    "Reminders will not work when denied.",
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,27 +65,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Check permission for background services
+     * based on android versions.
+     */
     private fun checkServicePermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
             if (ContextCompat.checkSelfPermission(
                     this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
+                    android.Manifest.permission.POST_NOTIFICATIONS,
                 ) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissionLauncher.launch(
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                 )
             } else {
-                Intent(this, ReminderService::class.java).apply {
+                Intent(this, ReminderSyncService::class.java).apply {
                     startService(this)
                 }
             }
 
             if (ContextCompat.checkSelfPermission(
                     this,
-                    android.Manifest.permission.SCHEDULE_EXACT_ALARM
+                    android.Manifest.permission.SCHEDULE_EXACT_ALARM,
                 ) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
@@ -86,8 +97,30 @@ class MainActivity : ComponentActivity() {
                         android.Manifest.permission.SCHEDULE_EXACT_ALARM,
                         android.Manifest.permission.SET_ALARM,
                         android.Manifest.permission.USE_EXACT_ALARM,
-                    )
+                    ),
                 )
+            } else {
+                Intent(this, ReminderService::class.java).apply {
+                    startService(this)
+                }
+            }
+        }
+
+        // For Android 14 and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
+                ) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(
+                    arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC),
+                )
+            } else {
+                Intent(this, ReminderService::class.java).apply {
+                    startService(this)
+                }
             }
         }
     }

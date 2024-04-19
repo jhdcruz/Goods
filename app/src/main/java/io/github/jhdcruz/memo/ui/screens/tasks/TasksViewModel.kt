@@ -28,21 +28,40 @@ abstract class TasksViewModel : ViewModel() {
     // Attachments to be uploaded
     abstract val taskLocalAttachments: Flow<List<Pair<String, Uri>>>
 
-    abstract fun getTaskDueDate(millis: Long, hour: Int, minute: Int): Timestamp
+    abstract fun getTaskDueDate(
+        millis: Long,
+        hour: Int,
+        minute: Int,
+    ): Timestamp
 
     abstract fun onTagsChange(tags: List<String>)
+
     abstract fun onCategoryChange(category: String)
 
     abstract fun onTaskIdChange(id: String)
+
     abstract fun onTaskTitleChange(title: String)
+
     abstract fun onTaskDescriptionChange(description: TextFieldValue)
+
     abstract fun onTaskCategoryChange(category: String)
+
     abstract fun onTaskTagsChange(tags: List<String>)
 
     abstract fun onTaskAttachmentsChange(attachments: Map<String, TaskAttachment>?)
+
     abstract fun onTaskLocalAttachmentsChange(attachments: List<Pair<String, Uri>>)
-    abstract fun onTaskAttachmentPreview(context: Context, attachment: Map<String, String>)
-    abstract fun onTaskAttachmentPreview(context: Context, attachment: Pair<String, Uri>)
+
+    abstract fun onTaskAttachmentPreview(
+        context: Context,
+        attachment: Map<String, String>,
+    )
+
+    abstract fun onTaskAttachmentPreview(
+        context: Context,
+        attachment: Pair<String, Uri>,
+    )
+
     abstract fun removeTaskAttachment(
         taskId: String,
         filename: String,
@@ -50,14 +69,18 @@ abstract class TasksViewModel : ViewModel() {
     )
 
     abstract fun onTaskDueDateChange(date: Timestamp)
+
     abstract fun onTaskSelectedDateChange(date: Long)
+
     abstract fun onTaskSelectedHourChange(hour: Int)
+
     abstract fun onTaskSelectedMinuteChange(minute: Int)
 
     abstract fun onTaskPriorityChange(priority: Int)
+
     abstract fun onTaskUpdatedChange(updated: Timestamp)
 
-
     abstract fun onClearInput()
+
     abstract fun onTaskPreview(task: Task)
 }

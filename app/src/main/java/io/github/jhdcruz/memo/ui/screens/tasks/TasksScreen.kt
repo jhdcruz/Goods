@@ -52,10 +52,10 @@ import androidx.navigation.compose.rememberNavController
 import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.domain.dateUntil
+import io.github.jhdcruz.memo.ui.components.AppSearch
+import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
-import io.github.jhdcruz.memo.ui.navigation.BottomNavigation
-import io.github.jhdcruz.memo.ui.components.AppSearch
 import io.github.jhdcruz.memo.ui.screens.tasks.detailsheet.TaskDetailsSheet
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
 import kotlinx.coroutines.launch
@@ -80,9 +80,10 @@ private fun TasksListContent(
     containerViewModel: ContainerViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+        )
 
     val isFetchingTasks = containerViewModel.isFetchingTasks.collectAsState(true)
     val taskList = containerViewModel.taskList.collectAsState(emptyList())
@@ -106,13 +107,14 @@ private fun TasksListContent(
                                 sheetState.show()
                             }
                         },
-                        onTaskCompleted = { containerViewModel.onTaskCompleted(it.id!!) }
+                        onTaskCompleted = { containerViewModel.onTaskCompleted(it.id!!) },
                     )
 
                     HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp, horizontal = 16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp, horizontal = 16.dp),
                     )
                 }
             }
@@ -123,7 +125,7 @@ private fun TasksListContent(
                     containerViewModel = containerViewModel,
                     onDismissRequest = { selectedTask = null },
                     sheetState = sheetState,
-                    task = selectedTask!!
+                    task = selectedTask!!,
                 )
             }
         }
@@ -143,32 +145,34 @@ private fun TaskItem(
         visible = !task.isCompleted,
         enter = fadeIn(),
         exit = fadeOut(),
-        label = "Task completion anim"
+        label = "Task completion anim",
     ) {
         ListItem(
             modifier = Modifier.clickable { onTaskClick(task) },
             overlineContent = {
                 Row(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(bottom = 6.dp),
+                    modifier =
+                        Modifier
+                            .wrapContentSize()
+                            .padding(bottom = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         modifier = Modifier.size(16.dp),
                         painter = painterResource(id = R.drawable.baseline_folder_24),
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
                     )
 
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        text = if (task.category?.isNotBlank() == true) {
-                            task.category
-                        } else {
-                            "Inbox"
-                        }
+                        text =
+                            if (task.category?.isNotBlank() == true) {
+                                task.category
+                            } else {
+                                "Inbox"
+                            },
                     )
                 }
             },
@@ -176,7 +180,7 @@ private fun TaskItem(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.SemiBold,
-                    text = task.title
+                    text = task.title,
                 )
             },
             supportingContent = {
@@ -200,13 +204,13 @@ private fun TaskItem(
                             scope.launch {
                                 onTaskCompleted(task)
                             }
-                        }
+                        },
                     )
                 }
             },
             trailingContent = {
                 TaskTrailingContent(task)
-            }
+            },
         )
     }
 }
@@ -223,36 +227,40 @@ private fun TaskTrailingContent(task: Task) {
         ) {
             // due date & priority
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (task.dueDate != null) {
                     Text(
                         text = task.dueDate.dateUntil(),
-                        maxLines = 1
+                        maxLines = 1,
                     )
                 }
 
                 Image(
                     modifier = Modifier.padding(horizontal = 4.dp),
-                    colorFilter = ColorFilter.tint(
-                        when (task.priority) {
-                            3 -> Color.Red
-                            2 -> Color.Yellow
-                            1 -> Color.Blue
-                            else -> MaterialTheme.colorScheme.onSurface
-                        }
-                    ),
-                    painter = painterResource(
-                        id = if (task.priority != 0) {
-                            R.drawable.baseline_flag_filled_24
-                        } else {
-                            R.drawable.baseline_flag_24
-                        }
-                    ),
-                    contentDescription = "Set task's priority"
+                    colorFilter =
+                        ColorFilter.tint(
+                            when (task.priority) {
+                                3 -> Color.Red
+                                2 -> Color.Yellow
+                                1 -> Color.Blue
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
+                        ),
+                    painter =
+                        painterResource(
+                            id =
+                                if (task.priority != 0) {
+                                    R.drawable.baseline_flag_filled_24
+                                } else {
+                                    R.drawable.baseline_flag_24
+                                },
+                        ),
+                    contentDescription = "Set task's priority",
                 )
             }
 
@@ -284,7 +292,7 @@ private fun LoadingState(isLoading: Boolean) {
 private fun EmptyState() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "No tasks created yet",
@@ -309,7 +317,7 @@ private fun TasksScreenPreview() {
             },
             bottomBar = {
                 BottomNavigation(navController)
-            }
+            },
         ) { innerPadding ->
             TasksScreen(
                 modifier = Modifier.padding(innerPadding),

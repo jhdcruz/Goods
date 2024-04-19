@@ -10,7 +10,6 @@ import io.github.jhdcruz.memo.ui.theme.MemoTheme
 
 @AndroidEntryPoint
 class AuthActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

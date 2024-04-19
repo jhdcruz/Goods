@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.ui.screens.container
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import io.github.jhdcruz.memo.data.model.Task
@@ -12,6 +13,8 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override val taskList: Flow<List<Task>> = flowOf(emptyList())
     override val tags: Flow<List<String>> = flowOf(emptyList())
     override val categories: Flow<List<String>> = flowOf(emptyList())
+    override fun restartReminderWorker(context: Context) {
+    }
 
     override fun onVoiceSearch(): Intent {
         return Intent()

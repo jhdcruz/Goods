@@ -75,12 +75,13 @@ fun TaskDetailsSheet(
     task: Task? = null,
 ) {
     ModalBottomSheet(
-        modifier = modifier
-            .wrapContentHeight()
-            .imePadding(),
+        modifier =
+            modifier
+                .wrapContentHeight()
+                .imePadding(),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        dragHandle = { }
+        dragHandle = { },
     ) {
         // assign existing task data to view model
         if (task != null) {
@@ -91,7 +92,7 @@ fun TaskDetailsSheet(
             tasksViewModel = tasksViewModel,
             containerViewModel = containerViewModel,
             sheetState = sheetState,
-            task = task
+            task = task,
         )
     }
 }
@@ -127,7 +128,7 @@ private fun TaskDetailsContent(
 
     val selectTaskAttachments =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenMultipleDocuments()
+            contract = ActivityResultContracts.OpenMultipleDocuments(),
         ) { uris: List<Uri>? ->
             if (uris != null) {
                 // append selected files, instead of overwriting
@@ -135,18 +136,20 @@ private fun TaskDetailsContent(
             }
         }
 
-    val requestMediaPermission = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) {
-        if (it.values.any { granted -> granted }) {
-            selectTaskAttachments.launch(arrayOf("*/*"))
+    val requestMediaPermission =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+        ) {
+            if (it.values.any { granted -> granted }) {
+                selectTaskAttachments.launch(arrayOf("*/*"))
+            }
         }
-    }
 
     Column(
-        modifier = Modifier
-            .imePadding()
-            .wrapContentHeight(),
+        modifier =
+            Modifier
+                .imePadding()
+                .wrapContentHeight(),
     ) {
         if (showDeleteDialog) {
             ConfirmDialog(
@@ -169,9 +172,10 @@ private fun TaskDetailsContent(
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -182,19 +186,20 @@ private fun TaskDetailsContent(
                         scope.launch {
                             showDeleteDialog = true
                         }
-                    }
+                    },
                 ) {
                     Image(
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
                         painter = painterResource(id = R.drawable.baseline_delete_24),
-                        contentDescription = "Delete task"
+                        contentDescription = "Delete task",
                     )
                 }
             } else {
                 Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                 )
             }
 
@@ -202,15 +207,16 @@ private fun TaskDetailsContent(
             if (taskDueDate.value != null) {
                 TextButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { showDatePicker = true }
+                    onClick = { showDatePicker = true },
                 ) {
                     Text(text = taskDueDate.value!!.format(context.applicationContext))
                 }
             } else {
                 Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                 )
             }
 
@@ -236,9 +242,9 @@ private fun TaskDetailsContent(
                                     category = taskCategory.value,
                                     tags = taskTags.value,
                                     created = task.created,
-                                    updated = Timestamp.now()
+                                    updated = Timestamp.now(),
                                 ),
-                                taskLocalAttachments.value
+                                taskLocalAttachments.value,
                             )
                         } else {
                             // add new task
@@ -251,22 +257,24 @@ private fun TaskDetailsContent(
                                     category = taskCategory.value,
                                     tags = taskTags.value,
                                 ),
-                                taskLocalAttachments.value
+                                taskLocalAttachments.value,
                             )
                         }
 
                         // reset selected files
                         fileUris.value = emptyList()
                     }
-                }) {
+                },
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.baseline_done_24),
                     contentDescription = "Save task",
-                    colorFilter = if (taskTitle.value.isNotEmpty()) {
-                        ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-                    } else {
-                        ColorFilter.tint(Color.Gray)
-                    },
+                    colorFilter =
+                        if (taskTitle.value.isNotEmpty()) {
+                            ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                        } else {
+                            ColorFilter.tint(Color.Gray)
+                        },
                 )
             }
         }
@@ -277,10 +285,11 @@ private fun TaskDetailsContent(
             onValueChange = { tasksViewModel.onTaskTitleChange(it) },
             singleLine = true,
             placeholder = { Text(text = "Headline of your task") },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
-            )
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                ),
         )
 
         HorizontalDivider()
@@ -292,10 +301,11 @@ private fun TaskDetailsContent(
             minLines = 7,
             maxLines = 7,
             placeholder = { Text(text = "Elaborate the details of your task") },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
-            )
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                ),
         )
 
         // list of attachments uploaded
@@ -305,21 +315,21 @@ private fun TaskDetailsContent(
 
         Row(
             modifier = Modifier.padding(bottom = 16.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             PriorityButton(
                 taskPriority = taskPriority.value,
-                tasksViewModel = tasksViewModel
+                tasksViewModel = tasksViewModel,
             )
 
             CategoryButton(
                 containerViewModel = containerViewModel,
-                tasksViewModel = tasksViewModel
+                tasksViewModel = tasksViewModel,
             )
 
             DueDatePicker(
                 tasksViewModel = tasksViewModel,
-                showPicker = showDatePicker
+                showPicker = showDatePicker,
             )
 
             // attachments button
@@ -331,11 +341,11 @@ private fun TaskDetailsContent(
                             // Android 13 and above
                             if (ContextCompat.checkSelfPermission(
                                     context,
-                                    android.Manifest.permission.READ_MEDIA_IMAGES
+                                    android.Manifest.permission.READ_MEDIA_IMAGES,
                                 ) == PackageManager.PERMISSION_GRANTED &&
                                 ContextCompat.checkSelfPermission(
                                     context,
-                                    android.Manifest.permission.READ_MEDIA_VIDEO
+                                    android.Manifest.permission.READ_MEDIA_VIDEO,
                                 ) == PackageManager.PERMISSION_GRANTED
                             ) {
                                 selectTaskAttachments.launch(arrayOf("*/*"))
@@ -344,15 +354,15 @@ private fun TaskDetailsContent(
                                 requestMediaPermission.launch(
                                     arrayOf(
                                         android.Manifest.permission.READ_MEDIA_IMAGES,
-                                        android.Manifest.permission.READ_MEDIA_VIDEO
+                                        android.Manifest.permission.READ_MEDIA_VIDEO,
                                     ),
                                 )
                             }
-                        } else
-                        // Android 11 and below
+                        } else {
+                            // Android 11 and below
                             if (ContextCompat.checkSelfPermission(
                                     context,
-                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
                                 ) == PackageManager.PERMISSION_GRANTED
                             ) {
                                 selectTaskAttachments.launch(arrayOf("*/*"))
@@ -362,12 +372,14 @@ private fun TaskDetailsContent(
                                     arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
                                 )
                             }
+                        }
                     }
-                }) {
+                },
+            ) {
                 Image(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     painter = painterResource(id = R.drawable.baseline_attach_24),
-                    contentDescription = "Upload attachments"
+                    contentDescription = "Upload attachments",
                 )
             }
 
@@ -376,12 +388,11 @@ private fun TaskDetailsContent(
 
             TagsButton(
                 containerViewModel = containerViewModel,
-                tasksViewModel = tasksViewModel
+                tasksViewModel = tasksViewModel,
             )
         }
     }
 }
-
 
 @Composable
 @Preview(showBackground = true)
@@ -395,7 +406,7 @@ private fun TaskDetailsContentPreview() {
         TaskDetailsContent(
             tasksViewModel = previewViewModel,
             containerViewModel = containerViewModel,
-            sheetState = sheetState
+            sheetState = sheetState,
         )
     }
 }

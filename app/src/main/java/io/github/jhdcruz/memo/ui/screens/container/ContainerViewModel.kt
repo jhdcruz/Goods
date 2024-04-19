@@ -1,5 +1,6 @@
 package io.github.jhdcruz.memo.ui.screens.container
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -15,8 +16,18 @@ abstract class ContainerViewModel : ViewModel() {
     abstract val tags: Flow<List<String>>
     abstract val categories: Flow<List<String>>
 
+    /**
+     * Reruns the [io.github.jhdcruz.memo.service.reminders.ReminderWorker]
+     * to fetch tasks that are due in the next 30 minutes for reminders.
+     *
+     * Use when a task is created/updated and are due in the next 30 minutes.
+     */
+    abstract fun restartReminderWorker(context: Context)
+
     abstract fun onVoiceSearch(): Intent
+
     abstract fun onSearch()
+
     abstract fun onGetTasks()
 
     abstract fun onTaskAdd(
@@ -36,13 +47,19 @@ abstract class ContainerViewModel : ViewModel() {
 
     abstract fun onCategoryAdd(category: String)
 
-    abstract fun onCategoryUpdate(category: String, newCategory: String)
+    abstract fun onCategoryUpdate(
+        category: String,
+        newCategory: String,
+    )
 
     abstract fun onCategoriesDelete(categories: List<String>)
 
     abstract fun onTagAdd(tag: String)
 
-    abstract fun onTagUpdate(tag: String, newTag: String)
+    abstract fun onTagUpdate(
+        tag: String,
+        newTag: String,
+    )
 
     abstract fun onTagsDelete(tags: List<String>)
 
@@ -52,8 +69,11 @@ abstract class ContainerViewModel : ViewModel() {
     )
 
     abstract fun onGetCategories()
+
     abstract fun onGetTags()
+
     abstract fun onFilterCategory(category: String)
+
     abstract fun onFilterTag(tag: String)
 
     abstract fun onIsFetchingTasksChange(isFetching: Boolean)

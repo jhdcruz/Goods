@@ -9,31 +9,24 @@ import com.google.firebase.storage.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
+@InstallIn(SingletonComponent::class, ServiceComponent::class)
 @Module
 object FirebaseModule {
-
     @Provides
-    @Singleton
     fun provideFirestore() = Firebase.firestore
 
     @Provides
-    @Singleton
     fun provideAuth() = Firebase.auth
 
     @Provides
-    @Singleton
     fun provideStorage() = Firebase.storage
 
     @Provides
-    @Singleton
     fun provideAnalytics() = Firebase.analytics
 
     @Provides
-    @Singleton
     fun provideCrashlytics() = Firebase.crashlytics
-
 }
