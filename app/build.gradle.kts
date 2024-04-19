@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.perf.plugin)
     alias(libs.plugins.firebase.crashlytics.gradle)
+    alias(libs.plugins.ktlint.gradle)
 }
 
 android {
@@ -32,12 +33,12 @@ android {
         buildConfigField(
             "String",
             "GCP_WEB_CLIENT",
-            "\"${properties.getProperty("gcp.web.client")}\""
+            "\"${properties.getProperty("gcp.web.client")}\"",
         )
         buildConfigField(
             "String",
             "GCP_WEB_SECRET",
-            "\"${properties.getProperty("gcp.web.secret")}\""
+            "\"${properties.getProperty("gcp.web.secret")}\"",
         )
     }
 
@@ -65,7 +66,7 @@ android {
             buildConfigField(
                 "String",
                 "GCP_CLIENT",
-                "\"${properties.getProperty("gcp.client.debug")}\""
+                "\"${properties.getProperty("gcp.client.debug")}\"",
             )
         }
 
@@ -94,7 +95,7 @@ android {
             buildConfigField(
                 "String",
                 "GCP_CLIENT",
-                "\"${properties.getProperty("gcp.client.release")}\""
+                "\"${properties.getProperty("gcp.client.release")}\"",
             )
         }
     }
@@ -147,4 +148,6 @@ dependencies {
     debugImplementation(libs.bundles.compose.debug)
 
     ksp(libs.hilt.compiler)
+
+    ktlintRuleset(libs.ktlint.compose.rules)
 }
