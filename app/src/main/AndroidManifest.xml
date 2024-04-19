@@ -68,8 +68,8 @@
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
 
-                <action android:name="io.github.jhdcruz.Memo.NOTIF_ACTION_DONE" />
-                <action android:name="io.github.jhdcruz.Memo.NOTIF_ACTION_SNOOZE" />
+                <action android:name="io.github.jhdcruz.memo.NOTIF_ACTION_DONE" />
+                <action android:name="io.github.jhdcruz.memo.NOTIF_ACTION_SNOOZE" />
             </intent-filter>
 
             <meta-data

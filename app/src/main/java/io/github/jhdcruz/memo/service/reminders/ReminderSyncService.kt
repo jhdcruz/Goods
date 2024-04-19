@@ -27,6 +27,8 @@ class ReminderSyncService : Service() {
     private lateinit var serviceScope: CoroutineScope
 
     override fun onCreate() {
+        super.onCreate()
+
         serviceScope = CoroutineScope(Dispatchers.Main)
     }
 
