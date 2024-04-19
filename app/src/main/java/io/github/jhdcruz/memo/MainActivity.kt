@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.jhdcruz.memo.service.reminders.ReminderService
 import io.github.jhdcruz.memo.service.reminders.ReminderSyncService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -100,7 +99,7 @@ class MainActivity : ComponentActivity() {
                     ),
                 )
             } else {
-                Intent(this, ReminderService::class.java).apply {
+                Intent(this, ReminderSyncService::class.java).apply {
                     startService(this)
                 }
             }
@@ -118,7 +117,7 @@ class MainActivity : ComponentActivity() {
                     arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC),
                 )
             } else {
-                Intent(this, ReminderService::class.java).apply {
+                Intent(this, ReminderSyncService::class.java).apply {
                     startService(this)
                 }
             }
