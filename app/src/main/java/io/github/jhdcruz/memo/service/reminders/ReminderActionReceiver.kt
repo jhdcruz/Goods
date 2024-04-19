@@ -38,7 +38,7 @@ class ReminderActionReceiver : BroadcastReceiver() {
             "NOTIF_ACTION_SNOOZE" -> {
                 // Schedule a new notification after 5 minutes
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val reminderIntent = Intent(context, ReminderService::class.java)
+                val reminderIntent = Intent(context, ReminderNotifyService::class.java)
 
                 val pendingIntent =
                     PendingIntent.getService(

@@ -47,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.jhdcruz.memo.AuthActivity
 import io.github.jhdcruz.memo.R
-import io.github.jhdcruz.memo.service.reminders.ReminderService
+import io.github.jhdcruz.memo.service.reminders.ReminderNotifyService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelPreview
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
@@ -186,7 +186,7 @@ fun AppSearch(
                                     // terminate the reminder service
                                     Intent(
                                         appContext,
-                                        ReminderService::class.java,
+                                        ReminderNotifyService::class.java,
                                     ).apply {
                                         appContext.applicationContext.stopService(this)
                                     }

@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 /**
  * Schedules notifications for tasks with due dates.
- * To be passed to [ReminderService] for notifications.
+ * To be passed to [ReminderNotifyService] for notifications.
  */
 @AndroidEntryPoint
 class ReminderSchedulerService : Service() {
@@ -25,20 +25,6 @@ class ReminderSchedulerService : Service() {
 
     @Inject
     lateinit var firestore: FirebaseFirestore
-
-    /*
-     * Instantiate the sync adapter object.
-     */
-    override fun onCreate() {
-        /*
-         * Create the sync adapter as a singleton.
-         * Set the sync adapter as syncable
-         * Disallow parallel syncs
-         */
-        synchronized(schedulerServiceLock) {
-            reminderSchedulerService = reminderSchedulerService ?: ReminderSchedulerService()
-        }
-    }
 
     override fun onBind(intent: Intent): IBinder? = null
 
@@ -63,7 +49,7 @@ class ReminderSchedulerService : Service() {
             tasks.tasks.forEach { task ->
                 // Intent and content for the notification
                 val reminderIntent =
-                    Intent(this, ReminderService::class.java).apply {
+                    Intent(this, ReminderNotifyService::class.java).apply {
                         putExtra("id", task.id)
                         putExtra("title", task.title)
                         putExtra("dueDate", task.dueDate!!.format(super.getApplicationContext()))
@@ -112,13 +98,5 @@ class ReminderSchedulerService : Service() {
     override fun onDestroy() {
         stopForeground(STOP_FOREGROUND_DETACH)
         super.onDestroy()
-    }
-
-    companion object {
-        // single instance holder
-        private var reminderSchedulerService: ReminderSchedulerService? = null
-
-        // Object to use as a thread-safe lock
-        private val schedulerServiceLock = Any()
     }
 }

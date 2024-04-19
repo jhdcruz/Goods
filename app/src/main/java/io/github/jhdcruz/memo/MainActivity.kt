@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jhdcruz.memo.service.reminders.ReminderService
 import io.github.jhdcruz.memo.service.reminders.ReminderSyncService
 import io.github.jhdcruz.memo.ui.screens.container.ContainerScreen
 import io.github.jhdcruz.memo.ui.theme.MemoTheme
@@ -28,9 +29,7 @@ class MainActivity : ComponentActivity() {
         ) { permissions ->
             // Start services if all permissions are granted
             if (permissions.values.all { isGranted -> isGranted }) {
-                Intent(this, ReminderSyncService::class.java).apply {
-                    startService(this)
-                }
+                startServices()
             } else {
                 Toast.makeText(
                     this,
@@ -117,10 +116,14 @@ class MainActivity : ComponentActivity() {
                     arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC),
                 )
             } else {
-                Intent(this, ReminderSyncService::class.java).apply {
-                    startService(this)
-                }
+                startServices()
             }
+        }
+    }
+
+    private fun startServices() {
+        Intent(this, ReminderService::class.java).apply {
+            startService(this)
         }
     }
 }

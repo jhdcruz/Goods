@@ -5,14 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.task.AttachmentsRepository
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
-import io.github.jhdcruz.memo.service.reminders.ReminderWorker
+import io.github.jhdcruz.memo.service.reminders.ReminderService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -43,10 +41,10 @@ class ContainerViewModelImpl
         private val _categories = MutableStateFlow<List<String>>(emptyList())
         override val categories: Flow<List<String>> = _categories
 
-        override fun restartReminderWorker(context: Context) {
-            val workManager = WorkManager.getInstance(context)
-            val workRequest = OneTimeWorkRequestBuilder<ReminderWorker>().build()
-            workManager.enqueue(workRequest)
+        override fun restartReminderService(context: Context) {
+            Intent(context, ReminderService::class.java).apply {
+                context.startService(this)
+            }
         }
 
         init {
@@ -103,7 +101,6 @@ class ContainerViewModelImpl
                 if (localAttachments.isNotEmpty()) {
                     onAttachmentsUpload(taskId, localAttachments)
                 }
-
                 onIsFetchingTasksChange(false)
             }
         }

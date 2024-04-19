@@ -59,7 +59,7 @@
         tools:targetApi="31">
 
         <service
-            android:name=".service.reminders.ReminderService"
+            android:name=".service.reminders.ReminderNotifyService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse|mediaPlayback"
@@ -68,8 +68,8 @@
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
 
-                <action android:name="io.github.jhdcruz.memo.NOTIF_ACTION_DONE" />
-                <action android:name="io.github.jhdcruz.memo.NOTIF_ACTION_SNOOZE" />
+                <action android:name="io.github.jhdcruz.Memo.NOTIF_ACTION_DONE" />
+                <action android:name="io.github.jhdcruz.Memo.NOTIF_ACTION_SNOOZE" />
             </intent-filter>
 
             <meta-data
@@ -86,8 +86,7 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse"
-            android:label="Memo Tasks Scheduler"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            android:label="Memo Tasks Scheduler">
 
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
@@ -99,8 +98,14 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync"
-            android:label="Memo Tasks Scheduler"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+            android:label="Memo Tasks Scheduler" />
+
+        <service
+            android:name=".service.reminders.ReminderService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:label="Memo Services Initializer" />
 
 
         <activity

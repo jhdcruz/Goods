@@ -13,7 +13,8 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override val taskList: Flow<List<Task>> = flowOf(emptyList())
     override val tags: Flow<List<String>> = flowOf(emptyList())
     override val categories: Flow<List<String>> = flowOf(emptyList())
-    override fun restartReminderWorker(context: Context) {
+
+    override fun restartReminderService(context: Context) {
     }
 
     override fun onVoiceSearch(): Intent {

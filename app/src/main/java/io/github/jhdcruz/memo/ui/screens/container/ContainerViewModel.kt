@@ -17,12 +17,12 @@ abstract class ContainerViewModel : ViewModel() {
     abstract val categories: Flow<List<String>>
 
     /**
-     * Reruns the [io.github.jhdcruz.memo.service.reminders.ReminderWorker]
+     * Reruns the [io.github.jhdcruz.memo.service.reminders.ReminderService]
      * to fetch tasks that are due in the next 30 minutes for reminders.
      *
      * Use when a task is created/updated and are due in the next 30 minutes.
      */
-    abstract fun restartReminderWorker(context: Context)
+    abstract fun restartReminderService(context: Context)
 
     abstract fun onVoiceSearch(): Intent
 
