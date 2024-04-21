@@ -185,6 +185,8 @@ private fun TaskDetailsContent(
                     onClick = {
                         scope.launch {
                             showDeleteDialog = true
+                            sheetState.hide()
+                            tasksViewModel.onClearInput()
                         }
                     },
                 ) {
