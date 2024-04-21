@@ -206,20 +206,20 @@ private fun TaskDetailsContent(
             }
 
             // task due date
-            if (taskDueDate.value != null) {
-                TextButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = { showDatePicker = true },
-                ) {
-                    Text(text = taskDueDate.value!!.format(context.applicationContext))
+            TextButton(
+                modifier = Modifier.weight(1f),
+                onClick = { showDatePicker = true },
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (taskDueDate.value != null) {
+                        Image(
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                            painter = painterResource(id = R.drawable.baseline_calendar_24),
+                            contentDescription = null,
+                        )
+                        Text(text = taskDueDate.value?.format(context.applicationContext) ?: "")
+                    }
                 }
-            } else {
-                Spacer(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                )
             }
 
             // submit button
