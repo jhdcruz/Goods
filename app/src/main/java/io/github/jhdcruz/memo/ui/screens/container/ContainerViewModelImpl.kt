@@ -10,7 +10,7 @@ import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.task.AttachmentsRepository
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import io.github.jhdcruz.memo.domain.response.FirestoreResponseUseCase
-import io.github.jhdcruz.memo.service.reminders.ReminderService
+import io.github.jhdcruz.memo.service.reminders.ReminderSyncService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -41,15 +41,15 @@ class ContainerViewModelImpl
         private val _categories = MutableStateFlow<List<String>>(emptyList())
         override val categories: Flow<List<String>> = _categories
 
-        override fun restartReminderService(context: Context) {
-            Intent(context, ReminderService::class.java).apply {
-                context.startService(this)
-            }
-        }
-
         init {
             viewModelScope.launch {
                 onGetTasks()
+            }
+        }
+
+        override fun restartReminderService(context: Context) {
+            Intent(context, ReminderSyncService::class.java).apply {
+                context.startService(this)
             }
         }
 
@@ -101,7 +101,8 @@ class ContainerViewModelImpl
                 if (localAttachments.isNotEmpty()) {
                     onAttachmentsUpload(taskId, localAttachments)
                 }
-                onIsFetchingTasksChange(false)
+
+                onGetTasks()
             }
         }
 
@@ -124,7 +125,7 @@ class ContainerViewModelImpl
                 taskUpdateJob.await()
                 attachmentsUploadJob.await()
 
-                onIsFetchingTasksChange(false)
+                onGetTasks()
             }
         }
 
@@ -138,7 +139,7 @@ class ContainerViewModelImpl
                 taskDeleteJob.await()
                 attachmentDeleteJob.await()
 
-                onIsFetchingTasksChange(true)
+                onGetTasks()
             }
         }
 

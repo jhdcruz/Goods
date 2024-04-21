@@ -1,17 +1,24 @@
 package io.github.jhdcruz.memo.service.reminders
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
+import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jhdcruz.memo.R
 import io.github.jhdcruz.memo.data.model.TaskList
-import io.github.jhdcruz.memo.domain.format
+import io.github.jhdcruz.memo.domain.toLocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 /**
@@ -26,6 +33,13 @@ class ReminderSchedulerService : Service() {
     @Inject
     lateinit var firestore: FirebaseFirestore
 
+    private lateinit var alarmManager: AlarmManager
+
+    override fun onCreate() {
+        super.onCreate()
+        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    }
+
     override fun onBind(intent: Intent): IBinder? = null
 
     override fun onStartCommand(
@@ -36,67 +50,99 @@ class ReminderSchedulerService : Service() {
         // get the data from intent
         val tasks =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent?.getSerializableExtra("data", TaskList::class.java)
+                intent?.getParcelableExtra("data", TaskList::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                intent?.getSerializableExtra("data") as TaskList
+                intent?.getParcelableExtra("data")!!
             }
 
         // schedule notifications
         if (tasks?.tasks?.isNotEmpty() == true) {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            tasks.tasks.forEach { task ->
-                // Intent and content for the notification
+            tasks.tasks.forEachIndexed { index, task ->
                 val reminderIntent =
                     Intent(this, ReminderNotifyService::class.java).apply {
+                        putExtra("index", index + 1) // as notification ID
                         putExtra("id", task.id)
                         putExtra("title", task.title)
-                        putExtra("dueDate", task.dueDate!!.format(super.getApplicationContext()))
+                        putExtra("description", task.description)
                     }
 
-                // Use the due date as trigger time
-                val triggerAtMillis = task.dueDate?.toDate()?.time!!
+                val triggerAtDueDate =
+                    task.dueDate?.toLocalDateTime()?.atZone(ZoneId.systemDefault())?.toInstant()
+                        ?.toEpochMilli()!!
 
-                val pendingIntent =
-                    PendingIntent.getBroadcast(
-                        this,
-                        0,
-                        reminderIntent,
-                        PendingIntent.FLAG_IMMUTABLE,
-                    )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    // For API level 31 and above
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerAtMillis,
-                            pendingIntent,
-                        )
-                    } else {
-                        alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerAtMillis,
-                            pendingIntent,
-                        )
-                    }
-                } else {
-                    alarmManager.setExact(
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
-                        triggerAtMillis,
-                        pendingIntent,
+                        triggerAtDueDate,
+                        PendingIntent.getService(
+                            this,
+                            index + 1,
+                            reminderIntent,
+                            PendingIntent.FLAG_IMMUTABLE,
+                        ),
                     )
+                } catch (e: SecurityException) {
+                    Log.e("ReminderSchedulerService", "Permission denied for setting alarm", e)
                 }
             }
+
+            // show notification of amount of tasks are due
+            buildNotification(tasks.tasks.size)
         }
 
-        // Return START_STICKY so the service will be restarted if it is killed
         return START_STICKY
+    }
+
+    private fun buildNotification(count: Int) {
+        val channelId = "io.github.jhdcruz.memo"
+        val channelName = "Near Due"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+        val channel = NotificationChannel(channelId, channelName, importance)
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        // Create a notification
+        val notification =
+            NotificationCompat.Builder(this, channelId)
+                .setContentTitle("You have $count tasks that due in an hour.")
+                .setSmallIcon(R.drawable.baseline_notify_24)
+                .build()
+
+        // Start the foreground service
+        startForeground(3, notification)
     }
 
     override fun onDestroy() {
         stopForeground(STOP_FOREGROUND_DETACH)
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent) {
+        Log.i("ReminderSchedulerService", "Restarting ReminderSchedulerService")
+
+        val restartServiceIntent =
+            Intent(applicationContext, ReminderSchedulerService::class.java).also {
+                it.setPackage(packageName)
+            }
+
+        val restartServicePendingIntent: PendingIntent =
+            PendingIntent.getService(
+                this,
+                3,
+                restartServiceIntent,
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+        applicationContext.getSystemService(Context.ALARM_SERVICE)
+
+        val alarmService: AlarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmService.set(
+            AlarmManager.ELAPSED_REALTIME,
+            SystemClock.elapsedRealtime() + 1000,
+            restartServicePendingIntent,
+        )
     }
 }

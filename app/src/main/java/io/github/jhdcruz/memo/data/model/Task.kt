@@ -1,8 +1,10 @@
 package io.github.jhdcruz.memo.data.model
 
+import android.os.Parcelable
 import com.google.firebase.Timestamp
-import java.io.Serializable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Task(
     val id: String? = null,
     val priority: Int = 0,
@@ -24,13 +26,14 @@ data class Task(
     val attachments: Map<String, TaskAttachment>? = null,
     val created: Timestamp = Timestamp.now(),
     val updated: Timestamp? = null,
-) : Serializable
+) : Parcelable
 
+@Parcelize
 data class TaskAttachment(
     val name: String = "",
     val path: String = "",
     val downloadUrl: String = "",
-)
+) : Parcelable
 
-// certain classes requires serialized list of task
-data class TaskList(val tasks: List<Task>) : Serializable
+@Parcelize
+data class TaskList(val tasks: List<Task>) : Parcelable

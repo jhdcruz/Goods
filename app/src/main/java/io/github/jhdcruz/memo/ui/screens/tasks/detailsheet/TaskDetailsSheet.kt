@@ -260,11 +260,7 @@ private fun TaskDetailsContent(
                                 taskLocalAttachments.value,
                             )
                         }
-                        // reset selected files
-                        fileUris.value = emptyList()
-                    }
 
-                    scope.launch {
                         if (taskDueDate.value != null) {
                             // check if the tasks due date is within the next 30 minutes
                             val dueDate = taskDueDate.value?.toDate()?.time ?: 0
@@ -272,11 +268,13 @@ private fun TaskDetailsContent(
                             val in30m = currentDate + (30 * 60 * 1000)
 
                             if (dueDate <= in30m) {
-                                containerViewModel.restartReminderService(
-                                    context.applicationContext,
-                                )
+                                containerViewModel.restartReminderService(context)
                             }
                         }
+
+                        // reset inputs
+                        fileUris.value = emptyList()
+                        tasksViewModel.onClearInput()
                     }
                 },
             ) {

@@ -1,11 +1,10 @@
 package io.github.jhdcruz.memo.service.reminders
 
-import android.app.AlarmManager
-import android.app.PendingIntent
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jhdcruz.memo.data.task.TasksRepository
 import kotlinx.coroutines.CoroutineScope
@@ -15,64 +14,39 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ReminderActionReceiver : BroadcastReceiver() {
-
     @Inject
     lateinit var tasksRepository: TasksRepository
 
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private lateinit var coroutineScope: CoroutineScope
 
     override fun onReceive(
         context: Context,
         intent: Intent,
     ) {
-        when (intent.action) {
-            "NOTIF_ACTION_DONE" -> {
-                // get task ID
-                val taskId = intent.getStringExtra("id")
+        Log.i("ReminderActionReceiver", "Received action ${intent.action}")
 
-                coroutineScope.launch {
-                    tasksRepository.onTaskCompleted(taskId!!)
-                }
-            }
+        coroutineScope = CoroutineScope(Dispatchers.Default)
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            "NOTIF_ACTION_SNOOZE" -> {
-                // Schedule a new notification after 5 minutes
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val reminderIntent = Intent(context, ReminderNotifyService::class.java)
+        // get task ID
+        val index = intent.getIntExtra("index", 1)
+        val taskId = intent.getStringExtra("id")
 
-                val pendingIntent =
-                    PendingIntent.getService(
-                        context,
-                        0,
-                        reminderIntent,
-                        PendingIntent.FLAG_IMMUTABLE,
-                    )
+        Log.d("ReminderActionReceiver", "Notif Index: $index")
+        Log.d("ReminderActionReceiver", "Task ID: $taskId")
 
-                // 5m from now
-                val triggerAtMillis = System.currentTimeMillis() + (5 * 60 * 1000)
-
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                        // For API level 31 and above
-                        if (alarmManager.canScheduleExactAlarms()) {
-                            alarmManager.setExactAndAllowWhileIdle(
-                                AlarmManager.RTC_WAKEUP,
-                                triggerAtMillis,
-                                pendingIntent,
-                            )
-                        }
-                    }
-
-                    else -> {
-                        // For API level 23 to 30
-                        alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerAtMillis,
-                            pendingIntent,
-                        )
+        if (taskId?.isNotBlank() == true) {
+            when (intent.action) {
+                "io.github.jhdcruz.memo.NOTIF_ACTION_DONE" -> {
+                    coroutineScope.launch {
+                        tasksRepository.onTaskCompleted(taskId)
                     }
                 }
             }
         }
+
+        // cancel notification
+        notificationManager.cancel(index)
     }
 }

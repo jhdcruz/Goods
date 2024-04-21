@@ -4,11 +4,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import io.github.jhdcruz.memo.MainActivity
 import io.github.jhdcruz.memo.R
+import okhttp3.internal.notify
 
 /**
  * Starts and shows notifications based on received data
@@ -22,73 +25,82 @@ class ReminderNotifyService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val receiver = ReminderActionReceiver()
-            val intentFilter =
-                IntentFilter("NOTIF_ACTION_DONE").apply {
-                    addAction("NOTIF_ACTION_SNOOZE")
-                }
+        val receiver = ReminderActionReceiver()
+        val intentFilter = IntentFilter("io.github.jhdcruz.memo.NOTIF_ACTION_DONE")
 
-            registerReceiver(receiver, intentFilter, RECEIVER_NOT_EXPORTED)
-        }
-
-        // get the data from intent
-        val taskId = intent?.getStringExtra("id") ?: ""
-        val title = intent?.getStringExtra("title") ?: ""
-        val dueDate = intent?.getStringExtra("dueDate") ?: ""
-
-        buildNotification(
-            taskId = taskId,
-            message = title,
-            dueDate = dueDate,
+        ContextCompat.registerReceiver(
+            this,
+            receiver,
+            intentFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
-        // Return START_STICKY so the service will be restarted if it is killed
-        return START_NOT_STICKY
+        // get the data from intent
+        val index = intent?.getIntExtra("index", 1)
+        val taskId = intent?.getStringExtra("id") ?: ""
+        val title = intent?.getStringExtra("title") ?: ""
+        val description = intent?.getStringExtra("description") ?: ""
+
+        buildNotification(
+            index = index!!,
+            taskId = taskId,
+            title = title,
+            description = description,
+        )
+
+        return START_STICKY
     }
 
     private fun buildNotification(
+        index: Int,
         taskId: String,
-        message: String,
-        dueDate: String,
+        title: String,
+        description: String,
     ) {
         val channelId = "io.github.jhdcruz.memo"
-        val channelName = "Memo"
+        val channelName = "Task Reminders"
         val importance = NotificationManager.IMPORTANCE_HIGH
 
         val channel = NotificationChannel(channelId, channelName, importance)
-        val notificationManager = getSystemService(NotificationManager::class.java)
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+
+        val doneIntent =
+            Intent("io.github.jhdcruz.memo.NOTIF_ACTION_DONE").apply {
+                putExtra("index", index)
+                putExtra("id", taskId)
+            }
 
         val doneAction =
             PendingIntent.getBroadcast(
                 this,
-                1,
-                Intent("NOTIF_ACTION_DONE").apply {
-                    putExtra("id", taskId)
-                },
-                PendingIntent.FLAG_IMMUTABLE,
+                index,
+                doneIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-        val snoozeAction =
-            PendingIntent.getBroadcast(
-                this,
-                2,
-                Intent("NOTIF_ACTION_SNOOZE"),
-                PendingIntent.FLAG_IMMUTABLE,
-            )
+
+        val onTapIntent = PendingIntent.getActivity(
+            this,
+            9,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
 
         // Create a notification
         val notification =
             NotificationCompat.Builder(this, channelId)
-                .setContentTitle("You have a task that is due.")
-                .setContentText("$message\n\n $dueDate")
+                .setContentTitle("Task Due: $title")
+                .setContentText(description)
                 .setSmallIcon(R.drawable.baseline_notify_24)
                 .addAction(R.drawable.baseline_add_24, "Done", doneAction)
-                .addAction(R.drawable.baseline_clock_24, "Snooze", snoozeAction)
+                .setGroup("Due Tasks")
+                .setContentIntent(onTapIntent)
+                .setAutoCancel(true)
                 .build()
 
         // Start the foreground service
-        startForeground(1, notification)
+        startForeground(index, notification)
     }
 
     override fun onDestroy() {

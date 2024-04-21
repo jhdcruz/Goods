@@ -35,16 +35,21 @@ fun Timestamp.format(context: Context): String {
     // check if system uses 24 hour time format
 
     val is24Hour = DateFormat.is24HourFormat(context)
-    val formatter = if (is24Hour) {
-        DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
-    } else {
-        DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a")
-    }
+    val formatter =
+        if (is24Hour) {
+            DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm")
+        } else {
+            DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a")
+        }
 
     return this.toLocalDateTime().format(formatter)
 }
 
-fun createTimestamp(millis: Long, hour: Int? = null, minute: Int? = null): Timestamp {
+fun createTimestamp(
+    millis: Long,
+    hour: Int? = null,
+    minute: Int? = null,
+): Timestamp {
     // Convert system milliseconds to LocalDateTime
     var localDateTime =
         Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDateTime()
@@ -63,14 +68,17 @@ fun createTimestamp(millis: Long, hour: Int? = null, minute: Int? = null): Times
 
 fun Timestamp.dateUntil(): String {
     val dueDate = this.toLocalDateTime()
-    val now = LocalDateTime.now()
 
-    val months = ChronoUnit.MONTHS.between(now, dueDate)
-    val days = ChronoUnit.DAYS.between(now, dueDate)
-    val hours = ChronoUnit.HOURS.between(now, dueDate)
-    val minutes = ChronoUnit.MINUTES.between(now, dueDate)
+    // for some reason its 1 minute delay
+    val currentDate = LocalDateTime.now().plusMinutes(1)
+
+    val months = ChronoUnit.MONTHS.between(currentDate, dueDate)
+    val days = ChronoUnit.DAYS.between(currentDate, dueDate)
+    val hours = ChronoUnit.HOURS.between(currentDate, dueDate)
+    val minutes = ChronoUnit.MINUTES.between(currentDate, dueDate)
 
     return when {
+        currentDate == dueDate -> "Now"
         minutes in 1..59 -> "${minutes}m"
         hours in 1..23 -> "${hours}H"
         days in 1..30 -> "${days}D"

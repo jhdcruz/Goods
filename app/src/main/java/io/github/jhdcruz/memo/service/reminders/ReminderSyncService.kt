@@ -9,11 +9,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jhdcruz.memo.data.model.Task
 import io.github.jhdcruz.memo.data.model.TaskList
+import io.github.jhdcruz.memo.domain.createTimestamp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.Serializable
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -29,7 +29,7 @@ class ReminderSyncService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        serviceScope = CoroutineScope(Dispatchers.Main)
+        serviceScope = CoroutineScope(Dispatchers.Default)
     }
 
     override fun onBind(intent: Intent): IBinder? = null
@@ -43,11 +43,12 @@ class ReminderSyncService : Service() {
 
         // Fetch the necessary data here
         serviceScope.launch {
+            Log.i("ReminderSyncService", "Fetching due tasks")
             val data = fetchData()
 
             val schedulerIntent =
                 Intent(context, ReminderSchedulerService::class.java).apply {
-                    putExtra("data", data as Serializable)
+                    putExtra("data", data)
                 }
 
             context.startService(schedulerIntent)
@@ -62,24 +63,27 @@ class ReminderSyncService : Service() {
     }
 
     /**
-     * Get tasks that are due in the next 30 minutes.
+     * Get tasks that are due in 1 hour.
      */
     private suspend fun fetchData(): TaskList {
         val uid =
             auth.currentUser?.uid
                 ?: throw IllegalStateException("ReminderWorker: User not signed in")
 
-        val currentDate = System.currentTimeMillis()
-        val in30m = currentDate + (30 * 60 * 1000)
+        val now = System.currentTimeMillis()
+        val everyHour = now + (60 * 60 * 1000)
+
+        val nowTimestamp = createTimestamp(now)
+        val hourTimestamp = createTimestamp(everyHour)
 
         val tasksDue =
             firestore.collection("users").document(uid).collection("tasks")
                 .whereEqualTo("isCompleted", false)
-                .whereGreaterThanOrEqualTo("dueDate", in30m)
+                .whereGreaterThanOrEqualTo("dueDate", nowTimestamp)
+                .whereLessThanOrEqualTo("dueDate", hourTimestamp)
                 .get()
                 .await()
                 .toObjects(Task::class.java)
-                .sortedByDescending { it.dueDate }
 
         Log.d("ReminderWorker", "Fetched ${tasksDue.size} tasks: $tasksDue")
         return TaskList(tasksDue)
