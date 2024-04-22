@@ -57,7 +57,7 @@ jobs:
         uses: timheuer/base64-to-file@main
         with:
           fileName: 'memo.jks'
-          fileDir: './'
+          fileDir: './app'
           encodedString: ${{ secrets.KEYSTORE_FILE }}
 
       - name: Build with analyze
