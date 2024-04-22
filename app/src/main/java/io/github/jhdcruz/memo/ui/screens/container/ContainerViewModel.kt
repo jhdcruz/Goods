@@ -76,6 +76,10 @@ abstract class ContainerViewModel : ViewModel() {
 
     abstract fun onFilterTag(tag: String)
 
+    abstract fun onFilterInbox()
+
+    abstract fun onFilterDueWeek()
+
     abstract fun onIsFetchingTasksChange(isFetching: Boolean)
 
     abstract fun onQueryChange(query: String)

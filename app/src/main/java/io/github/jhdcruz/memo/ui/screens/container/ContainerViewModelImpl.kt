@@ -247,7 +247,29 @@ class ContainerViewModelImpl
             }
         }
 
-        override fun onIsFetchingTasksChange(isFetching: Boolean) {
+    override fun onFilterInbox() {
+        viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
+            val taskList = tasksRepository.onFiterInbox()
+            onTaskListChange(taskList)
+
+            onIsFetchingTasksChange(false)
+        }
+    }
+
+    override fun onFilterDueWeek() {
+        viewModelScope.launch(Dispatchers.IO) {
+            onIsFetchingTasksChange(true)
+
+            val taskList = tasksRepository.onFilterDueWeek()
+            onTaskListChange(taskList)
+
+            onIsFetchingTasksChange(false)
+        }
+    }
+
+    override fun onIsFetchingTasksChange(isFetching: Boolean) {
             _isFetchingTasks.value = isFetching
         }
 

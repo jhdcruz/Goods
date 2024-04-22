@@ -71,18 +71,18 @@ fun Sidebar(
         modifier = modifier,
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "Tasks",
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -92,10 +92,11 @@ fun Sidebar(
                         scope.launch {
                             drawerState.close()
                         }
-                    }) {
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
-                        contentDescription = "Close sidebar"
+                        contentDescription = "Close sidebar",
                     )
                 }
             }
@@ -106,7 +107,7 @@ fun Sidebar(
                     Image(
                         painter = painterResource(id = R.drawable.baseline_checklist_24),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 },
                 selected = selected == 0,
@@ -115,8 +116,9 @@ fun Sidebar(
 
                     scope.launch {
                         drawerState.close()
+                        containerViewModel.onGetTasks()
                     }
-                }
+                },
             )
             NavigationDrawerItem(
                 label = { Text(text = "Inbox") },
@@ -124,7 +126,7 @@ fun Sidebar(
                     Image(
                         painter = painterResource(id = R.drawable.baseline_inbox_24),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 },
                 selected = selected == 1,
@@ -133,8 +135,9 @@ fun Sidebar(
 
                     scope.launch {
                         drawerState.close()
+                        containerViewModel.onFilterInbox()
                     }
-                }
+                },
             )
             NavigationDrawerItem(
                 label = { Text(text = "Next 7 days") },
@@ -142,7 +145,7 @@ fun Sidebar(
                     Image(
                         painter = painterResource(id = R.drawable.baseline_event_upcoming_24),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 },
                 selected = selected == 2,
@@ -151,8 +154,9 @@ fun Sidebar(
 
                     scope.launch {
                         drawerState.close()
+                        containerViewModel.onFilterDueWeek()
                     }
-                }
+                },
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -162,14 +166,14 @@ fun Sidebar(
                 modifier = Modifier.padding(16.dp),
             )
 
-
             // loading state
             when {
                 drawerState.isOpen && categories.value.contains("loading") ->
                     CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(16.dp)
+                        modifier =
+                            Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(16.dp),
                     )
 
                 drawerState.isOpen && categories.value.isEmpty() ->
@@ -182,9 +186,15 @@ fun Sidebar(
                                 label = { Text(text = category) },
                                 icon = {
                                     Image(
-                                        painter = painterResource(id = R.drawable.baseline_folder_24),
-                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
-                                        contentDescription = null
+                                        painter =
+                                            painterResource(
+                                                id = R.drawable.baseline_folder_24,
+                                            ),
+                                        colorFilter =
+                                            ColorFilter.tint(
+                                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                            ),
+                                        contentDescription = null,
                                     )
                                 },
                                 // +3 because there are 3 items above the categories
@@ -196,20 +206,17 @@ fun Sidebar(
                                         containerViewModel.onFilterCategory(category)
                                         drawerState.close()
                                     }
-                                }
+                                },
                             )
                         }
                     }
             }
-
         }
     }
 }
 
 @Composable
-private fun EmptyCategory(
-    containerViewModel: ContainerViewModel,
-) {
+private fun EmptyCategory(containerViewModel: ContainerViewModel) {
     val scope = rememberCoroutineScope()
 
     var showCategoryDialog by remember { mutableStateOf(false) }
@@ -217,25 +224,25 @@ private fun EmptyCategory(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
             text = "No categories",
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-
-            )
+        )
 
         FilledTonalButton(
             modifier = Modifier.height(46.dp),
-            onClick = { showCategoryDialog = true }
+            onClick = { showCategoryDialog = true },
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
                 Text(text = "Create new category")
@@ -258,15 +265,16 @@ private fun EmptyCategory(
                     OutlinedTextField(
                         label = { Text(text = "Category") },
                         value = newCategory.value,
-                        onValueChange = { newCategory.value = it })
+                        onValueChange = { newCategory.value = it },
+                    )
                 },
                 icon = {
                     Icon(
                         modifier = Modifier.size(38.dp),
                         imageVector = Icons.Outlined.Info,
-                        contentDescription = null
+                        contentDescription = null,
                     )
-                }
+                },
             )
         }
     }

@@ -27,10 +27,17 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override fun onGetTasks() {
     }
 
-    override fun onTaskAdd(task: Task, localAttachments: List<Pair<String, Uri>>) {
+    override fun onTaskAdd(
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    ) {
     }
 
-    override fun onTaskUpdate(id: String, task: Task, localAttachments: List<Pair<String, Uri>>) {
+    override fun onTaskUpdate(
+        id: String,
+        task: Task,
+        localAttachments: List<Pair<String, Uri>>,
+    ) {
     }
 
     override fun onTaskDelete(id: String) {
@@ -42,7 +49,10 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override fun onCategoryAdd(category: String) {
     }
 
-    override fun onCategoryUpdate(category: String, newCategory: String) {
+    override fun onCategoryUpdate(
+        category: String,
+        newCategory: String,
+    ) {
     }
 
     override fun onCategoriesDelete(categories: List<String>) {
@@ -51,13 +61,19 @@ class ContainerViewModelPreview : ContainerViewModel() {
     override fun onTagAdd(tag: String) {
     }
 
-    override fun onTagUpdate(tag: String, newTag: String) {
+    override fun onTagUpdate(
+        tag: String,
+        newTag: String,
+    ) {
     }
 
     override fun onTagsDelete(tags: List<String>) {
     }
 
-    override fun onAttachmentsUpload(id: String, attachments: List<Pair<String, Uri>>) {
+    override fun onAttachmentsUpload(
+        id: String,
+        attachments: List<Pair<String, Uri>>,
+    ) {
     }
 
     override fun onGetCategories() {
@@ -70,6 +86,12 @@ class ContainerViewModelPreview : ContainerViewModel() {
     }
 
     override fun onFilterTag(tag: String) {
+    }
+
+    override fun onFilterInbox() {
+    }
+
+    override fun onFilterDueWeek() {
     }
 
     override fun onIsFetchingTasksChange(isFetching: Boolean) {
