@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
@@ -172,10 +173,7 @@ private fun TaskDetailsContent(
         }
 
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -197,12 +195,7 @@ private fun TaskDetailsContent(
                     )
                 }
             } else {
-                Spacer(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                )
+                Spacer(modifier = Modifier.width(48.dp))
             }
 
             // task due date
@@ -213,6 +206,7 @@ private fun TaskDetailsContent(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (taskDueDate.value != null) {
                         Image(
+                            modifier = Modifier.padding(end = 8.dp),
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                             painter = painterResource(id = R.drawable.baseline_calendar_24),
                             contentDescription = null,
@@ -293,18 +287,28 @@ private fun TaskDetailsContent(
             }
         }
 
-        OutlinedTextField(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            value = taskTitle.value,
-            onValueChange = { tasksViewModel.onTaskTitleChange(it) },
-            singleLine = true,
-            placeholder = { Text(text = "Headline of your task") },
-            colors =
-                OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                ),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                value = taskTitle.value,
+                onValueChange = { tasksViewModel.onTaskTitleChange(it) },
+                singleLine = true,
+                placeholder = { Text(text = "Headline of your task") },
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                    ),
+            )
+
+            PriorityButton(
+                taskPriority = taskPriority.value,
+                tasksViewModel = tasksViewModel,
+            )
+        }
 
         HorizontalDivider()
 
@@ -328,14 +332,9 @@ private fun TaskDetailsContent(
         HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
 
         Row(
-            modifier = Modifier.padding(bottom = 16.dp, end = 8.dp),
+            modifier = Modifier.padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PriorityButton(
-                taskPriority = taskPriority.value,
-                tasksViewModel = tasksViewModel,
-            )
-
             CategoryButton(
                 containerViewModel = containerViewModel,
                 tasksViewModel = tasksViewModel,
