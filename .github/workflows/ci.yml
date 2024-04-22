@@ -52,14 +52,6 @@ jobs:
           
           echo $LOCAL_PROPERTIES >> ./local.properties
 
-      - name: Store keystore file
-        id: write_file
-        uses: timheuer/base64-to-file@main
-        with:
-          fileName: 'memo.jks'
-          fileDir: './app'
-          encodedString: ${{ secrets.KEYSTORE_FILE }}
-
       - name: Build with analyze
         run: ./gradlew build --no-daemon --stacktrace
         env:

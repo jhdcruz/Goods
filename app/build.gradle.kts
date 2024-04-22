@@ -43,12 +43,14 @@ android {
         )
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file(properties.getProperty("signing.release.store.file"))
-            storePassword = properties.getProperty("signing.release.store.password")
-            keyAlias = properties.getProperty("signing.release.key.alias")
-            keyPassword = properties.getProperty("signing.release.key.password")
+    if (!providers.environmentVariable("CI").isPresent) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(properties.getProperty("signing.release.store.file"))
+                storePassword = properties.getProperty("signing.release.store.password")
+                keyAlias = properties.getProperty("signing.release.key.alias")
+                keyPassword = properties.getProperty("signing.release.key.password")
+            }
         }
     }
 
@@ -76,7 +78,9 @@ android {
             isShrinkResources = true
             isDebuggable = false
 
-            signingConfig = signingConfigs.getByName("release")
+            if (!providers.environmentVariable("CI").isPresent) {
+                signingConfig = signingConfigs.getByName("release")
+            }
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
