@@ -18,9 +18,11 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseUser
 import io.github.jhdcruz.memo.R
@@ -53,6 +56,7 @@ fun ContainerScreen(
 ) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val sheetState =
@@ -77,12 +81,19 @@ fun ContainerScreen(
     ) {
         Scaffold(
             topBar = {
-                Box(modifier = Modifier.statusBarsPadding()) {
-                    AppSearch(
-                        profile = photoUrl.value,
-                        drawerState = drawerState,
-                        containerViewModel = containerViewModel,
-                    )
+                if (currentRoute != RootScreens.Settings.route) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .statusBarsPadding()
+                                .padding(top = 4.dp),
+                    ) {
+                        AppSearch(
+                            profile = photoUrl.value,
+                            drawerState = drawerState,
+                            containerViewModel = containerViewModel,
+                        )
+                    }
                 }
             },
             bottomBar = {
@@ -91,23 +102,25 @@ fun ContainerScreen(
                 )
             },
             floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        scope.launch {
-                            sheetState.show()
-                        }
-                    },
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                if (currentRoute != RootScreens.Settings.route) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            scope.launch {
+                                sheetState.show()
+                            }
+                        },
                     ) {
-                        Image(
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                            painter = painterResource(id = R.drawable.baseline_add_24),
-                            contentDescription = null,
-                        )
-                        Text(text = "New task")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Image(
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                                painter = painterResource(id = R.drawable.baseline_add_24),
+                                contentDescription = null,
+                            )
+                            Text(text = "New task")
+                        }
                     }
                 }
             },
@@ -132,6 +145,7 @@ fun ContainerScreen(
                 composable(RootScreens.Settings.route) {
                     SettingsScreen(
                         modifier = Modifier.padding(innerPadding),
+                        photoUrl = photoUrl.value,
                     )
                 }
             }

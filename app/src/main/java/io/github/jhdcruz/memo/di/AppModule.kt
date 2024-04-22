@@ -8,6 +8,8 @@ import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModel
 import io.github.jhdcruz.memo.ui.screens.container.ContainerViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModel
 import io.github.jhdcruz.memo.ui.screens.login.LoginViewModelImpl
+import io.github.jhdcruz.memo.ui.screens.settings.SettingsViewModel
+import io.github.jhdcruz.memo.ui.screens.settings.SettingsViewModelImpl
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModel
 import io.github.jhdcruz.memo.ui.screens.tasks.TasksViewModelImpl
 
@@ -24,4 +26,7 @@ abstract class AppModule {
 
     @Binds
     abstract fun bindTasksViewModel(tasksViewModel: TasksViewModelImpl): TasksViewModel
+
+    @Binds
+    abstract fun bindSettingsViewModel(settingsViewModel: SettingsViewModelImpl): SettingsViewModel
 }
