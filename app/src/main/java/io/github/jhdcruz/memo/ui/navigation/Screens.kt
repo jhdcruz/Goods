@@ -40,3 +40,20 @@ object RootScreens {
         override val inactiveIcon = R.drawable.baseline_settings_filled_24
     }
 }
+
+object Screens {
+    object SettingsProfile : Destination {
+        override val route = "settings/profile"
+        override val title = "Profile"
+    }
+
+    object SettingsTags : Destination {
+        override val route = "settings/tags"
+        override val title = "Tags"
+    }
+
+    object SettingsCategories : Destination {
+        override val route = "settings/categories"
+        override val title = "Categories"
+    }
+}
