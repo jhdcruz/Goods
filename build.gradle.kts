@@ -13,4 +13,5 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.perf.plugin) apply false
     alias(libs.plugins.firebase.crashlytics.gradle) apply false
+    alias(libs.plugins.ktlint.gradle) apply false
 }
