@@ -69,8 +69,8 @@ fun createTimestamp(
 fun Timestamp.dateUntil(): String {
     val dueDate = this.toLocalDateTime()
 
-    // for some reason its 1 minute delay
-    val currentDate = LocalDateTime.now().plusMinutes(1)
+    // for some reason its 1 minute advanced
+    val currentDate = LocalDateTime.now().minusMinutes(1)
 
     val months = ChronoUnit.MONTHS.between(currentDate, dueDate)
     val days = ChronoUnit.DAYS.between(currentDate, dueDate)
@@ -78,11 +78,11 @@ fun Timestamp.dateUntil(): String {
     val minutes = ChronoUnit.MINUTES.between(currentDate, dueDate)
 
     return when {
-        currentDate == dueDate -> "Now"
         minutes in 1..59 -> "${minutes}m"
         hours in 1..23 -> "${hours}H"
         days in 1..30 -> "${days}D"
         months in 1..12 -> "${months}M"
-        else -> "Overdue"
+        currentDate > dueDate -> "Overdue"
+        else -> "Now"
     }
 }
